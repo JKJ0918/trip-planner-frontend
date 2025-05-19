@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Login } from "./utils/login";
 import SocialLoginButton from "./components/SocialLoginButton";
+import Link from "next/link";
 
 
 export default function LoginPage() {
@@ -77,7 +78,11 @@ export default function LoginPage() {
                         onClick={handleLogin}>
                         로그인 하기
                         </button>
-                        <p className="text-sm !mt-6 text-center text-slate-500">계정이 없으신가요? <a href="javascript:void(0);" className="text-blue-600 font-medium hover:underline ml-1 whitespace-nowrap">회원가입</a></p>
+                        <p className="text-sm !mt-6 text-center text-slate-500">계정이 없으신가요?
+                            <Link href={"/join"}>
+                            <span className="text-blue-600 font-medium hover:underline ml-1 whitespace-nowrap">회원가입</span>
+                            </Link>
+                        </p>
                     </div>
                     </form>
 
@@ -90,12 +95,14 @@ export default function LoginPage() {
                     <div className="flex flex-col space-y-3">
                     <SocialLoginButton /> {/*소셜 로그인 버튼*/}
                     </div>
-                    
+
+                    <p className="text-sm !mt-6 text-center text-slate-500">계속 진행하시면 TripPlanner의 서비스 약관 및 개인정보처리방침에 동의하시는 것으로 간주됩니다.</p>
                 </div>
 
                 <div className="max-md:mt-8">
                     <img src="/images/plannerlogin.png" className="w-full aspect-[71/50] max-md:w-4/5 mx-auto block object-cover" alt="login img" />
                 </div>
+                
 
 
             </div>
