@@ -1,10 +1,8 @@
-// pages/index.tsx
+"use client";
 
-import React from "react";
 import DropdownMenu from "./components/DropdownMenu"; // 개인메뉴 드롭다운
-import LogoutButton from "./components/LogoutButton";
 
-const MainPage: React.FC = () => {
+function MainPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 상단 헤더 */}
@@ -70,7 +68,7 @@ const MainPage: React.FC = () => {
           </a>
         </div>
       </main>
-      <LogoutButton/>
+
       {/* 푸터 */}
       <footer className="bg-gray-100 py-6 mt-12">
         <div className="container mx-auto px-6 text-center text-gray-600 text-sm select-none">
@@ -80,6 +78,6 @@ const MainPage: React.FC = () => {
       </footer>
     </div>
   );
-};
+}
 
 export default MainPage;
