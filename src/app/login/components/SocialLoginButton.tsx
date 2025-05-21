@@ -1,29 +1,16 @@
-import { useState } from "react";
-import SocialLoginModal from "./SocialLoginModal";
+const onNaverLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/naver"
+}
 
-type Provider = "google" | "kakao" | "naver";
+const onGoogleLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/google"
+}
 
-const providerUrls: Record<Provider, string> = {
-  google: "http://localhost:8080/oauth2/authorization/google",
-  kakao: "http://localhost:8080/oauth2/authorization/kakao",
-  naver: "http://localhost:8080/oauth2/authorization/naver",
-};
+const onKakaoLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/kakao"
+}
 
-const SocialLoginButton: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
-
-  const openModal = (provider: Provider) => {
-    setSelectedProvider(provider);
-    setIsModalOpen(true);
-  };
-
-  const handleAgree = () => {
-    if (selectedProvider) {
-      window.location.href = providerUrls[selectedProvider];
-    }
-    setIsModalOpen(false);
-  };
+const SocialLoginButton = () => {
 
   return (
     <>
@@ -33,7 +20,7 @@ const SocialLoginButton: React.FC = () => {
         <button
             type="button"
             className="flex items-center justify-center gap-3 border border-gray-300 rounded-md px-4 h-12 w-full hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => openModal("google")}
+            onClick={onGoogleLogin}
         >
             <svg
             className="w-6 h-6"
@@ -66,7 +53,7 @@ const SocialLoginButton: React.FC = () => {
         <button
             type="button"
             className="flex items-center justify-center gap-3 border border-gray-300 rounded-md px-4 h-12 w-full hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => openModal("kakao")}
+            onClick={onKakaoLogin}
         >
             <svg
             className="w-6 h-6"
@@ -83,7 +70,7 @@ const SocialLoginButton: React.FC = () => {
         <button
             type="button"
             className="flex items-center justify-center gap-3 border border-gray-300 rounded-md px-4 h-12 w-full hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => openModal("naver")}
+            onClick={onNaverLogin}
         >
             <svg
             className="w-6 h-6"
@@ -97,13 +84,6 @@ const SocialLoginButton: React.FC = () => {
         </button>
       </div>
 
-      {isModalOpen && selectedProvider && (
-        <SocialLoginModal
-          provider={selectedProvider}
-          onClose={() => setIsModalOpen(false)}
-          onAgree={handleAgree}
-        />
-      )}
     </>
   );
 };
