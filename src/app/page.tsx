@@ -1,5 +1,5 @@
 "use client";
-
+// 랜딩페이지
 import Link from "next/link";
 
 export default function Home() {
