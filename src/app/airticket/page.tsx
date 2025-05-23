@@ -7,6 +7,8 @@ export default function FlightSearchForm() {
   const [arrival, setArrival] = useState(''); // 도착지
   const [departureDate, setDepartureDate] = useState(''); // 출국 날짜
   const [returnDate, setReturnDate] = useState(''); // 귀국 날짜
+  const [goFlights, setGoFlights] = useState([]);     // 출국편 리스트
+  const [backFlights, setBackFlights] = useState([]); // 귀국편 리스트
 
   const handleSwap = () => { // 출발지 <-> 도착지 
     const temp = departure;
@@ -27,79 +29,197 @@ export default function FlightSearchForm() {
   });
 
   const data = await res.json();
+  console.log("전체응답", data);
+  // go → 출국편, back → 귀국편
+  setGoFlights(data.go || []);
+  setBackFlights(data.back || []);
 
-  // 예: go → 출국편, back → 귀국편
   console.log("출국편", data.go);
   console.log("귀국편", data.back);
 };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-4">
-      <h2 className="text-2xl font-bold text-center">항공권 검색</h2>
-      
-      <div className="flex items-center space-x-2">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">출발지</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-md p-2"
-            placeholder="예: ICN"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
-          />
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-6">
+
+      {/* 검색 폼 */}
+      <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+        <div className="max-w-xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">
+              항공권 검색
+            </h1>
+            <p className="mt-1 text-gray-600 dark:text-neutral-400">
+              일정을 입력하고 항공 일정을 확인해 보세요. 
+            </p>
+          </div>
         </div>
 
-        <button
-          type="button"
-          className="p-2 mt-5 rounded-full bg-gray-100 hover:bg-gray-200 transition"
-          onClick={handleSwap}
-          aria-label="Switch departure and arrival"
-        >
-          🔁
-        </button>
+        <div className="mt-12 max-w-lg mx-auto">
+          {/* Card */}
+          <div className="flex flex-col border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
+              <div className="grid gap-4 lg:gap-6">
+                {/* Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+                  <div>
+                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">출발지</label>
+                    <input type="text" 
+                           className="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                           placeholder="예 ICN"
+                           value={departure}
+                           onChange={(e) => setDeparture(e.target.value)}
+                    />
+                  </div>
 
-        <div className="flex-1">
-          <label className="block text-sm font-medium">도착지</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-md p-2"
-            placeholder="예: PUS"
-            value={arrival}
-            onChange={(e) => setArrival(e.target.value)}
-          />
+                  <div>
+                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">도착지</label>
+                    <input type="text"
+                           className="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                           placeholder="예 KIX"
+                           value={arrival}
+                           onChange={(e) => setArrival(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {/* End Grid */}
+
+                {/* Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+                  <div>
+                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">가는날</label>
+                    <input type="date"
+                           className="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                           value={departureDate}
+                           onChange={(e) => setDepartureDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">오는날</label>
+                    <input type="date"
+                           className="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                           value={returnDate}
+                           onChange={(e) => setReturnDate(e.target.value)}
+                           />
+                  </div>
+                </div>
+                {/* End Grid */}
+              </div>
+              {/* End Grid */}
+
+              <div className="mt-6 grid">
+                <button 
+                   className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                   onClick={handleSearch}
+                   >검색</button>
+              </div>
+          </div>
+          {/* End Card */}
+        </div>
+
+      </div>
+
+
+      {/* 출국편 테이블 */}
+      <h3 className="text-l font-semibold mt-6 mb-2 text-gray-500">출국편 검색 결과</h3>
+      <div className="flex flex-col">
+        <div className="-m-1.5 overflow-x-auto">
+          <div className="p-1.5 min-w-full inline-block align-middle">
+            <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
+
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                <thead className="bg-gray-50 dark:bg-neutral-700">
+                  <tr>
+                    <th scope="col" className="py-3 ps-4">
+                      <div className="flex items-center h-5">
+                        <input id="hs-table-checkbox-all"
+                               type="checkbox" 
+                               className="border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 dark:bg-neutral-700 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"/>
+                        <label className="sr-only">Checkbox</label>
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">항공사</th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">항공편명</th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">출발시간</th>
+                    <th className="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">비고</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
+                {goFlights.map((flight: any, index) => (
+                  <tr key={index} className="text center">
+                    <td className="py-3 ps-4">
+                      <div className="flex items-center h-5">
+                        <input id="hs-table-checkbox-1"
+                               type="checkbox" 
+                               className="border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"/>
+                        <label className="sr-only">Checkbox</label>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-neutral-200">{flight.airline}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{flight.airPlanecode}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{flight.departureTime}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                      <button type="button" className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-hidden focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:text-blue-400">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex space-x-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">가는 날짜</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2"
-            value={departureDate}
-            onChange={(e) => setDepartureDate(e.target.value)}
-          />
-        </div>
+      {/* 귀국편 테이블 */}          
+      <h3 className="text-l font-semibold mt-6 mb-2 text-gray-500">귀국편 검색 결과</h3>
+      <div className="flex flex-col">
+        <div className="-m-1.5 overflow-x-auto">
+          <div className="p-1.5 min-w-full inline-block align-middle">
+            <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
 
-        <div className="flex-1">
-          <label className="block text-sm font-medium">오는 날짜</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2"
-            value={returnDate}
-            onChange={(e) => setReturnDate(e.target.value)}
-          />
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                <thead className="bg-gray-50 dark:bg-neutral-700">
+                  <tr>
+                    <th scope="col" className="py-3 ps-4">
+                      <div className="flex items-center h-5">
+                        <input id="hs-table-checkbox-all"
+                               type="checkbox" 
+                               className="border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 dark:bg-neutral-700 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"/>
+                        <label className="sr-only">Checkbox</label>
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">항공사</th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">항공편명</th>
+                    <th className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">출발시간</th>
+                    <th className="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">비고</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
+                {backFlights.map((flight: any, index) => (
+                  <tr key={index} className="text center">
+                    <td className="py-3 ps-4">
+                      <div className="flex items-center h-5">
+                        <input id="hs-table-checkbox-1"
+                               type="checkbox" 
+                               className="border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"/>
+                        <label className="sr-only">Checkbox</label>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-neutral-200">{flight.airline}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{flight.airPlanecode}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{flight.departureTime}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                      <button type="button" className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-hidden focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:text-blue-400">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="text-center">
-        <button
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          onClick={handleSearch}
-        >
-          검색
-        </button>
-      </div>
     </div>
+
   );
 }
