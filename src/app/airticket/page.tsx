@@ -1,5 +1,6 @@
 'use client';
 
+import { useInfiniteQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 
 export default function FlightSearchForm() {
@@ -10,12 +11,7 @@ export default function FlightSearchForm() {
   const [goFlights, setGoFlights] = useState([]);     // 출국편 리스트
   const [backFlights, setBackFlights] = useState([]); // 귀국편 리스트
 
-  const handleSwap = () => { // 출발지 <-> 도착지 
-    const temp = departure;
-    setDeparture(arrival);
-    setArrival(temp);
-  };
-
+  // 데이터 요청함수
   const handleSearch = async () => {
   const res = await fetch("http://localhost:8080/api/flights", {
     method: "POST",
@@ -37,6 +33,23 @@ export default function FlightSearchForm() {
   console.log("출국편", data.go);
   console.log("귀국편", data.back);
 };
+
+
+{/*useInfiniteQuery
+const {
+  data : airInfoData, // 서버에서 받아온 항공편 데이터
+  fetchNextPage, // 다음페이지 데이터 불러오는 함수
+  hasNextPage, // 다음페이지가 있는지 여부 확인 boolean 값
+  isFetchingNextPage, // 다음 페이지를 가져오는 중인지 확인하는 boolean 값
+} = useInfiniteQuery({
+  queryKey: ["goFlights-List", goFlights],
+  queryFn: ({ pageParam }) => handleSearch (goFlights, pageParam),
+  initialPageParam: 0,
+  getNextPageParam: (lastPage) => lastPage.nextCursor,
+});*/}
+
+
+
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-6">
