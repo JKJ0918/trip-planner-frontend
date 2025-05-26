@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { useGoFlights } from '../hooks/useGoFlights';
+import { useBackFlights } from '../hooks/useBackFlights';
 
 type Flight = {
   airline: string;
@@ -9,29 +9,29 @@ type Flight = {
   departureTime: string;
 };
 
-type GoFlightTableProps = {
+type BackFlightTableProps = {
   departure: string;
   arrival: string;
   departureDate: string;
   returnDate: string;
-  selectedFlight: Flight | null;
-  onSelectFlight: (flight: Flight) => void;
+  selectedFlight: any;
+  onSelectFlight: (flight: any) => void;
 };
 
-function GoFlightTable({
+function BackFlightTable({
   departure,
   arrival,
   departureDate,
   returnDate,
   selectedFlight,
   onSelectFlight,
-}: GoFlightTableProps) {
+}: BackFlightTableProps) {
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useGoFlights({
+  } = useBackFlights({
     departure,
     arrival,
     departureDate,
@@ -40,7 +40,6 @@ function GoFlightTable({
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -60,7 +59,7 @@ function GoFlightTable({
 
   return (
     <div>
-      <h3 className="text-l font-semibold mt-6 mb-2 text-gray-500">출국편 검색 결과</h3>
+      <h3 className="text-l font-semibold mt-6 mb-2 text-gray-500">귀국편 검색 결과</h3>
 
       <div
         ref={scrollRef}
@@ -88,7 +87,7 @@ function GoFlightTable({
                     <td className="px-4 py-4 text-center">
                       <input
                         type="radio"
-                        name="goFlight"
+                        name="backFlight"
                         checked={isChecked}
                         onChange={() => onSelectFlight(flight)}
                       />
@@ -108,7 +107,7 @@ function GoFlightTable({
             )}
             {isFetchingNextPage && (
               <tr>
-                <td colSpan={4} className="text-center py-4 text-sm text-gray-400">
+                <td colSpan={3} className="text-center py-4 text-sm text-gray-400">
                   로딩 중...
                 </td>
               </tr>
@@ -120,4 +119,4 @@ function GoFlightTable({
   );
 }
 
-export default GoFlightTable;
+export default BackFlightTable;

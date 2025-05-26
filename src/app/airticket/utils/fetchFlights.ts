@@ -1,22 +1,22 @@
-export interface Flight {
+export interface Flight { // 하나의 항공편 정보를 담는 타입 
   airline: string;
   airPlanecode: string;
   departureTime: string;
 }
 
-export interface FlightPage {
+export interface FlightPage { // 목록과 페이지 정보를 담는 타입
   items: Flight[];
   nextPage: number | null;
   hasNext: boolean;
 }
 
-export const fetchFlights = async ({
+export const fetchFlights = async ({ // 항공편 데이터를 가져오는 비동기 함수
   departure,
   arrival,
   departureDate,
   returnDate,
-  goPage = 1,
-  backPage = 1,
+  goPage = 1, // 출국편 정보 1페이지
+  backPage = 1, // 귀국편 정보 1페이지
   size = 10,
 }: {
   departure: string;
@@ -26,7 +26,8 @@ export const fetchFlights = async ({
   goPage?: number;
   backPage?: number;
   size?: number;
-}): Promise<{ go: FlightPage; back: FlightPage }> => {
+
+}): Promise<{ go: FlightPage; back: FlightPage }> => { // 결과가 go, back 객체인 Promise
   const res = await fetch('http://localhost:8080/api/flights', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -49,5 +50,5 @@ export const fetchFlights = async ({
     throw new Error('Failed to fetch flights');
   }
 
-  return data;
+  return data; // 응답받은 데이터 반환(반환 타입 : { go: FlightPage; back: FlightPage })
 };
