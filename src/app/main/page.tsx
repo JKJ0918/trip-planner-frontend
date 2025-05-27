@@ -15,9 +15,9 @@ export default function MainPage() {
           당신의 여행 준비를 쉽고 빠르게, <br />
           체계적으로 도와드립니다.
         </p>
-        <Link href="/airticket">
+        <Link href="/maps">
           <button className="inline-block rounded-md bg-indigo-600 px-8 py-3 text-white font-semibold shadow-lg hover:bg-indigo-700 transition">
-            항공권
+            지도
           </button>
         </Link>
       </div>
