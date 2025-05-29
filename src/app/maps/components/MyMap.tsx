@@ -1,9 +1,10 @@
 // components/MyMap.tsx
 'use client';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
 import { useLocationStore } from '@/app/main/utils/locationStore';
+import { useTripStore } from '../utils/tripstore';
 
 const containerStyle = {
   width: '100%',
@@ -26,12 +27,16 @@ type Pin = {
 
 export default function MyMap(){
 
+  // 상태 가져오기
+  const pins = useTripStore((state) => state.pins)
+  const setPins = useTripStore((state) => state.setPins)
+  const addPin = useTripStore((state) => state.addPin)
+  const deletePin = useTripStore((state) => state.deletePin)
+
+
   const { lat, lng } = useLocationStore();
   // ✅ 최초 1번만 지도 중심 상태로 설정
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
-    lat,
-    lng,
-  });
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat, lng, });
 
   const [selectedPinIndex, setSelectedPinIndex] = useState<number | null>(null);
 
@@ -51,7 +56,8 @@ export default function MyMap(){
   });
 
   const [selectedPos, setSelectedPos] = useState<{ lat: number; lng: number } | null>(null);
-  const [pins, setPins] = useState<Pin[]>([]);
+  
+  // const [pins, setPins] = useState<Pin[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -68,19 +74,17 @@ export default function MyMap(){
     }
   }, []);
 
+  // 핀추가
   const handleAddPin = () => {
     if (!selectedPos) return;
 
-    setPins([
-      ...pins,
-      {
-        lat: selectedPos.lat,
-        lng: selectedPos.lng,
-        name: formData.name,
-        category: formData.category,
-        address: formData.address,
-      },
-    ]);
+    addPin({
+      lat: selectedPos.lat,
+      lng: selectedPos.lng,
+      name: formData.name,
+      category: formData.category,
+      address: formData.address,
+    });
 
     setSelectedPos(null);
     setFormData({ name: '', category: '', address: '' });
@@ -103,12 +107,11 @@ export default function MyMap(){
     }
   };
 
+  // 핀 삭제
   const handleDeletePin = (index: number) => {
-  const newPins = [...pins];
-  newPins.splice(index, 1);
-  setPins(newPins);
-  setHighlightedIndex(null); // 선택 해제
-};
+    deletePin(index);
+    setSelectedPinIndex(null);
+  };
 
 
   return (
