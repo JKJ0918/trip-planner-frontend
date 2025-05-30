@@ -9,7 +9,6 @@ export default function TravelJournal() {
     updateJournalDraft,
     addUploadedImageToDraft,
     removeImageFromDraft,
-    submitAllJournals,
   } = useTripStore();
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -97,13 +96,6 @@ export default function TravelJournal() {
           </p>
         </div>
       ))}
-
-      <button
-        onClick={submitAllJournals}
-        className="bg-green-600 text-white px-4 py-2 rounded"
-      >
-        전체 작성 완료
-      </button>
     </div>
   );
 }

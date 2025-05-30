@@ -52,11 +52,24 @@ type TripState = {
   addUploadedImageToDraft: (date: string, files: File[]) => Promise<void>,
   removeImageFromDraft: (date: string, imageId: string) => void,
   clearJournalDrafts: () => void;
-  submitAllJournals: () => Promise<void>,
+  submitTripPlan: (startDate: string, endDate: string, pins: Pin[]) => Promise<void>
+
+  startDate: string;
+  endDate: string;
+  setTripPeriod: (start: string, end: string) => void;
+  user: { id: string } | null;
+  setUser: (user: { id: string; }) => void;
   
 };
 
 export const useTripStore = create<TripState>((set, get) => ({
+
+  startDate: '',
+  endDate: '',
+  setTripPeriod: (start, end) => set({ startDate: start, endDate: end }),
+  user: null, // 처음엔 없음
+  setUser: (user) => set({ user }), // 제출누르면 생김
+
   pins: [],
   setPins: (pins) => set({ pins }),
   addPin: (pin) => set((state) => ({ pins: [...state.pins, pin] })),
@@ -124,28 +137,61 @@ export const useTripStore = create<TripState>((set, get) => ({
       ),
     })),
 
-  submitAllJournals: async () => {
-    const { journalDrafts } = get();
-    for (const draft of journalDrafts) {
-      const res = await fetch('http://localhost:8080/api/journals', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          date: draft.date,
-          title: draft.title,
-          description: draft.description,
-          photos: draft.uploadedImages.map((img) => img.url),
-        }),
-      });
+  submitTripPlan: async (startDate: string, endDate: string) => {
+    const { pins, journalDrafts, user } = get();
 
-      if (!res.ok) {
-        throw new Error(`저장 실패: ${draft.date}`);
-      }
+    if (!user) {
+    alert("로그인이 필요합니다.");
+    return;
     }
-    alert('모든 여행일지를 저장했습니다!');
-    set({ journalDrafts: [] });
-  },
+
+    try {
+      for (const draft of journalDrafts) {
+        // 유효성 검사
+        if (!draft.title || !draft.description) {
+          alert(`"${draft.date}"의 제목과 설명을 모두 입력해 주세요.`);
+          return;
+        }
+
+        const payload = {
+          startDate,
+          endDate,
+          userId: user.id,
+          pins,
+          journals: journalDrafts.map((draft) => ({
+            date: draft.date,
+            title: draft.title,
+            description: draft.description,
+            photos: draft.uploadedImages.map((img) => img.url),
+          })),
+        };
+
+        console.log("payload 확인", payload); // 여기에서 userId가 undefined 또는 null 이면 문제 발생
+
+        const res = await fetch('http://localhost:8080/api/journals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`여행 계획 저장 실패`);
+        }
+      }
+
+      alert('여행일지가 성공적으로 저장되었습니다!');
+      set({ journalDrafts: [], pins: [] }); // 저장 후 상태 초기화
+
+    } catch (err) {
+      console.error(err);
+      alert(`오류 발생: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
+    }
+  }
+
+
+
+
 }));

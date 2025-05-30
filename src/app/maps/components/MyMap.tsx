@@ -166,13 +166,19 @@ export default function MyMap(){
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="border p-1 w-full"
               />
-              <input
-                type="text"
-                placeholder="카테고리"
+              <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="border p-1 w-full"
-              />
+                className="border p-1 rounded"
+              >
+                <option value="">카테고리를 선택하세요</option>
+                <option value="숙소">🏨 숙소</option>
+                <option value="음식점">🍽️ 음식점</option>
+                <option value="의료">🏥 의료</option>
+                <option value="행정">🏛️ 행정</option>
+                <option value="공항">✈️ 공항</option>
+                <option value="도시">🌆 도시</option>
+              </select>
               <input
                 type="text"
                 placeholder="주소"

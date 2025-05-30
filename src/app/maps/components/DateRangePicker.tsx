@@ -14,6 +14,8 @@ export default function DateRangePicker() {
     },
   ]);
 
+  const setTripPeriod = useTripStore((state) => state.setTripPeriod);
+
   const setJournalDrafts = useTripStore((state) => state.setJournalDrafts);
 
   const handleSelect = (ranges: any) => {
@@ -27,8 +29,17 @@ export default function DateRangePicker() {
   };
 
   const handleDateRangeSelect = (startDate: Date, endDate: Date) => {
-  const dates = generateDateRange(startDate, endDate);
+    
+    console.log("선택된 날짜:", startDate.toISOString(), endDate.toISOString()); // ✅ 콘솔 확인
 
+
+    const dates = generateDateRange(startDate, endDate);
+
+    setTripPeriod(
+      startDate.toISOString().split("T")[0], // "2025-05-29"
+      endDate.toISOString().split("T")[0]    // "2025-05-30"
+    );
+    
     setJournalDrafts(
       dates.map((date) => ({
         date,
