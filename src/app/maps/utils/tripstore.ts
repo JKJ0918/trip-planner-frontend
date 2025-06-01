@@ -5,8 +5,9 @@ import { uploadImage } from './uploadImage';
 
 export type UploadedImage = {
   id: string;
-  url: string;
   preview: string;
+  file: File; // 서버 업로드 전 실제 파일
+  url?: string; // 업로드 후 URL (아직 업로드 안 됐으면 undefined)
 };
 
 export type TravelEntry = {
@@ -106,24 +107,25 @@ export const useTripStore = create<TripState>((set, get) => ({
     })),
 
   addUploadedImageToDraft: async (date, files) => {
-    const uploaded = await Promise.all(
-      files.map(async (file) => {
-        const preview = URL.createObjectURL(file);
-        const url = await uploadImage(file);
-        if (!url) return null;
-        return { id: uuidv4(), url, preview };
-      })
-    );
-    const filtered = uploaded.filter((img): img is UploadedImage => img !== null);
+    const newImages = files.map((file) => ({
+      id: uuidv4(),
+      file,
+      preview: URL.createObjectURL(file),
+      url: undefined, // 아직 서버에 안 올렸음
+    }));
 
     set((state) => ({
       journalDrafts: state.journalDrafts.map((draft) =>
         draft.date === date
-          ? { ...draft, uploadedImages: [...draft.uploadedImages, ...filtered] }
+          ? {
+              ...draft,
+              uploadedImages: [...draft.uploadedImages, ...newImages],
+            }
           : draft
       ),
     }));
   },
+
 
   removeImageFromDraft: (date, imageId) =>
     set((state) => ({
@@ -137,59 +139,72 @@ export const useTripStore = create<TripState>((set, get) => ({
       ),
     })),
 
-  submitTripPlan: async (startDate: string, endDate: string) => {
-    const { pins, journalDrafts, user } = get();
+  submitTripPlan: async (startDate, endDate, pins) => {
+    const { journalDrafts, user } = get();
 
     if (!user) {
-    alert("로그인이 필요합니다.");
-    return;
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    // 유효성 검사
+    for (const draft of journalDrafts) {
+      if (!draft.title || !draft.description) {
+        alert(`"${draft.date}"의 제목과 설명을 모두 입력해 주세요.`);
+        return;
+      }
     }
 
     try {
-      for (const draft of journalDrafts) {
-        // 유효성 검사
-        if (!draft.title || !draft.description) {
-          alert(`"${draft.date}"의 제목과 설명을 모두 입력해 주세요.`);
-          return;
-        }
+      const journals = await Promise.all(
+        journalDrafts.map(async (draft) => {
+          const uploadedUrls: string[] = [];
 
-        const payload = {
-          startDate,
-          endDate,
-          userId: user.id,
-          pins,
-          journals: journalDrafts.map((draft) => ({
+          for (const image of draft.uploadedImages) {
+            // ✅ 아직 업로드된 적이 없다면 서버에 전송
+            if (!image.url) {
+              const resultUrl = await uploadImage(image.file);
+              if (resultUrl) uploadedUrls.push(resultUrl);
+            } else {
+              uploadedUrls.push(image.url); // 이미 업로드된 이미지
+            }
+          }
+
+          return {
             date: draft.date,
             title: draft.title,
             description: draft.description,
-            photos: draft.uploadedImages.map((img) => img.url),
-          })),
-        };
+            photos: uploadedUrls,
+          };
+        })
+      );
 
-        console.log("payload 확인", payload); // 여기에서 userId가 undefined 또는 null 이면 문제 발생
+      const payload = {
+        startDate,
+        endDate,
+        userId: user.id,
+        pins,
+        journals,
+      };
 
-        const res = await fetch('http://localhost:8080/api/journals', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(payload),
-        });
+      const res = await fetch('http://localhost:8080/api/journals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
 
-        if (!res.ok) {
-          throw new Error(`여행 계획 저장 실패`);
-        }
-      }
-
-      alert('여행일지가 성공적으로 저장되었습니다!');
-      set({ journalDrafts: [], pins: [] }); // 저장 후 상태 초기화
+      if (!res.ok) throw new Error('저장 실패');
+      alert('저장 성공!');
+      set({ journalDrafts: [], pins: [] });
 
     } catch (err) {
       console.error(err);
       alert(`오류 발생: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
     }
-  }
+  },
+
+
 
 
 
