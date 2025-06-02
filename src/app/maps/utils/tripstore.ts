@@ -3,6 +3,12 @@ import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadImage } from './uploadImage';
 
+// 여행일지 제목, 여행도시 작성
+export type TravelMainEntry = {
+  title: string;
+  locationSummary: string; // 여행 도시
+}
+
 export type UploadedImage = {
   id: string;
   preview: string;
@@ -10,6 +16,7 @@ export type UploadedImage = {
   url?: string; // 업로드 후 URL (아직 업로드 안 됐으면 undefined)
 };
 
+// 여행 일지 작성 관련
 export type TravelEntry = {
   id: string;
   title: string;
@@ -22,11 +29,21 @@ export type TravelLog = {
   entries: TravelEntry[];
 };
 
-export type JournalDraft = {
+export type JournalDraft = { 
   date: string;
   title: string;
   description: string;
   uploadedImages: UploadedImage[];
+};
+
+// 여행일지 게시글 작성
+export type TravelPostSummary = {
+  id: number;
+  title: string;
+  locationSummary: string;
+  thumbnailUrl: string;
+  authorNickname: string;
+  createdAt: string;
 };
 
 type Pin = {
@@ -47,6 +64,12 @@ type TripState = {
   addLogEntry: (date: string, entry: TravelEntry) => void;
   deleteLogEntry: (date: string, entryId: string) => void;
 
+  travelMainEntry: TravelMainEntry;
+  setTravelMainEntry: (entry: Partial<TravelMainEntry>) => void;
+
+  isPublic: boolean;
+  setIsPublic: (value: boolean) => void;
+  
   journalDrafts: JournalDraft[];
   setJournalDrafts: (drafts: JournalDraft[]) => void;
   updateJournalDraft: (date: string, updates: Partial<JournalDraft>) => void;
@@ -95,6 +118,21 @@ export const useTripStore = create<TripState>((set, get) => ({
       ),
     })),
 
+  travelMainEntry: {
+    title: '',
+    locationSummary: '',
+  },
+  setTravelMainEntry: (entry) =>
+    set((state) => ({
+      travelMainEntry: {
+        ...state.travelMainEntry,
+        ...entry,
+      },
+    })),
+
+  isPublic: true,
+  setIsPublic: (value) => set({ isPublic: value }),
+
   journalDrafts: [],
   setJournalDrafts: (drafts) => set({ journalDrafts: drafts }),
   clearJournalDrafts: () => set({ journalDrafts: [] }),
@@ -139,11 +177,17 @@ export const useTripStore = create<TripState>((set, get) => ({
       ),
     })),
 
-  submitTripPlan: async (startDate, endDate, pins) => {
-    const { journalDrafts, user } = get();
+  submitTripPlan: async (startDate, endDate, pins, ) => {
+    const { journalDrafts, user, travelMainEntry, isPublic } = get();
 
     if (!user) {
       alert("로그인이 필요합니다.");
+      return;
+    }
+
+    // 메인 제목/도시 유효성 검사
+    if (!travelMainEntry.title || !travelMainEntry.locationSummary) {
+      alert("여행 제목과 도시명을 모두 입력해 주세요.");
       return;
     }
 
@@ -161,7 +205,7 @@ export const useTripStore = create<TripState>((set, get) => ({
           const uploadedUrls: string[] = [];
 
           for (const image of draft.uploadedImages) {
-            // ✅ 아직 업로드된 적이 없다면 서버에 전송
+            // 아직 업로드된 적이 없다면 서버에 전송
             if (!image.url) {
               const resultUrl = await uploadImage(image.file);
               if (resultUrl) uploadedUrls.push(resultUrl);
@@ -179,13 +223,19 @@ export const useTripStore = create<TripState>((set, get) => ({
         })
       );
 
+
       const payload = {
         startDate,
         endDate,
         userId: user.id,
+        title: travelMainEntry.title, // 추가
+        locationSummary: travelMainEntry.locationSummary, // 추가
+        isPublic,
         pins,
-        journals,
+        journals, // 여행 일정들
       };
+
+      console.log(payload);
 
       const res = await fetch('http://localhost:8080/api/journals', {
         method: 'POST',
@@ -203,9 +253,6 @@ export const useTripStore = create<TripState>((set, get) => ({
       alert(`오류 발생: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
     }
   },
-
-
-
 
 
 

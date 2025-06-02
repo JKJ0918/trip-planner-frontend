@@ -6,6 +6,7 @@ import TravelJournal from './components/TravelJournal';
 import { useTripStore } from './utils/tripstore';
 import { useEffect } from 'react';
 import { fetchUserInfoJ } from './utils/fetchUserInfoJ';
+import TravelInfo from './components/TravelInfo';
 
 const MyMap = dynamic(() => import('./components/MyMap'), { ssr: false });
 
@@ -30,6 +31,9 @@ export default function MapPage() {
 
   return (
     <div className="p-4 space-y-6">
+
+      <TravelInfo />
+      
       <h1 className="text-xl font-bold">📍 지도 테스트</h1>
       
       {/* 지도 및 방문지 목록 */}
@@ -46,10 +50,6 @@ export default function MapPage() {
         <h2 className="text-lg font-semibold mb-2">일정 작성</h2>
         <TravelJournal />
       </div>
-
-     <div>
-      현재 저장된 여행 기간: {startDate} ~ {endDate}
-    </div>
 
       {/* 작성 완료 버튼 */}
       <div className="text-right">

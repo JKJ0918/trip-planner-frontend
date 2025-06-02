@@ -35,7 +35,7 @@ export default function MyMap(){
 
 
   const { lat, lng } = useLocationStore();
-  // ✅ 최초 1번만 지도 중심 상태로 설정
+  // 최초 1번만 지도 중심 상태로 설정
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat, lng, });
 
   const [selectedPinIndex, setSelectedPinIndex] = useState<number | null>(null);
