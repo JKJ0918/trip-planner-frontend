@@ -1,72 +1,73 @@
+// maps page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { TravelPostSummary } from '../maps/utils/tripstore';
-import PostCard from '../posts/components/PostCard';
+import dynamic from 'next/dynamic';
+import DateRangePicker from './components/DateRangePicker';
+import TravelJournal from './components/TravelJournal';
+import { useTripStore } from './utils/tripstore';
+import { useEffect } from 'react';
+import { fetchUserInfoJ } from './utils/fetchUserInfoJ';
+import TravelInfo from './components/TravelInfo';
+
+const MyMap = dynamic(() => import('./components/MyMap'), { ssr: false });
 
 
 
-export default function PostListPage() {
+export default function MapPage() {
 
-  const [loading, setLoading] = useState(true);
-  const [posts, setPosts] = useState<TravelPostSummary[]>([]);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [keyword, setKeyword] = useState("");
-
-  
+  const { startDate, endDate, pins, submitTripPlan } = useTripStore();
+  const setUser = useTripStore((state) => state.setUser);
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const loadUser = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8080/api/journals/public?page=${page}&size=6&keyword=${keyword}`
-        );
-        const data = await res.json();
-          setPosts(data.content);
-          setTotalPages(data.totalPages);
+        const user = await fetchUserInfoJ();
+        setUser({id: user.userId});
       } catch (err) {
-        console.error('게시물 불러오기 실패:', err);
-      } finally {
-        setLoading(false);
+        console.error("유저 정보를 불러오지 못했습니다:", err);
       }
     };
-
-    fetchPosts();
+    loadUser();
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold mb-4">📚 여행 게시판</h1>
+    <div className="p-4 space-y-6">
 
-      {loading && <p>로딩 중...</p>}
-
-      {posts.length === 0 && !loading && <p>게시물이 없습니다.</p>}
-
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-
-
-      <input
-      type="text"
-      value={keyword}
-      onChange={(e) => setKeyword(e.target.value)}
-      placeholder="제목 또는 도시명으로 검색"
-      />
-      <button onClick={() => setPage(0)}>🔍 검색</button>
-
-      <div className="mt-4 space-x-2">
-        {Array.from({ length: totalPages }).map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setPage(i)}
-            className={`px-2 py-1 ${i === page ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          >
-            {i + 1}
-          </button>
-        ))}
+      <TravelInfo />
+      
+      <h1 className="text-xl font-bold">📍 지도 테스트</h1>
+      
+      {/* 지도 및 방문지 목록 */}
+      <MyMap />
+      
+      {/* 날짜 선택기 */}
+      <div className="bg-white p-4 shadow-md rounded">
+        <h2 className="text-lg font-semibold mb-2">🗓️ 여행 기간 설정</h2>
+        <DateRangePicker />
       </div>
+
+      {/* 일정 작성 */}
+      <div className="bg-white p-4 shadow-md rounded">
+        <h2 className="text-lg font-semibold mb-2">일정 작성</h2>
+        <TravelJournal />
+      </div>
+
+      {/* 작성 완료 버튼 */}
+      <div className="text-right">
+        <button
+          onClick={() => {
+            if (!startDate || !endDate) {
+              alert("여행 기간을 설정해 주세요!");
+              return;
+            }
+            submitTripPlan(startDate, endDate, pins);
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          전체 작성 완료
+        </button>
+      </div>
+    
 
     </div>
   );

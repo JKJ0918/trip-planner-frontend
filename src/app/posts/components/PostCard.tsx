@@ -11,6 +11,7 @@ const BASE_URL = "http://localhost:8080";
 
 
 export default function PostCard({ post }: Props) {
+  console.log(post.thumbnailUrl);
   return (
     <Link href={`/posts/${post.id}`}>
       <div className="flex border rounded-lg shadow-sm hover:shadow-md cursor-pointer bg-white overflow-hidden">

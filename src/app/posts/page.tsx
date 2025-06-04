@@ -1,3 +1,4 @@
+// 게시물 리스트 나열 페이지
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ export default function PostListPage() {
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  
 
   // 게시글 불러오기
   const fetchPosts = async () => {
