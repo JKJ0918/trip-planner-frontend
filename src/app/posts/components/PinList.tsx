@@ -1,3 +1,4 @@
+// 상세 보기 안 핀 리스트
 'use client';
 
 import { useEffect } from 'react';

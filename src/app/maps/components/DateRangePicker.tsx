@@ -30,7 +30,7 @@ export default function DateRangePicker() {
 
   const handleDateRangeSelect = (startDate: Date, endDate: Date) => {
     
-    console.log("선택된 날짜:", startDate.toISOString(), endDate.toISOString()); // ✅ 콘솔 확인
+    console.log("선택된 날짜:", startDate.toISOString(), endDate.toISOString()); // 콘솔 확인
 
 
     const dates = generateDateRange(startDate, endDate);

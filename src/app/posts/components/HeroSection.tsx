@@ -1,4 +1,5 @@
 // components/TravelPost/HeroSection.tsx
+// 상세보기 표지
 import React from 'react';
 
 type HeroSectionProps = {
