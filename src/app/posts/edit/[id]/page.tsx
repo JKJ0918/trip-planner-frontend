@@ -1,17 +1,15 @@
-// app/posts/edit/[id]/page.tsx
+// ✅ page.tsx (EditPostPage)
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-// DateRangepicker
-import { parseISO } from 'date-fns';
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import MapEditor from '../components/MapEditor';
+import ItineraryEditor from '../components/ItineraryEditor';
 
-
-type TravelJournal = { // 여행일정 전체
+type TravelJournal = {
   id: number;
   title: string;
   locationSummary: string;
@@ -23,7 +21,7 @@ type TravelJournal = { // 여행일정 전체
   itinerary: DayJournal[];
 };
 
-type Pin = { // 핀 타입
+type Pin = {
   lat: number;
   lng: number;
   name: string;
@@ -31,25 +29,52 @@ type Pin = { // 핀 타입
   address: string;
 };
 
-type DayJournal = { // 일일 여행 일정
-  date: string;
+type DayJournal = {
   title: string;
   content: string;
   imageUrls: string[];
+  newImages?: File[];
+  deletedImages?: string[];
+};
+
+const parseLocalDate = (dateString: string): Date => {
+  return new Date(dateString.replace(/-/g, '/'));
 };
 
 export default function EditPostPage() {
   const { id } = useParams();
   const router = useRouter();
+
   const [journalData, setJournalData] = useState<TravelJournal | null>(null);
-  
+  const [range, setRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection',
+    },
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(`http://localhost:8080/api/journals/public/${id}`);
         const data = await res.json();
-        setJournalData(data);
+
+        const enhancedItinerary = data.itinerary.map((entry: any) => ({
+          ...entry,
+          imageUrls: entry.images ?? [],
+          newImages: [],
+          deletedImages: [],
+        }));
+        console.log("data.itinerary:", JSON.stringify(data.itinerary, null, 2));
+        setJournalData({ ...data, itinerary: enhancedItinerary });
+        setRange([
+          {
+            startDate: parseLocalDate(data.dateRange.startDate),
+            endDate: parseLocalDate(data.dateRange.endDate),
+            key: 'selection',
+          },
+        ]);
       } catch (err) {
         console.error('데이터 불러오기 실패:', err);
       }
@@ -58,38 +83,88 @@ export default function EditPostPage() {
     fetchData();
   }, [id]);
 
-
-  // 컴포넌트 내에 추가
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(), // 초기값 아무거나(초기 null 발생 가능성이 있음)
-    endDate: new Date(),
-    key: 'selection',
-  });
-
-  useEffect(() => { // 값을 받아오면 ISO 타입으로 변환
-    if (journalData) {
-      setDateRange({
-        startDate: parseISO(journalData.dateRange.startDate),
-        endDate: parseISO(journalData.dateRange.endDate),
-        key: 'selection',
-      });
-    }
-  }, [journalData]);
-
-  // 날짜 변경 시 journalData에 반영
   const handleDateChange = (ranges: any) => {
     const { startDate, endDate } = ranges.selection;
-    setDateRange({ ...dateRange, startDate, endDate });
+    setRange([ranges.selection]);
 
-    if (!journalData) return; // journalData null 방지
-    
+    if (!journalData) return;
+
     setJournalData({
       ...journalData,
       dateRange: {
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
-      }
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+      },
     });
+  };
+
+  // 수정 본 저장 함수
+  const handleSave = async () => {
+    if (!journalData) return;
+
+    try {
+      const updatedItinerary = await Promise.all(
+        journalData.itinerary.map(async (entry, dayIndex) => {
+          // 1. 새 이미지 업로드
+          const uploadedUrls: string[] = [];
+          if (entry.newImages && entry.newImages.length > 0) {
+            const formData = new FormData();
+            entry.newImages.forEach((file) => formData.append('files', file));
+
+            const res = await fetch(`http://localhost:8080/api/images/edit/upload`, {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await res.json();
+            uploadedUrls.push(...data.imageUrls); // 백엔드에서 URL 배열 리턴된다고 가정
+          }
+
+          // 2. 삭제할 이미지 서버에 전달
+          if (entry.deletedImages && entry.deletedImages.length > 0) {
+            await fetch(`http://localhost:8080/api/images/edit/delete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ imageUrls: entry.deletedImages }),
+            });
+          }
+
+          // 3. 이미지 URL 최종 조합
+          const finalImages = [
+            ...(entry.imageUrls || []),
+            ...uploadedUrls,
+          ];
+
+          return {
+            title: entry.title,
+            content: entry.content,
+            images: finalImages,
+          };
+        })
+      );
+
+      // 4. 전체 업데이트 요청
+      const res = await fetch(`http://localhost:8080/api/journals/public/edit/${journalData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...journalData,
+          itinerary: updatedItinerary,
+        }),
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        alert('수정이 완료되었습니다!');
+      } else {
+        throw new Error('수정 실패');
+      }
+    } catch (err) {
+      console.error('저장 중 오류 발생:', err);
+      alert('저장에 실패했습니다.');
+    }
   };
 
 
@@ -127,10 +202,12 @@ export default function EditPostPage() {
         <div>
           <label className="block mb-1 font-medium">여행 날짜</label>
           <DateRange
-            ranges={[dateRange]}
+            ranges={range}
             onChange={handleDateChange}
             moveRangeOnFirstSelection={false}
             rangeColors={['#3b82f6']}
+            months={1}
+            direction="horizontal"
           />
         </div>
 
@@ -141,7 +218,21 @@ export default function EditPostPage() {
           }
         />
 
+        <ItineraryEditor
+          itinerary={journalData.itinerary}
+          startDate={range[0].startDate}
+          onItineraryChange={(updatedItinerary) =>
+            setJournalData({ ...journalData, itinerary: updatedItinerary })
+          }
+        />
       </div>
+
+      <button className="bg-green-500 text-white px-4 py-2 rounded mt-6"
+        onClick={handleSave}
+      >
+        수정 완료
+      </button>
+
     </div>
   );
 }
