@@ -8,6 +8,7 @@ import HeroSection from '../components/HeroSection';
 import PostMap from '../components/PostMap';
 import PinList from '../components/PinList';
 import PostItinerary from '../components/PostItinerary';
+import CommentSection from '../components/CommentSection';
 
 type Pin = {
   lat: number;
@@ -76,6 +77,8 @@ export default function TravelPostPage() {
         startDate={post.dateRange.startDate}
         endDate={post.dateRange.endDate}
       />
+
+      <CommentSection journalId={post.id} />
     </div>
   );
 }
