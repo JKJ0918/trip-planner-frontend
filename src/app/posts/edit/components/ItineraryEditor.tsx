@@ -115,7 +115,7 @@ export default function ItineraryEditor({ itinerary, startDate, onItineraryChang
             rows={3}
           />
 
-          {/* ✅ 이미지 리스트들 */}
+          {/* 이미지 리스트들 */}
           <div className="flex flex-wrap gap-2 mb-2">
             {/* 기존 이미지 */}
             {(entry.imageUrls || []).map((url, imgIdx) => (

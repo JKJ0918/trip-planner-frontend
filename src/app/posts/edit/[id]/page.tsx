@@ -54,6 +54,8 @@ export default function EditPostPage() {
     },
   ]);
 
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -96,6 +98,7 @@ export default function EditPostPage() {
         endDate: endDate.toISOString().split('T')[0],
       },
     });
+
   };
 
   // 수정 본 저장 함수
@@ -143,6 +146,9 @@ export default function EditPostPage() {
         })
       );
 
+            // 여기에 찍기
+    console.log('📦 백엔드로 보낼 수정 데이터:', JSON.stringify(journalData, null, 2))
+    
       // 4. 전체 업데이트 요청
       const res = await fetch(`http://localhost:8080/api/journals/public/edit/${journalData.id}`, {
         method: 'PUT',
@@ -155,6 +161,7 @@ export default function EditPostPage() {
         }),
         credentials: 'include',
       });
+      console.log(JSON.stringify(res, null, 2));
 
       if (res.ok) {
         alert('수정이 완료되었습니다!');
@@ -167,6 +174,28 @@ export default function EditPostPage() {
     }
   };
 
+  // 삭제 함수
+  const handleDelete = async () => {
+    const confirm = window.confirm('정말 이 게시글을 삭제하시겠습니까?');
+    if (!confirm) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/journals/public/delete/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        alert('삭제가 완료되었습니다.');
+        router.push('/posts'); // 삭제 후 이동할 페이지 경로
+      } else {
+        throw new Error('삭제 실패');
+      }
+    } catch (err) {
+      console.error('삭제 중 오류 발생:', err);
+      alert('삭제에 실패했습니다.');
+    }
+  };
 
   if (!journalData) return <div>불러오는 중...</div>;
 
@@ -231,6 +260,13 @@ export default function EditPostPage() {
         onClick={handleSave}
       >
         수정 완료
+      </button>
+
+      <button
+        className="bg-red-500 text-white px-4 py-2 rounded"
+        onClick={handleDelete}
+      >
+        삭제
       </button>
 
     </div>
