@@ -11,6 +11,7 @@ type Comment = {
   edited: boolean;
   likeCount: number;
   likedByMe: boolean;
+  author: boolean; // 백엔드의 isAuthor 이지만, 기본적으로 Jackson은 isAuthor를 → "author"라는 키로 변환.
 };
 
 export default function CommentSection({ journalId }: { journalId: number }) {
@@ -26,12 +27,13 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     fetchComments();
   }, [journalId]);
 
-  const fetchComments = async () => {
+  const fetchComments = async () => { // 댓글 불러오는 메소드
     try {
       const res = await fetch(`http://localhost:8080/api/comments/${journalId}`, {
         credentials: 'include',
       });
       const data = await res.json();
+      console.log(data); // 👈 여기를 확인
       setComments(data);
     } catch (err) {
       console.error('댓글 불러오기 실패:', err);
@@ -153,15 +155,25 @@ export default function CommentSection({ journalId }: { journalId: number }) {
                   답글 달기
                 </button>
               )}
-              <button onClick={() => {
-                setEditMap((prev) => ({ ...prev, [comment.id]: true }));
-                setEditContentMap((prev) => ({ ...prev, [comment.id]: comment.content }));
-              }} className="text-yellow-600 hover:underline">
-                수정
-              </button>
-              <button onClick={() => handleDeleteComment(comment.id)} className="text-red-500 hover:underline">
-                삭제
-              </button>
+              {comment.author && (
+                <>
+                  <button
+                    onClick={() => {
+                      setEditMap((prev) => ({ ...prev, [comment.id]: true }));
+                      setEditContentMap((prev) => ({ ...prev, [comment.id]: comment.content }));
+                    }}
+                    className="text-yellow-600 hover:underline"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="text-red-500 hover:underline"
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
               <button onClick={() => handleToggleLike(comment.id)}>
                 {comment.likedByMe ? '❤️' : '🤍'} {comment.likeCount}
               </button>
