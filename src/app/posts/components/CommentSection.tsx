@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
-type Comment = {
+export type Comment = {
   id: number;
   content: string;
   writerName: string;
@@ -11,11 +12,15 @@ type Comment = {
   edited: boolean;
   likeCount: number;
   likedByMe: boolean;
-  author: boolean; // 백엔드의 isAuthor 이지만, 기본적으로 Jackson은 isAuthor를 → "author"라는 키로 변환.
+  author: boolean;
+};
+
+type CommentPage = {
+  content: Comment[];
+  last: boolean;
 };
 
 export default function CommentSection({ journalId }: { journalId: number }) {
-  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [replyMap, setReplyMap] = useState<{ [key: number]: string }>({});
@@ -23,20 +28,59 @@ export default function CommentSection({ journalId }: { journalId: number }) {
   const [editContentMap, setEditContentMap] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchComments();
-  }, [journalId]);
+  const [repliesMap, setRepliesMap] = useState<{ [parentId: number]: Comment[] }>({});
+  const [repliesLoaded, setRepliesLoaded] = useState<{ [parentId: number]: boolean }>({});
 
-  const fetchComments = async () => { // 댓글 불러오는 메소드
-    try {
-      const res = await fetch(`http://localhost:8080/api/comments/${journalId}`, {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<CommentPage>({
+    queryKey: ['comments', journalId],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await fetch(`http://localhost:8080/api/comments/${journalId}?page=${pageParam}&size=10`, {
         credentials: 'include',
       });
-      const data = await res.json();
-      console.log(data); // 👈 여기를 확인
-      setComments(data);
+      return res.json();
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.last ? undefined : allPages.length;
+    },
+  });
+
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage]);
+
+  const fetchReplies = async (parentId: number) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/comments/${parentId}/replies`, {
+        credentials: 'include',
+      });
+      const data: Comment[] = await res.json();
+      setRepliesMap((prev) => ({ ...prev, [parentId]: data }));
+      setRepliesLoaded((prev) => ({ ...prev, [parentId]: true }));
     } catch (err) {
-      console.error('댓글 불러오기 실패:', err);
+      console.error('대댓글 불러오기 실패:', err);
     }
   };
 
@@ -59,7 +103,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         setReplyTo(null);
       }
 
-      fetchComments();
+      location.reload();
     } catch (err) {
       console.error('댓글 작성 실패:', err);
     } finally {
@@ -79,7 +123,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         credentials: 'include',
       });
       setEditMap((prev) => ({ ...prev, [commentId]: false }));
-      fetchComments();
+      location.reload();
     } catch (err) {
       console.error('댓글 수정 실패:', err);
     }
@@ -93,7 +137,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         method: 'DELETE',
         credentials: 'include',
       });
-      fetchComments();
+      location.reload();
     } catch (err) {
       console.error('댓글 삭제 실패:', err);
     }
@@ -105,38 +149,29 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         method: 'POST',
         credentials: 'include',
       });
-      fetchComments();
+      location.reload();
     } catch (err) {
       console.error('좋아요 실패:', err);
     }
   };
 
-  const renderComments = (parentId: number | null = null) => {
+  const renderComments = (comments: Comment[], parentId: number | null = null) => {
     const list = comments.filter((c) => (c.parentId ?? null) === parentId);
 
     return list.map((comment) => (
       <div key={comment.id} className={`border p-3 mb-2 rounded ${parentId ? 'ml-6 bg-gray-50' : ''}`}>
-        {/* 수정 모드 */}
         {editMap[comment.id] ? (
           <>
             <textarea
               className="w-full border rounded p-2 text-sm"
               value={editContentMap[comment.id]}
-              onChange={(e) =>
-                setEditContentMap((prev) => ({ ...prev, [comment.id]: e.target.value }))
-              }
+              onChange={(e) => setEditContentMap((prev) => ({ ...prev, [comment.id]: e.target.value }))}
             />
             <div className="flex gap-2 mt-1 text-sm">
-              <button
-                className="bg-green-500 text-white px-2 py-1 rounded"
-                onClick={() => handleEditComment(comment.id)}
-              >
+              <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleEditComment(comment.id)}>
                 저장
               </button>
-              <button
-                className="text-gray-500 hover:underline"
-                onClick={() => setEditMap((prev) => ({ ...prev, [comment.id]: false }))}
-              >
+              <button className="text-gray-500 hover:underline" onClick={() => setEditMap((prev) => ({ ...prev, [comment.id]: false }))}>
                 취소
               </button>
             </div>
@@ -148,7 +183,6 @@ export default function CommentSection({ journalId }: { journalId: number }) {
               {comment.writerName} • {new Date(comment.createdAt).toLocaleString()}
               {comment.edited && <span className="ml-2 text-xs text-gray-400">(수정됨)</span>}
             </div>
-
             <div className="flex gap-2 mt-2 text-sm">
               {!parentId && (
                 <button onClick={() => setReplyTo(comment.id)} className="text-blue-600 hover:underline">
@@ -166,10 +200,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
                   >
                     수정
                   </button>
-                  <button
-                    onClick={() => handleDeleteComment(comment.id)}
-                    className="text-red-500 hover:underline"
-                  >
+                  <button onClick={() => handleDeleteComment(comment.id)} className="text-red-500 hover:underline">
                     삭제
                   </button>
                 </>
@@ -178,8 +209,6 @@ export default function CommentSection({ journalId }: { journalId: number }) {
                 {comment.likedByMe ? '❤️' : '🤍'} {comment.likeCount}
               </button>
             </div>
-
-            {/* 대댓글 입력창 */}
             {replyTo === comment.id && (
               <div className="mt-2">
                 <textarea
@@ -187,9 +216,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
                   rows={2}
                   placeholder="답글을 입력하세요..."
                   value={replyMap[comment.id] || ''}
-                  onChange={(e) =>
-                    setReplyMap((prev) => ({ ...prev, [comment.id]: e.target.value }))
-                  }
+                  onChange={(e) => setReplyMap((prev) => ({ ...prev, [comment.id]: e.target.value }))}
                 />
                 <button
                   className="mt-1 bg-blue-500 text-white text-sm px-3 py-1 rounded"
@@ -200,11 +227,29 @@ export default function CommentSection({ journalId }: { journalId: number }) {
                 </button>
               </div>
             )}
+
+            {!repliesLoaded[comment.id] && (
+              <button
+                className="text-blue-500 text-sm hover:underline mt-1"
+                onClick={() => fetchReplies(comment.id)}
+              >
+                답글 보기
+              </button>
+            )}
+
+            {repliesMap[comment.id] &&
+              repliesMap[comment.id].map((reply) => (
+                <div key={reply.id} className="ml-6 mt-2 bg-gray-50 p-2 rounded border text-sm">
+                  <p>{reply.content}</p>
+                  <div className="text-xs text-gray-500">
+                    {reply.writerName} • {new Date(reply.createdAt).toLocaleString()}
+                    {reply.edited && <span className="ml-2 text-xs text-gray-400">(수정됨)</span>}
+                  </div>
+                </div>
+              ))}
           </>
         )}
-
-        {/* 자식 댓글 재귀 */}
-        {renderComments(comment.id)}
+        {renderComments(comments, comment.id)}
       </div>
     ));
   };
@@ -212,9 +257,10 @@ export default function CommentSection({ journalId }: { journalId: number }) {
   return (
     <div className="mt-8">
       <h3 className="text-lg font-semibold mb-4">댓글</h3>
-      {renderComments()}
+      {data?.pages.map((page) => renderComments(page.content))}
+      <div ref={observerRef} className="h-6" />
+      {isFetchingNextPage && <p>불러오는 중...</p>}
 
-      {/* 최상위 댓글 입력 */}
       <div className="mt-6">
         <textarea
           className="w-full border rounded p-2"
