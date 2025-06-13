@@ -13,6 +13,7 @@ export type Comment = {
   likeCount: number;
   likedByMe: boolean;
   author: boolean;
+  replyCount: number;
 };
 
 type CommentPage = {
@@ -30,19 +31,23 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
   const [repliesMap, setRepliesMap] = useState<{ [parentId: number]: Comment[] }>({});
   const [repliesLoaded, setRepliesLoaded] = useState<{ [parentId: number]: boolean }>({});
+  const [repliesVisibleMap, setRepliesVisibleMap] = useState<{ [parentId: number]: boolean }>({});
+  const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
 
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteQuery<CommentPage>({
-    queryKey: ['comments', journalId],
+    queryKey: ['comments', journalId, sortOrder],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const res = await fetch(`http://localhost:8080/api/comments/${journalId}?page=${pageParam}&size=10`, {
-        credentials: 'include',
-      });
+      const res = await fetch(
+        `http://localhost:8080/api/comments/${journalId}?page=${pageParam}&size=10&sort=${sortOrder}`,
+        { credentials: 'include' }
+      );
       return res.json();
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -84,30 +89,34 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     }
   };
 
+  const toggleReplies = async (parentId: number, replyCount: number) => {
+    const isOpen = repliesVisibleMap[parentId];
+    if (!isOpen && !repliesLoaded[parentId] && replyCount > 0) {
+      await fetchReplies(parentId);
+    }
+    setRepliesVisibleMap((prev) => ({ ...prev, [parentId]: !isOpen }));
+  };
+
   const handleAddComment = async (parentId: number | null = null) => {
     const content = parentId === null ? newComment : replyMap[parentId] || '';
     if (!content.trim()) return;
 
     try {
-      setLoading(true);
-      await fetch(`http://localhost:8080/api/comments/${journalId}`, {
+      const res = await fetch(`http://localhost:8080/api/comments/${journalId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, parentId }),
         credentials: 'include',
       });
 
-      if (parentId === null) setNewComment('');
-      else {
-        setReplyMap((prev) => ({ ...prev, [parentId]: '' }));
-        setReplyTo(null);
+      if (res.status === 401) {
+        alert('로그인이 필요합니다.');
+        return;
       }
 
-      location.reload();
+      refetch();
     } catch (err) {
       console.error('댓글 작성 실패:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -123,7 +132,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         credentials: 'include',
       });
       setEditMap((prev) => ({ ...prev, [commentId]: false }));
-      location.reload();
+      refetch();
     } catch (err) {
       console.error('댓글 수정 실패:', err);
     }
@@ -137,7 +146,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         method: 'DELETE',
         credentials: 'include',
       });
-      location.reload();
+      refetch();
     } catch (err) {
       console.error('댓글 삭제 실패:', err);
     }
@@ -149,7 +158,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         method: 'POST',
         credentials: 'include',
       });
-      location.reload();
+      refetch();
     } catch (err) {
       console.error('좋아요 실패:', err);
     }
@@ -160,95 +169,121 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
     return list.map((comment) => (
       <div key={comment.id} className={`border p-3 mb-2 rounded ${parentId ? 'ml-6 bg-gray-50' : ''}`}>
-        {editMap[comment.id] ? (
-          <>
+        <p>{comment.content}</p>
+        <div className="text-sm text-gray-500">
+          {comment.writerName} • {new Date(comment.createdAt).toLocaleString()}
+          {comment.edited && <span className="ml-2 text-xs text-gray-400">(수정됨)</span>}
+        </div>
+        <div className="flex gap-2 mt-2 text-sm">
+          {!parentId && (
+            <button onClick={() => setReplyTo(comment.id)} className="text-blue-600 hover:underline">
+              답글 달기
+            </button>
+          )}
+          {comment.author && (
+            <>
+              <button
+                onClick={() => {
+                  setEditMap((prev) => ({ ...prev, [comment.id]: true }));
+                  setEditContentMap((prev) => ({ ...prev, [comment.id]: comment.content }));
+                }}
+                className="text-yellow-600 hover:underline"
+              >
+                수정
+              </button>
+              <button onClick={() => handleDeleteComment(comment.id)} className="text-red-500 hover:underline">
+                삭제
+              </button>
+            </>
+          )}
+          <button onClick={() => handleToggleLike(comment.id)}>
+            {comment.likedByMe ? '❤️' : '🤍'} {comment.likeCount}
+          </button>
+        </div>
+
+        {replyTo === comment.id && (
+          <div className="mt-2">
             <textarea
               className="w-full border rounded p-2 text-sm"
-              value={editContentMap[comment.id]}
-              onChange={(e) => setEditContentMap((prev) => ({ ...prev, [comment.id]: e.target.value }))}
+              rows={2}
+              placeholder="답글을 입력하세요..."
+              value={replyMap[comment.id] || ''}
+              onChange={(e) => setReplyMap((prev) => ({ ...prev, [comment.id]: e.target.value }))}
             />
-            <div className="flex gap-2 mt-1 text-sm">
-              <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleEditComment(comment.id)}>
-                저장
-              </button>
-              <button className="text-gray-500 hover:underline" onClick={() => setEditMap((prev) => ({ ...prev, [comment.id]: false }))}>
-                취소
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p>{comment.content}</p>
-            <div className="text-sm text-gray-500">
-              {comment.writerName} • {new Date(comment.createdAt).toLocaleString()}
-              {comment.edited && <span className="ml-2 text-xs text-gray-400">(수정됨)</span>}
-            </div>
-            <div className="flex gap-2 mt-2 text-sm">
-              {!parentId && (
-                <button onClick={() => setReplyTo(comment.id)} className="text-blue-600 hover:underline">
-                  답글 달기
-                </button>
-              )}
-              {comment.author && (
+            <button
+              className="mt-1 bg-blue-500 text-white text-sm px-3 py-1 rounded"
+              onClick={() => handleAddComment(comment.id)}
+              disabled={loading}
+            >
+              등록
+            </button>
+          </div>
+        )}
+
+        {comment.replyCount > 0 && (
+          <button
+            className="text-blue-500 text-sm hover:underline mt-1"
+            onClick={() => toggleReplies(comment.id, comment.replyCount)}
+          >
+            {repliesVisibleMap[comment.id] ? '답글 숨기기' : `답글 보기 ${comment.replyCount}개`}
+          </button>
+        )}
+
+        {repliesVisibleMap[comment.id] &&
+          repliesMap[comment.id]?.map((reply) => (
+            <div key={reply.id} className="ml-6 mt-2 bg-gray-50 p-2 rounded border text-sm">
+              {editMap[reply.id] ? (
                 <>
-                  <button
-                    onClick={() => {
-                      setEditMap((prev) => ({ ...prev, [comment.id]: true }));
-                      setEditContentMap((prev) => ({ ...prev, [comment.id]: comment.content }));
-                    }}
-                    className="text-yellow-600 hover:underline"
-                  >
-                    수정
-                  </button>
-                  <button onClick={() => handleDeleteComment(comment.id)} className="text-red-500 hover:underline">
-                    삭제
-                  </button>
+                  <textarea
+                    className="w-full border rounded p-2 text-sm"
+                    value={editContentMap[reply.id]}
+                    onChange={(e) =>
+                      setEditContentMap((prev) => ({ ...prev, [reply.id]: e.target.value }))
+                    }
+                  />
+                  <div className="flex gap-2 mt-1 text-sm">
+                    <button
+                      className="bg-green-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleEditComment(reply.id)}
+                    >
+                      저장
+                    </button>
+                    <button
+                      className="text-gray-500 hover:underline"
+                      onClick={() => setEditMap((prev) => ({ ...prev, [reply.id]: false }))}
+                    >
+                      취소
+                    </button>
+                  </div>
                 </>
-              )}
-              <button onClick={() => handleToggleLike(comment.id)}>
-                {comment.likedByMe ? '❤️' : '🤍'} {comment.likeCount}
-              </button>
-            </div>
-            {replyTo === comment.id && (
-              <div className="mt-2">
-                <textarea
-                  className="w-full border rounded p-2 text-sm"
-                  rows={2}
-                  placeholder="답글을 입력하세요..."
-                  value={replyMap[comment.id] || ''}
-                  onChange={(e) => setReplyMap((prev) => ({ ...prev, [comment.id]: e.target.value }))}
-                />
-                <button
-                  className="mt-1 bg-blue-500 text-white text-sm px-3 py-1 rounded"
-                  onClick={() => handleAddComment(comment.id)}
-                  disabled={loading}
-                >
-                  등록
-                </button>
-              </div>
-            )}
-
-            {!repliesLoaded[comment.id] && (
-              <button
-                className="text-blue-500 text-sm hover:underline mt-1"
-                onClick={() => fetchReplies(comment.id)}
-              >
-                답글 보기
-              </button>
-            )}
-
-            {repliesMap[comment.id] &&
-              repliesMap[comment.id].map((reply) => (
-                <div key={reply.id} className="ml-6 mt-2 bg-gray-50 p-2 rounded border text-sm">
+              ) : (
+                <>
                   <p>{reply.content}</p>
                   <div className="text-xs text-gray-500">
                     {reply.writerName} • {new Date(reply.createdAt).toLocaleString()}
                     {reply.edited && <span className="ml-2 text-xs text-gray-400">(수정됨)</span>}
                   </div>
-                </div>
-              ))}
-          </>
-        )}
+                  {reply.author && (
+                    <div className="flex gap-2 mt-1 text-sm">
+                      <button
+                        onClick={() => {
+                          setEditMap((prev) => ({ ...prev, [reply.id]: true }));
+                          setEditContentMap((prev) => ({ ...prev, [reply.id]: reply.content }));
+                        }}
+                        className="text-yellow-600 hover:underline"
+                      >
+                        수정
+                      </button>
+                      <button onClick={() => handleDeleteComment(reply.id)} className="text-red-500 hover:underline">
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+
         {renderComments(comments, comment.id)}
       </div>
     ));
@@ -256,7 +291,18 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-semibold mb-4">댓글</h3>
+      <div className="mb-4 flex justify-between items-center">
+        <h3 className="text-lg font-semibold">댓글</h3>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value as 'recent' | 'popular')}
+          className="border rounded p-1 text-sm"
+        >
+          <option value="recent">최신순</option>
+          <option value="popular">인기순</option>
+        </select>
+      </div>
+
       {data?.pages.map((page) => renderComments(page.content))}
       <div ref={observerRef} className="h-6" />
       {isFetchingNextPage && <p>불러오는 중...</p>}
