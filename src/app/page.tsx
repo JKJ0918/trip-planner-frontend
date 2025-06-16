@@ -55,9 +55,12 @@ export default function Home() {
       
       <div className="text-center my-20">
         <span className="text-4xl md:text-4xl font-bold">간편하고 편리하게</span>
+        <p className="text-lg md:text-xl mb-8 drop-shadow-md">
+          휴가의 설렘을 앞당겨 줄 기능을 만나보세요.
+        </p>
       </div>
       {/* Features */}
-      <section className="grid md:grid-cols-3 gap-6 py-20">
+      <section className="grid md:grid-cols-3 gap-6 py-15">
         {[
           {
             title: "맛집 & 명소 등록",
