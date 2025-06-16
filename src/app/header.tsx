@@ -7,22 +7,21 @@ export default function header() {
     <header className="bg-white shadow-md">
       <nav className="container mx-auto flex items-center justify-between py-4 px-6">
         <div className="flex items-center space-x-4">
+          <Link href={"/"}>
           <img
-            src="https://tailwindcss.com/_next/static/media/tailwindcss-logotype.5ca45d07.svg"
+            src="/images/logo.png"
             alt="Travel Planner Logo"
-            className="h-10"
+            className="h-8"
           />
-          <span className="text-xl font-bold text-indigo-600 select-none">
-            Trip Planner
-          </span>
+          </Link>
         </div>
 
         <ul className="hidden md:flex space-x-8 text-gray-700 font-semibold">
           <li>
-            <a href="#" className="hover:text-indigo-600 transition">메뉴1</a>
+            <a href="http://localhost:3000/posts" className="hover:text-indigo-600 transition">여행 일정</a>
           </li>
           <li>
-            <a href="#" className="hover:text-indigo-600 transition">메뉴2</a>
+            <a href="#" className="hover:text-indigo-600 transition">맛집&명소 등록</a>
           </li>
           <li>
             <a href="#" className="hover:text-indigo-600 transition">메뉴3</a>
