@@ -18,7 +18,7 @@ export default function LocationModal({ location, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
         <button
           onClick={onClose}

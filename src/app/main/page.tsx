@@ -50,7 +50,7 @@ export default function MainPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       goToNextSlide();
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
