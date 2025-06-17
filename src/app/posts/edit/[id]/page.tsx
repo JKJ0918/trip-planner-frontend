@@ -145,9 +145,6 @@ export default function EditPostPage() {
           };
         })
       );
-
-            // 여기에 찍기
-    console.log('📦 백엔드로 보낼 수정 데이터:', JSON.stringify(journalData, null, 2))
     
       // 4. 전체 업데이트 요청
       const res = await fetch(`http://localhost:8080/api/journals/public/edit/${journalData.id}`, {
