@@ -9,6 +9,7 @@ type Itinerary = {
   title: string;
   content: string;
   images: string[];
+  date: string;
 };
 
 type Props = {
@@ -19,21 +20,22 @@ type Props = {
 
 const BASE_URL = "http://localhost:8080";
 
-// 날짜 계산 함수: startDate + day
-function getDateByDay(startDate: string, day: number): string {
-  const base = new Date(startDate);
-  base.setDate(base.getDate() + (day - 1));
-  if (!startDate || isNaN(new Date(startDate).getTime())) {
-  return '날짜 오류';
-}
-  return base.toISOString().split('T')[0]; // YYYY-MM-DD
-}
 
 export default function PostItinerary({ itinerary, startDate, endDate }: Props) {
 
   const [openDays, setOpenDays] = useState<Set<number>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+
+  const formatDateWithWeekday = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short', // 'long'으로 하면 "수요일"
+    });
+  };
 
   const toggleDay = (day: number) => {
     setOpenDays(prev => {
@@ -55,9 +57,8 @@ export default function PostItinerary({ itinerary, startDate, endDate }: Props) 
             className="w-full text-left px-4 py-3 font-semibold bg-gray-100 hover:bg-gray-200"
             onClick={() => toggleDay(item.day)}
           >
-            {item.day}일차 - {getDateByDay(startDate, item.day)} {item.title}
+            {formatDateWithWeekday(item.date)} {item.title}
           </button>
-
           {openDays.has(item.day) && (
             <div className="p-4 space-y-3 text-sm">
               <p className="whitespace-pre-line">{item.content}</p>

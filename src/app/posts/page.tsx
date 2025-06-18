@@ -16,7 +16,7 @@ export default function PostListPage() {
   // 게시글 불러오기
   const fetchPosts = async () => {
     const res = await fetch(
-      `http://localhost:8080/api/journals/public?page=${page}&size=6&keyword=${encodeURIComponent(keyword)}`
+      `http://localhost:8080/api/journals/public?page=${page}&size=3&keyword=${encodeURIComponent(keyword)}`
     );
     const data = await res.json();
     setPosts(data.content);

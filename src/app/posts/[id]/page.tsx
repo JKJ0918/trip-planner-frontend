@@ -26,7 +26,7 @@ type TravelPostDetail = {
   thumbnailUrl: string;
   authorNickname: string;
   pins: Pin[];
-  itinerary: { day: number; title: string; content: string; images: string[] }[];
+  itinerary: { day: number; title: string; content: string; images: string[]; date: string }[];
 };
 
 export default function TravelPostPage() {

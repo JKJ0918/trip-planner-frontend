@@ -29,6 +29,17 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
     setLocalItinerary(itinerary);
   }, [itinerary]);
 
+  const formatDateWithWeekday = (dateStr: string): string => {
+    const date = new Date(dateStr);
+
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short',
+    });
+  };
+
   const handleChange = (
     index: number,
     field: 'title' | 'content' | 'date', // 타입 명시
@@ -108,9 +119,9 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
             className="w-full border rounded p-2 mb-2"
           >
             <option value="">날짜를 선택하세요</option>
-            {availableDates.map((date) => (
+            {availableDates.map((date: string) => (
               <option key={date} value={date}>
-                {date}
+                {formatDateWithWeekday(date)}
               </option>
             ))}
           </select>

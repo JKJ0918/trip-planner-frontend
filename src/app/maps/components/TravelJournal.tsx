@@ -14,6 +14,17 @@ export default function TravelJournal() {
     dateRangeList,
   } = useTripStore();
 
+  const formatDateWithWeekday = (dateStr: string): string => {
+    const date = new Date(dateStr);
+
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short', // 결과 예: 2025.06.25 (수)
+    });
+  };
+
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const handleImageChange = async (
@@ -67,11 +78,7 @@ export default function TravelJournal() {
             <option value="">날짜를 선택하세요</option>
             {dateRangeList.map((date) => (
               <option key={date} value={date}>
-                {new Date(date).toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDateWithWeekday(date)}
               </option>
             ))}
           </select>
