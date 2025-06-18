@@ -1,4 +1,4 @@
-// ✅ ItineraryEditor.tsx (일정 + 이미지 업로드 편집기)
+// ItineraryEditor.tsx (일정 + 이미지 업로드 편집기)
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { format, addDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 type DayJournal = {
+  date?: string; // 날짜 직접 입력
   title: string;
   content: string;
   imageUrls: string[];
@@ -15,20 +16,24 @@ type DayJournal = {
 
 type ItineraryEditorProps = {
   itinerary: DayJournal[];
-  startDate: Date;
   onItineraryChange: (updated: DayJournal[]) => void;
+  availableDates: string[];
 };
 
 const BASE_URL = 'http://localhost:8080';
 
-export default function ItineraryEditor({ itinerary, startDate, onItineraryChange }: ItineraryEditorProps) {
+export default function ItineraryEditor({ itinerary, onItineraryChange, availableDates, }: ItineraryEditorProps) {
   const [localItinerary, setLocalItinerary] = useState<DayJournal[]>([]);
 
   useEffect(() => {
     setLocalItinerary(itinerary);
   }, [itinerary]);
 
-  const handleChange = (index: number, field: 'title' | 'content', value: string) => {
+  const handleChange = (
+    index: number,
+    field: 'title' | 'content' | 'date', // 타입 명시
+    value: string
+  ) => {
     const updated = [...localItinerary];
     updated[index][field] = value;
     setLocalItinerary(updated);
@@ -95,9 +100,20 @@ export default function ItineraryEditor({ itinerary, startDate, onItineraryChang
 
       {localItinerary.map((entry, index) => (
         <div key={index} className="p-4 border rounded relative bg-white">
-          <p className="mb-1 font-medium">
-            {index + 1}일차 ({format(addDays(startDate, index), 'yyyy년 M월 d일', { locale: ko })})
-          </p>
+
+        <label className="block mb-1 font-medium">날짜 선택</label>
+          <select
+            value={entry.date || ''}
+            onChange={(e) => handleChange(index, 'date', e.target.value)}
+            className="w-full border rounded p-2 mb-2"
+          >
+            <option value="">날짜를 선택하세요</option>
+            {availableDates.map((date) => (
+              <option key={date} value={date}>
+                {date}
+              </option>
+            ))}
+          </select>
 
           <input
             type="text"

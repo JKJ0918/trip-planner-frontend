@@ -1,4 +1,4 @@
-// ✅ page.tsx (EditPostPage)
+// page.tsx (EditPostPage)
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import MapEditor from '../components/MapEditor';
 import ItineraryEditor from '../components/ItineraryEditor';
+import { generateDateRange } from '@/app/maps/utils/dateUtils';
 
 type TravelJournal = {
   id: number;
@@ -29,7 +30,8 @@ type Pin = {
   address: string;
 };
 
-type DayJournal = {
+type DayJournal = { // 일별 일정표
+  date?: string;
   title: string;
   content: string;
   imageUrls: string[];
@@ -54,9 +56,17 @@ export default function EditPostPage() {
     },
   ]);
 
-
-
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   useEffect(() => {
+    const start = range[0].startDate;
+    const end = range[0].endDate;
+    const dateList = generateDateRange(start, end);
+    setAvailableDates(dateList);
+  }, [range]);
+
+
+
+  useEffect(() => { // 특정 게시글 불러오기
     const fetchData = async () => {
       try {
         const res = await fetch(`http://localhost:8080/api/journals/public/${id}`);
@@ -64,6 +74,7 @@ export default function EditPostPage() {
 
         const enhancedItinerary = data.itinerary.map((entry: any) => ({
           ...entry,
+          date: entry.date || '',
           imageUrls: entry.images ?? [],
           newImages: [],
           deletedImages: [],
@@ -142,6 +153,7 @@ export default function EditPostPage() {
             title: entry.title,
             content: entry.content,
             images: finalImages,
+            date: entry.date || null, // 날짜 정보 포함
           };
         })
       );
@@ -246,10 +258,10 @@ export default function EditPostPage() {
 
         <ItineraryEditor
           itinerary={journalData.itinerary}
-          startDate={range[0].startDate}
           onItineraryChange={(updatedItinerary) =>
             setJournalData({ ...journalData, itinerary: updatedItinerary })
           }
+          availableDates={availableDates}
         />
       </div>
 
