@@ -32,28 +32,22 @@ export default function MapPage() {
 
   return (
     <div className="p-4 space-y-6">
-
+      {/* 제목 입력 */}
       <TravelInfo />
-      
-      <h1 className="text-xl font-bold">📍 지도 테스트</h1>
-      
+
+      {/* 날짜 선택기 */}
+      <DateRangePicker />
+
       {/* 지도 및 방문지 목록 */}
       <MyMap />
       
-      {/* 날짜 선택기 */}
-      <div className="bg-white p-4 shadow-md rounded">
-        <h2 className="text-lg font-semibold mb-2">🗓️ 여행 기간 설정</h2>
-        <DateRangePicker />
-      </div>
+
 
       {/* 일정 작성 */}
-      <div className="bg-white p-4 shadow-md rounded">
-        <h2 className="text-lg font-semibold mb-2">일정 작성</h2>
-        <TravelJournal />
-      </div>
+      <TravelJournal />
 
       {/* 작성 완료 버튼 */}
-      <div className="text-right">
+      <div className="text-center">
         <button
           onClick={() => {
             if (!startDate || !endDate) {
@@ -62,7 +56,7 @@ export default function MapPage() {
             }
             submitTripPlan(startDate, endDate, pins);
           }}
-          className="bg-green-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
         >
           전체 작성 완료
         </button>
