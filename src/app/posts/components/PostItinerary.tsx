@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import 'yet-another-react-lightbox/styles.css';
 import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 
 type Itinerary = {
   day: number;
@@ -20,10 +20,7 @@ type Props = {
 
 const BASE_URL = "http://localhost:8080";
 
-
 export default function PostItinerary({ itinerary, startDate, endDate }: Props) {
-
-  const [openDays, setOpenDays] = useState<Set<number>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
 
@@ -33,62 +30,72 @@ export default function PostItinerary({ itinerary, startDate, endDate }: Props) 
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      weekday: 'short', // 'long'으로 하면 "수요일"
-    });
-  };
-
-  const toggleDay = (day: number) => {
-    setOpenDays(prev => {
-      const newSet = new Set(prev);
-      newSet.has(day) ? newSet.delete(day) : newSet.add(day);
-      return newSet;
+      weekday: 'short',
     });
   };
 
   return (
-    <div className="space-y-4 mt-8">
-      <h2 className="text-2xl font-bold mb-4">
-        📝 여행 일정 <span className="text-base font-normal">({startDate} ~ {endDate})</span>
+    <div className="mt-10">
+      <h2 className="text-2xl font-bold mb-6">
+        여행 일정 <span className="font-normal text-2xl font-bold mb-6">({startDate} ~ {endDate})</span>
       </h2>
+      <ol className="relative border-s border-blue-300 ml-6">
+        {itinerary.map((item, index) => (
+          <li key={item.day} className="mb-10 ms-6">
+            {/* 타임라인 ● */}
+            <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white">
+                <svg className="w-2.5 h-2.5 text-blue-800 dark:text-blue-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"></path>
+                </svg>
+            </span>
 
-      {itinerary.map((item) => (
-        <div key={item.day} className="border rounded-lg overflow-hidden">
-          <button
-            className="w-full text-left px-4 py-3 font-semibold bg-gray-100 hover:bg-gray-200"
-            onClick={() => toggleDay(item.day)}
-          >
-            {formatDateWithWeekday(item.date)} {item.title}
-          </button>
-          {openDays.has(item.day) && (
-            <div className="p-4 space-y-3 text-sm">
-              <p className="whitespace-pre-line">{item.content}</p>
+            {/* 날짜 */}
+            <time className="block mb-1 text-m font-semibold text-blue-700">
+              {formatDateWithWeekday(item.date)}
+            </time>
 
-                {item.images?.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                    {item.images.map((url, idx) => (
-                      <img
-                        key={idx}
-                        src={`${BASE_URL}${url}`}
-                        onClick={() => {
-                          setLightboxImages(item.images.map(img => `${BASE_URL}${img}`));
-                          setLightboxIndex(idx);
-                        }}
-                        alt={`itinerary-${item.day}-img-${idx}`}
-                        className="rounded-md object-cover h-40 w-full cursor-pointer hover:opacity-90"
-                      />
-                    ))}
-                  </div>
-                )}
-            </div>
-          )}
-        </div>
-      ))}
+            {/* 제목 */}
+            <h3 className="text-lg font-bold text-gray-900">
+              {item.title}
+            </h3>
+
+            {/* 본문 내용 */}
+            <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">
+              {item.content}
+            </p>
+
+            {/* 이미지 */}
+            {item.images?.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {item.images.map((img, i) => {
+                  const fullUrl = `${BASE_URL}${img}`;
+                  return (
+                    <img
+                      key={i}
+                      src={fullUrl}
+                      alt={`img-${item.day}-${i}`}
+                      className="rounded-md object-cover h-40 w-full cursor-pointer hover:opacity-90"
+                      onClick={() => {
+                        setLightboxImages(item.images.map(i => `${BASE_URL}${i}`));
+                        setLightboxIndex(i);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      {/* 라이트박스 */}
       <Lightbox
         open={lightboxIndex >= 0}
         close={() => setLightboxIndex(-1)}
         index={lightboxIndex}
         slides={lightboxImages.map(src => ({ src }))}
       />
+
     </div>
   );
 }
