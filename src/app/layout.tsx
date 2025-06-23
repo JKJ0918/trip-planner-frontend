@@ -20,11 +20,9 @@ export const metadata: Metadata = {
   description: "여행을 쉽게 계획하세요",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+
+  
   return (
     <html lang="ko">
       <body
@@ -32,9 +30,7 @@ export default function RootLayout({
       >
         <AppProvider>
         <Header />
-        <main className="flex-grow container mx-auto px-4 py-6">
           {children}
-        </main>
         <Footer />
         </AppProvider>
       </body>

@@ -4,8 +4,15 @@
 import Link from "next/link";
 import DropdownMenu from "./main/components/DropdownMenu";
 import { Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  // 특정 페이지 header 제외
+  const pathname = usePathname();
+  const hideHeaderPages = ['/maps'];
+  if (hideHeaderPages.includes(pathname)) return null;
+
+
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">

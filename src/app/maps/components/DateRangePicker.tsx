@@ -51,7 +51,7 @@ export default function DateRangePicker() {
       {/* 날짜 요약 버튼 */}
       <button
         onClick={() => setIsOpen(true)}
-        className="text-2xl text-gray-800 font-semibold px-4 py-3 hover:bg-gray-100 transition rounded-xl"
+        className="text-xl text-gray-800 font-semibold hover:bg-gray-100 transition "
       >
         {start && end
           ? `${format(start)} - ${format(end)}`

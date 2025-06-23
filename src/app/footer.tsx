@@ -3,7 +3,7 @@ import { Link } from "lucide-react";
 // app/Footer.tsx
 export default function footer() {
   return (
-    <footer className="bg-grat-200 text-gray-300 py-12 px-6 mt-24">
+    <footer className="bg-gray-200 text-gray-300 py-12 px-6 mt-24">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
         
         {/* 소개 */}

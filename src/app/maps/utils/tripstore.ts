@@ -50,6 +50,12 @@ type Pin = {
   name: string;
   category: string;
   address: string;
+  minCost?: string;
+  maxCost?: string;
+  currency?: string;
+  openTime?: string;
+  closeTime?: string;
+  description?: string;
 };
 
 type TripState = {
@@ -79,6 +85,18 @@ type TripState = {
   removeImageFromDraft: (id: string, imageId: string) => void;
   clearJournalDrafts: () => void;
   submitTripPlan: (startDate: string, endDate: string, pins: Pin[]) => Promise<void>;
+
+  // 방문지 탭으로 위치 이동중
+  selectedPinIndex: number | null;
+  setSelectedPinIndex: (index: number | null) => void;
+  highlightedIndex: number | null;
+  setHighlightedIndex: (index: number | null) => void;
+  mapRef: google.maps.Map | null;
+  setMapRef: (ref: google.maps.Map | null) => void;
+
+
+
+
 
   startDate: string;
   endDate: string;
@@ -192,6 +210,14 @@ export const useTripStore = create<TripState>((set, get) => ({
           : draft
       ),
     })),
+
+  selectedPinIndex: null,
+  setSelectedPinIndex: (index) => set({ selectedPinIndex: index }),
+  highlightedIndex: null, // 추가
+  setHighlightedIndex: (index: number | null) => set({ highlightedIndex: index }), // 추가
+  mapRef: null,
+  setMapRef: (ref: google.maps.Map | null) => set({ mapRef: ref }),
+
 
   submitTripPlan: async (startDate, endDate, pins) => {
     const { journalDrafts, user, travelMainEntry, isPublic } = get();

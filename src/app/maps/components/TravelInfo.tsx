@@ -1,6 +1,7 @@
 'use client'
 
 import { useTripStore } from "../utils/tripstore";
+import DateRangePicker from "./DateRangePicker";
 
 export default function TravelInfo() {
   const { travelMainEntry, setTravelMainEntry } = useTripStore();
@@ -20,8 +21,11 @@ export default function TravelInfo() {
         value={travelMainEntry.title}
         onChange={handleChange}
         placeholder="제목"
-        className="w-full text-3xl font-semibold text-gray-800 placeholder-gray-400 outline-none focus:border-gray-400 transition"
+        className="w-full text-xl font-semibold text-gray-800 placeholder-gray-400 outline-none focus:border-gray-400 transition"
       />
+
+      {/* 날짜 선택 */}
+      <DateRangePicker />
 
       {/* 여행 도시 입력 */}
       <input

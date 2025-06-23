@@ -7,7 +7,7 @@ import { useTripStore } from '../utils/tripstore';
 
 const containerStyle = {
   width: '100%',
-  height: '600px',
+  height: '834px',
 };
 
 const center = {
@@ -21,7 +21,14 @@ type Pin = {
   name: string;
   category: string;
   address: string;
+  minCost?: string;
+  maxCost?: string;
+  currency?: string;
+  openTime?: string;
+  closeTime?: string;
+  description?: string;
 };
+
 
 export default function MyMap() {
   const pins = useTripStore((state) => state.pins);
@@ -35,6 +42,7 @@ export default function MyMap() {
   const [editMode, setEditMode] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [selectedPos, setSelectedPos] = useState<{ lat: number; lng: number } | null>(null);
+  const setMapRef = useTripStore((state) => state.setMapRef);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -46,11 +54,14 @@ export default function MyMap() {
     name: '',
     category: '',
     address: '',
+    minCost: '',
+    maxCost: '',
+    currency: '₩',
+    openTime: '',
+    closeTime: '',
+    description: '',
   });
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
 
   const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
     if (event.latLng) {
@@ -69,10 +80,29 @@ export default function MyMap() {
       name: formData.name,
       category: formData.category,
       address: formData.address,
+      // 확장된 필드 예시:
+      minCost: formData.minCost,
+      maxCost: formData.maxCost,
+      currency: formData.currency,
+      openTime: formData.openTime,
+      closeTime: formData.closeTime,
+      description: formData.description,
+      // 추후 이미지도 함께 연동 가능
     });
     setSelectedPos(null);
-    setFormData({ name: '', category: '', address: '' });
+    setFormData({
+      name: '',
+      category: '',
+      address: '',
+      minCost: '',
+      maxCost: '',
+      currency: '₩',
+      openTime: '',
+      closeTime: '',
+      description: '',
+    });
   };
+
 
   const handleListClick = (pin: Pin, index: number) => {
     if (highlightedIndex === index) {
@@ -93,18 +123,41 @@ export default function MyMap() {
     setSelectedPinIndex(null);
   };
 
+  const [images, setImages] = useState<File[]>([]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const newImage = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (!file) return; // 유효한 파일이 없을 경우 리턴
+    if (images.length < 3) {
+      setImages((prev) => [...prev, newImage]);
+    }
+  };
+
+  const handleDeleteImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+
+
   if (!isLoaded) return <p>Loading...</p>;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 mt-4">
+    <div>
       {/* 지도 영역 */}
       <div className="flex-1">
         <GoogleMap
-          onLoad={onLoad}
+          // onLoad={onLoad}
           mapContainerStyle={containerStyle}
           center={mapCenter}
           zoom={12}
           onClick={handleMapClick}
+          onLoad={(map) => {
+            mapRef.current = map;
+            setMapRef(map); // Zustand에 저장
+          }}
+
         >
           {pins.map((pin, index) => (
             <Marker
@@ -138,20 +191,68 @@ export default function MyMap() {
 
           {selectedPos && (
             <InfoWindow position={selectedPos} onCloseClick={() => setSelectedPos(null)}>
-              <div className="p-2 space-y-2">
+              <div className="w-64 p-3 space-y-2 text-sm">
+
+                {/* 이미지 미리보기 및 삭제 */}
+                <div className="flex gap-1.5 overflow-x-auto">
+                  {images.map((img, index) =>
+                    img instanceof File ? (
+                      <div key={index} className="relative w-18 h-18">
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt="preview"
+                          className="rounded border w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => handleDeleteImage(index)}
+                          className="absolute -top-1 -right-1 text-xs bg-red-500 text-white rounded-full w-5 h-5"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+
+                {/* 이미지 업로드 */}
+                {images.length < 3 && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="image-upload"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                )}
+                {/* 사용자에게 보이는 커스텀 버튼 */}
+
+                {images.length < 3 && (
+                  <label
+                  htmlFor="image-upload"
+                  className="cursor-pointer inline-block bg-gray-400 text-white text-xs py-1 px-2 rounded hover:bg-blue-600"
+                >
+                  이미지 추가
+                </label>
+                )}
+
+                {images.length > 0 && (
+                  <p className="text-xs text-gray-600">{images.length}장 추가됨</p>
+                )}
+
                 <input
                   type="text"
                   placeholder="장소 이름"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="border p-1 w-full"
+                  className="w-full p-1 rounded"
                 />
+
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="border p-1 rounded"
+                  className="w-full p-1 rounded"
                 >
-                  <option value="">카테고리를 선택하세요</option>
+                  <option value="">카테고리 선택</option>
                   <option value="숙소">🏨 숙소</option>
                   <option value="음식점">🍽️ 음식점</option>
                   <option value="의료">🏥 의료</option>
@@ -159,21 +260,84 @@ export default function MyMap() {
                   <option value="공항">✈️ 공항</option>
                   <option value="도시">🌆 도시</option>
                 </select>
+
                 <input
                   type="text"
                   placeholder="주소"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="border p-1 w-full"
+                  className="w-full p-1 rounded"
                 />
+
+                {/* 비용 */}
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    placeholder="최소 비용"
+                    value={formData.minCost}
+                    onChange={(e) => setFormData({ ...formData, minCost: e.target.value })}
+                    className="w-1/2 p-1 rounded"
+                  />
+                  <span>~</span>
+                  <input
+                    type="number"
+                    placeholder="최대 비용"
+                    value={formData.maxCost}
+                    onChange={(e) => setFormData({ ...formData, maxCost: e.target.value })}
+                    className="w-1/2 p-1 rounded"
+                  />
+                </div>
+
+                <select
+                  className="w-full p-1 rounded"
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                >
+                  <option value="₩">₩ 원</option>
+                  <option value="$">$ 달러</option>
+                  <option value="€">€ 유로</option>
+                  <option value="¥">¥ 엔</option>
+                </select>
+
+                {/* 운영시간 */}
+                <div className="flex items-center gap-1">
+                  <input
+                    type="time"
+                    value={formData.openTime}
+                    onChange={(e) => setFormData({ ...formData, openTime: e.target.value })}
+                    className="w-1/2 p-1 rounded"
+                  />
+                  <span>~</span>
+                  <input
+                    type="time"
+                    value={formData.closeTime}
+                    onChange={(e) => setFormData({ ...formData, closeTime: e.target.value })}
+                    className="w-1/2 p-1 rounded"
+                  />
+                </div>
+
+                {/* 내용 */}
+                <textarea
+                  placeholder="내용"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full p-1 rounded resize-none"
+                  rows={3}
+                />
+
+
+
+
                 <button
                   onClick={handleAddPin}
-                  className="bg-blue-500 text-white px-3 py-1 mt-1 rounded"
+                  className="w-full bg-blue-600 text-white py-1 rounded hover:bg-blue-700 transition"
                 >
-                  핀 추가하기
+                  방문지 입력
                 </button>
               </div>
             </InfoWindow>
+
+
           )}
 
           {selectedPinIndex !== null && (
@@ -184,10 +348,10 @@ export default function MyMap() {
               }}
               onCloseClick={() => setSelectedPinIndex(null)}
             >
-              {editMode ? (
+              {editMode ? ( // 수정
                 <div className="space-y-2">
                   <input
-                    type="text"
+                    type="text" // 이름
                     value={pins[selectedPinIndex].name}
                     onChange={(e) => {
                       const newPins = [...pins];
@@ -196,18 +360,27 @@ export default function MyMap() {
                     }}
                     className="border p-1 w-full"
                   />
-                  <input
-                    type="text"
-                    value={pins[selectedPinIndex].category}
+                  <select
+                    value={pins[selectedPinIndex].category} // 카테고리
                     onChange={(e) => {
                       const newPins = [...pins];
                       newPins[selectedPinIndex].category = e.target.value;
                       setPins(newPins);
                     }}
                     className="border p-1 w-full"
-                  />
+                  >
+                    <option value="">카테고리를 선택하세요</option>
+                    <option value="숙소">🏨 숙소</option>
+                    <option value="음식점">🍽️ 음식점</option>
+                    <option value="의료">🏥 의료</option>
+                    <option value="행정">🏛️ 행정</option>
+                    <option value="공항">✈️ 공항</option>
+                    <option value="도시">🌆 도시</option>
+                  </select>
+
+
                   <input
-                    type="text"
+                    type="text" // 주소
                     value={pins[selectedPinIndex].address}
                     onChange={(e) => {
                       const newPins = [...pins];
@@ -248,46 +421,6 @@ export default function MyMap() {
             </InfoWindow>
           )}
         </GoogleMap>
-      </div>
-
-      {/* 방문지 리스트 우측 */}
-      <div className="w-full lg:w-[300px]">
-        <div className="p-4 bg-white shadow-md rounded-2xl max-h-[600px] overflow-y-auto">
-          <h2 className="text-lg font-semibold mb-4 text-center text-blue-600">등록된 방문지</h2>
-
-          <ul className="space-y-3">
-            {pins.map((pin, index) => (
-              <li
-                key={index}
-                onClick={() => handleListClick(pin, index)}
-                className={`cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-xl shadow-sm transition-all flex flex-col gap-1 ${
-                  highlightedIndex === index ? 'ring-2 ring-yellow-300' : ''
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-gray-800 text-sm">{index + 1}. {pin.name}</p>
-                    <p className="text-sm text-gray-500">{pin.category}</p>
-                    <p className="text-xs text-gray-400">{pin.address}</p>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeletePin(index);
-                    }}
-                    className="text-red-400 hover:text-red-600 text-sm"
-                    title="삭제"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </li>
-            ))}
-            {pins.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-2">등록된 장소가 없습니다. 원하는 장소를 지도 위에 클릭해보세요.</p>
-            )}
-          </ul>
-        </div>
       </div>
 
     </div>
