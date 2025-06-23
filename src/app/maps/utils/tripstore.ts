@@ -56,6 +56,7 @@ type Pin = {
   openTime?: string;
   closeTime?: string;
   description?: string;
+  images?: File[];
 };
 
 type TripState = {
@@ -118,7 +119,9 @@ export const useTripStore = create<TripState>((set, get) => ({
 
   pins: [],
   setPins: (pins) => set({ pins }),
-  addPin: (pin) => set((state) => ({ pins: [...state.pins, pin] })),
+  addPin: (pin: Pin) => set((state) => ({
+  pins: [...state.pins, pin],
+  })), // addPin 확장
   deletePin: (index) =>
     set((state) => ({ pins: state.pins.filter((_, i) => i !== index) })),
 

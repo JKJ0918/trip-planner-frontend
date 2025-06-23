@@ -27,6 +27,7 @@ type Pin = {
   openTime?: string;
   closeTime?: string;
   description?: string;
+  images?: File[];
 };
 
 
@@ -38,9 +39,14 @@ export default function MyMap() {
 
   const { lat, lng } = useLocationStore();
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat, lng });
-  const [selectedPinIndex, setSelectedPinIndex] = useState<number | null>(null);
+
+  // 수정 후: Zustand로부터 받아오기
+  const selectedPinIndex = useTripStore((state) => state.selectedPinIndex);
+  const setSelectedPinIndex = useTripStore((state) => state.setSelectedPinIndex);
+  const highlightedIndex = useTripStore((state) => state.highlightedIndex);
+  const setHighlightedIndex = useTripStore((state) => state.setHighlightedIndex);
+
   const [editMode, setEditMode] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [selectedPos, setSelectedPos] = useState<{ lat: number; lng: number } | null>(null);
   const setMapRef = useTripStore((state) => state.setMapRef);
 
@@ -74,23 +80,25 @@ export default function MyMap() {
 
   const handleAddPin = () => {
     if (!selectedPos) return;
-    addPin({
+
+    const newPin: Pin = {
       lat: selectedPos.lat,
       lng: selectedPos.lng,
       name: formData.name,
       category: formData.category,
       address: formData.address,
-      // 확장된 필드 예시:
       minCost: formData.minCost,
       maxCost: formData.maxCost,
       currency: formData.currency,
       openTime: formData.openTime,
       closeTime: formData.closeTime,
       description: formData.description,
-      // 추후 이미지도 함께 연동 가능
-    });
-    setSelectedPos(null);
-    setFormData({
+      images: images, // 이미지도 함께 저장
+    };
+
+    addPin(newPin);          // Zustand에 저장
+    setSelectedPos(null);    // InfoWindow 닫기
+    setFormData({            // form 초기화
       name: '',
       category: '',
       address: '',
@@ -101,7 +109,9 @@ export default function MyMap() {
       closeTime: '',
       description: '',
     });
+    setImages([]); // 이미지 초기화
   };
+
 
 
   const handleListClick = (pin: Pin, index: number) => {
@@ -325,9 +335,6 @@ export default function MyMap() {
                   rows={3}
                 />
 
-
-
-
                 <button
                   onClick={handleAddPin}
                   className="w-full bg-blue-600 text-white py-1 rounded hover:bg-blue-700 transition"
@@ -339,7 +346,7 @@ export default function MyMap() {
 
 
           )}
-
+          {/*수정 모드*/}
           {selectedPinIndex !== null && (
             <InfoWindow
               position={{
@@ -348,26 +355,80 @@ export default function MyMap() {
               }}
               onCloseClick={() => setSelectedPinIndex(null)}
             >
-              {editMode ? ( // 수정
-                <div className="space-y-2">
+              {editMode ? (
+                <div className="space-y-2 text-sm w-64">
+                  <h3 className="text-center text-blue-600 font-semibold">정보 입력</h3>
+
+                  {/* 이미지 수정 UI */}
+                  <div className="flex gap-1.5 overflow-x-auto">
+                    {(pins[selectedPinIndex].images || []).map((img, i) => (
+                      <div key={i} className="relative w-16 h-16">
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt={`img-${i}`}
+                          className="rounded border w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => {
+                            const updatedPins = [...pins];
+                            updatedPins[selectedPinIndex].images = updatedPins[selectedPinIndex].images?.filter((_, idx) => idx !== i);
+                            setPins(updatedPins);
+                          }}
+                          className="absolute -top-1 -right-1 text-xs bg-red-500 text-white rounded-full w-5 h-5"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 이미지 업로드 */}
+                  {(pins[selectedPinIndex].images?.length || 0) < 3 && (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="edit-image-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const updatedPins = [...pins];
+                          updatedPins[selectedPinIndex].images = [...(updatedPins[selectedPinIndex].images || []), file];
+                          setPins(updatedPins);
+                        }}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="edit-image-upload"
+                        className="cursor-pointer inline-block bg-gray-400 text-white text-xs py-1 px-2 rounded hover:bg-blue-600"
+                      >
+                        이미지 추가
+                      </label>
+                    </>
+                  )}
+
+                  {/* 이름 */}
                   <input
-                    type="text" // 이름
+                    type="text"
                     value={pins[selectedPinIndex].name}
                     onChange={(e) => {
                       const newPins = [...pins];
                       newPins[selectedPinIndex].name = e.target.value;
                       setPins(newPins);
                     }}
-                    className="border p-1 w-full"
+                    className="border p-1 w-full rounded"
+                    placeholder="장소 이름"
                   />
+
+                  {/* 카테고리 */}
                   <select
-                    value={pins[selectedPinIndex].category} // 카테고리
+                    value={pins[selectedPinIndex].category}
                     onChange={(e) => {
                       const newPins = [...pins];
                       newPins[selectedPinIndex].category = e.target.value;
                       setPins(newPins);
                     }}
-                    className="border p-1 w-full"
+                    className="border p-1 w-full rounded"
                   >
                     <option value="">카테고리를 선택하세요</option>
                     <option value="숙소">🏨 숙소</option>
@@ -378,44 +439,162 @@ export default function MyMap() {
                     <option value="도시">🌆 도시</option>
                   </select>
 
-
+                  {/* 주소 */}
                   <input
-                    type="text" // 주소
+                    type="text"
                     value={pins[selectedPinIndex].address}
                     onChange={(e) => {
                       const newPins = [...pins];
                       newPins[selectedPinIndex].address = e.target.value;
                       setPins(newPins);
                     }}
-                    className="border p-1 w-full"
+                    className="border p-1 w-full rounded"
+                    placeholder="주소"
                   />
-                  <button
-                    onClick={() => setEditMode(false)}
-                    className="bg-green-500 text-white px-3 py-1 rounded"
+
+                  {/* 비용 */}
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      value={pins[selectedPinIndex].minCost || ''}
+                      onChange={(e) => {
+                        const newPins = [...pins];
+                        newPins[selectedPinIndex].minCost = e.target.value;
+                        setPins(newPins);
+                      }}
+                      placeholder="최소 비용"
+                      className="border p-1 w-1/2 rounded"
+                    />
+                    <span>~</span>
+                    <input
+                      type="number"
+                      value={pins[selectedPinIndex].maxCost || ''}
+                      onChange={(e) => {
+                        const newPins = [...pins];
+                        newPins[selectedPinIndex].maxCost = e.target.value;
+                        setPins(newPins);
+                      }}
+                      placeholder="최대 비용"
+                      className="border p-1 w-1/2 rounded"
+                    />
+                  </div>
+
+                  {/* 화폐 */}
+                  <select
+                    value={pins[selectedPinIndex].currency || '₩'}
+                    onChange={(e) => {
+                      const newPins = [...pins];
+                      newPins[selectedPinIndex].currency = e.target.value;
+                      setPins(newPins);
+                    }}
+                    className="border p-1 w-full rounded"
                   >
-                    저장
-                  </button>
+                    <option value="₩">₩ 원</option>
+                    <option value="$">$ 달러</option>
+                    <option value="€">€ 유로</option>
+                    <option value="¥">¥ 엔</option>
+                  </select>
+
+                  {/* 운영시간 */}
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="time"
+                      value={pins[selectedPinIndex].openTime || ''}
+                      onChange={(e) => {
+                        const newPins = [...pins];
+                        newPins[selectedPinIndex].openTime = e.target.value;
+                        setPins(newPins);
+                      }}
+                      className="border p-1 w-1/2 rounded"
+                    />
+                    <span>~</span>
+                    <input
+                      type="time"
+                      value={pins[selectedPinIndex].closeTime || ''}
+                      onChange={(e) => {
+                        const newPins = [...pins];
+                        newPins[selectedPinIndex].closeTime = e.target.value;
+                        setPins(newPins);
+                      }}
+                      className="border p-1 w-1/2 rounded"
+                    />
+                  </div>
+
+                  {/* 설명 */}
+                  <textarea
+                    value={pins[selectedPinIndex].description || ''}
+                    onChange={(e) => {
+                      const newPins = [...pins];
+                      newPins[selectedPinIndex].description = e.target.value;
+                      setPins(newPins);
+                    }}
+                    className="border p-1 w-full rounded resize-none"
+                    rows={3}
+                    placeholder="내용 입력"
+                  />
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="bg-green-500 text-white px-3 py-1 rounded"
+                    >
+                      저장
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div>
-                  <h3 className="font-bold">{pins[selectedPinIndex].name}</h3>
-                  <p>{pins[selectedPinIndex].category}</p>
-                  <p className="text-sm text-gray-600">{pins[selectedPinIndex].address}</p>
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="mt-2 bg-blue-500 text-white px-2 py-1 rounded"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleDeletePin(selectedPinIndex);
-                      setSelectedPinIndex(null);
-                    }}
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                  >
-                    삭제
-                  </button>
+                // 상세 보기
+                <div className="w-64 text-sm space-y-2">
+                  <h3 className="text-center text-blue-600 font-semibold">방문지 정보</h3>
+                  {pins[selectedPinIndex].images && pins[selectedPinIndex].images.length > 0 && (
+                    <div className="flex gap-1.5 overflow-x-auto">
+                      {pins[selectedPinIndex].images.map((img, i) => (
+                        <img
+                          key={i}
+                          src={URL.createObjectURL(img)}
+                          alt={`img-${i}`}
+                          className="w-16 h-16 object-cover rounded border"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-bold text-gray-800">{pins[selectedPinIndex].name}</p>
+                    <p className="text-gray-600">{pins[selectedPinIndex].category}</p>
+                    <p className="text-xs text-gray-500">{pins[selectedPinIndex].address}</p>
+                  </div>
+                  {(pins[selectedPinIndex].minCost || pins[selectedPinIndex].maxCost) && (
+                    <p className="text-xs text-gray-600">
+                      비용: {pins[selectedPinIndex].minCost || '0'} ~ {pins[selectedPinIndex].maxCost || '0'} {pins[selectedPinIndex].currency || '₩'}
+                    </p>
+                  )}
+                  {(pins[selectedPinIndex].openTime || pins[selectedPinIndex].closeTime) && (
+                    <p className="text-xs text-gray-600">
+                      운영시간: {pins[selectedPinIndex].openTime || '-'} ~ {pins[selectedPinIndex].closeTime || '-'}
+                    </p>
+                  )}
+                  {pins[selectedPinIndex].description && (
+                    <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                      {pins[selectedPinIndex].description}
+                    </p>
+                  )}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setEditMode(true)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDeletePin(selectedPinIndex);
+                        setSelectedPinIndex(null);
+                      }}
+                      className="bg-red-500 text-white px-2 py-1 rounded ml-2"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
               )}
             </InfoWindow>
