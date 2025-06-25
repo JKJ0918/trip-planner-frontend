@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import TravelInfo from './components/TravelInfo';
 import PinListPanel from './components/PinListPanel';
+import TravelJournal from './components/TravelJournal';
+import { useTripStore } from './utils/tripstore';
+import { fetchUserInfoJ } from './utils/fetchUserInfoJ';
 
 const MyMap = dynamic(() => import('./components/MyMap'), { ssr: false });
 
 export default function FullMapPage() {
   const [activeTab, setActiveTab] = useState<null | '여행 일정' | '방문지' | '상세 일정'>(null);
+  const { startDate, endDate, pins, submitTripPlan } = useTripStore();
+  const setUser = useTripStore((state) => state.setUser);
+  
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await fetchUserInfoJ();
+        setUser({id: user.userId});
+      } catch (err) {
+        console.error("유저 정보를 불러오지 못했습니다:", err);
+      }
+    };
+    loadUser();
+  }, []);
+
+
 
   const toggleTab = (tab: typeof activeTab) => {
     setActiveTab((prev) => (prev === tab ? null : tab));
@@ -123,8 +142,20 @@ export default function FullMapPage() {
             )}
             {activeTab === '상세 일정' && (
               <>
-                <li>Plans</li>
-                <li>Payment History</li>
+                <TravelJournal />
+
+                <button className='bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600'
+                  onClick={() => {
+                    if (!startDate || !endDate) {
+                      alert("여행 기간을 설정해 주세요!");
+                      return;
+                    }
+                    submitTripPlan(startDate, endDate, pins);
+                  }}
+                >
+                  전체 작성 완료
+                </button>
+
               </>
             )}
 

@@ -271,6 +271,28 @@ export const useTripStore = create<TripState>((set, get) => ({
         })
       );
 
+      const processedPins = await Promise.all( // pin 이미지 처리
+        pins.map(async (pin) => {
+          const uploadedPinImages: string[] = [];
+
+          if (pin.images && pin.images.length > 0) {
+            for (const image of pin.images) {
+              if (image instanceof File) {
+                const resultUrl = await uploadImage(image); // 이미지 저장함수
+                if (resultUrl) uploadedPinImages.push(resultUrl);
+              } else if (typeof image === 'string') {
+                uploadedPinImages.push(image);
+              }
+            }
+          }
+
+          return {
+            ...pin,
+            images: uploadedPinImages,
+          };
+        })
+      );
+
       const payload = {
         startDate,
         endDate,
@@ -278,7 +300,7 @@ export const useTripStore = create<TripState>((set, get) => ({
         title: travelMainEntry.title,
         locationSummary: travelMainEntry.locationSummary,
         isPublic,
-        pins,
+        pins: processedPins,  // 여기만 수정
         journals,
       };
 

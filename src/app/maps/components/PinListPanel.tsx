@@ -12,7 +12,7 @@ export default function PinListPanel() {
   const mapRef = useTripStore((state) => state.mapRef);
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-2xl max-h-[600px] overflow-y-auto">
+    <div className="p-4 bg-white max-h-[600px] overflow-y-auto">
       <ul className="space-y-3">
         {pins.map((pin, index) => {
           const imagePreview = pin.images?.[0];
@@ -28,8 +28,8 @@ export default function PinListPanel() {
                   mapRef.panTo({ lat: pin.lat, lng: pin.lng });
                 }
               }}
-              className={`cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-xl shadow-sm transition-all flex gap-4 items-center ${
-                highlightedIndex === index ? 'ring-2 ring-yellow-300' : ''
+              className={`cursor-pointer p-2 bg-gray-50 hover:bg-gray-100 rounded-m transition-all flex gap-4 items-center ${
+                highlightedIndex === index ? '' : ''
               }`}
             >
               {/* 이미지 섹션 */}
