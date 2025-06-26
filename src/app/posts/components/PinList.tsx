@@ -9,7 +9,15 @@ type Pin = {
   name: string;
   address: string;
   category: string;
+  images?: string[];      // 이미지 URL 목록
+  minCost?: string;
+  maxCost?: string;
+  currency?: string;
+  openTime?: string;
+  closeTime?: string;
+  description?: string;
 };
+
 
 type Props = {
   pins: Pin[];
@@ -17,12 +25,13 @@ type Props = {
   mapRef: { current: google.maps.Map | null };
 };
 
+const BASE_URL = "http://localhost:8080";
+
 export default function PinList({ pins, onSelect, mapRef }: Props) {
   const handleClick = (pin: Pin) => {
     onSelect(pin); // InfoWindow 열기
-
     if (mapRef.current) {
-      mapRef.current.panTo({ lat: pin.lat, lng: pin.lng }); // 지도 중심 이동
+      mapRef.current.panTo({ lat: pin.lat, lng: pin.lng });
     }
   };
 
@@ -33,15 +42,32 @@ export default function PinList({ pins, onSelect, mapRef }: Props) {
         {pins.map((pin, idx) => (
           <li
             key={idx}
-            className="py-2 cursor-pointer hover:bg-gray-100 px-2 rounded"
+            className="py-3 cursor-pointer hover:bg-gray-100 px-3 rounded"
             onClick={() => handleClick(pin)}
           >
-            <div className="font-medium">{pin.name}</div>
+            <div className="font-medium text-lg">{pin.name}</div>
             <div className="text-sm text-gray-500">{pin.address}</div>
-            <div className="text-xs text-gray-400">카테고리: {pin.category}</div>
+            <div className="text-xs text-gray-400 mb-1">카테고리: {pin.category}</div>
+
+            {pin.images && pin.images.length > 0 && (
+              <img
+                src={`http://localhost:8080${pin.images[0]}`}
+                alt="대표 이미지"
+                className="w-full h-36 object-cover rounded mb-2"
+              />
+            )}
+
+            <div className="text-sm text-gray-600">
+              💵 예산: {pin.minCost} ~ {pin.maxCost} {pin.currency}
+            </div>
+            <div className="text-sm text-gray-600">
+              🕒 운영 시간: {pin.openTime} ~ {pin.closeTime}
+            </div>
+            <p className="text-sm text-gray-700 mt-1">{pin.description}</p>
           </li>
         ))}
       </ul>
     </div>
   );
 }
+

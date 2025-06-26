@@ -16,7 +16,15 @@ type Pin = {
   name: string;
   address: string;
   category: string;
+  images?: string[];      // 이미지 URL 목록
+  minCost?: string;
+  maxCost?: string;
+  currency?: string;
+  openTime?: string;
+  closeTime?: string;
+  description?: string;
 };
+
 
 type TravelPostDetail = {
   id: number;
@@ -26,8 +34,29 @@ type TravelPostDetail = {
   thumbnailUrl: string;
   authorNickname: string;
   pins: Pin[];
-  itinerary: { day: number; title: string; content: string; images: string[]; date: string }[];
+  itinerary: {
+    day: number;
+    title: string;
+    content: string;
+    images: string[];
+    date: string;
+  }[];
+
+  // 추가된 필드
+  useFlight?: boolean;
+  flightDepartureAirline?: string;
+  flightDepartureName?: string;
+  flightDepartureTime?: string;
+  flightReturnAirline?: string;
+  flightReturnName?: string;
+  flightReturnTime?: string;
+  travelTrans?: string;
+  totalBudget?: string;
+  travelTheme?: string;
+  review?: string;
+  isAfterTravel?: boolean;
 };
+
 
 export default function TravelPostPage() {
   const { id } = useParams();
@@ -57,7 +86,20 @@ export default function TravelPostPage() {
         dateRange={post.dateRange}
         thumbnailUrl={post.thumbnailUrl}
         authorNickname={post.authorNickname}
+        useFlight={post.useFlight}
+        flightDepartureAirline={post.flightDepartureAirline}
+        flightDepartureName={post.flightDepartureName}
+        flightDepartureTime={post.flightDepartureTime}
+        flightReturnAirline={post.flightReturnAirline}
+        flightReturnName={post.flightReturnName}
+        flightReturnTime={post.flightReturnTime}
+        travelTrans={post.travelTrans}
+        totalBudget={post.totalBudget}
+        travelTheme={post.travelTheme}
+        review={post.review}
+        isAfterTravel={post.isAfterTravel}
       />
+
 
       <PostMap
         pins={post.pins}

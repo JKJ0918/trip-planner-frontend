@@ -14,7 +14,15 @@ type Pin = {
   name: string;
   address: string;
   category: string;
+  images?: string[];      // 이미지 URL 목록
+  minCost?: string;
+  maxCost?: string;
+  currency?: string;
+  openTime?: string;
+  closeTime?: string;
+  description?: string;
 };
+
 
 type Props = {
   pins: Pin[];
@@ -86,13 +94,30 @@ export default function PostMap({
           position={{ lat: selectedPin.lat, lng: selectedPin.lng }}
           onCloseClick={() => setSelectedPin(null)}
         >
-          <div className="text-sm">
-            <div className="font-bold">{selectedPin.name}</div>
-            <div>{selectedPin.address}</div>
-            <div className="text-xs text-gray-500">{selectedPin.category}</div>
+          <div className="max-w-xs">
+            <h3 className="font-semibold text-base mb-1">{selectedPin.name}</h3>
+            <p className="text-sm text-gray-600 mb-1">{selectedPin.address}</p>
+            <p className="text-xs text-gray-500 mb-2">카테고리: {selectedPin.category}</p>
+
+            {selectedPin.images && selectedPin.images.length > 0 && (
+              <img
+                src={`http://localhost:8080${selectedPin.images[0]}`}
+                alt="대표 이미지"
+                className="w-full h-24 object-cover rounded mb-2"
+              />
+            )}
+
+            <p className="text-xs text-gray-600">
+              💰 {selectedPin.minCost} ~ {selectedPin.maxCost} {selectedPin.currency}
+            </p>
+            <p className="text-xs text-gray-600">
+              🕒 {selectedPin.openTime} ~ {selectedPin.closeTime}
+            </p>
+            <p className="text-xs text-gray-700 mt-1">{selectedPin.description}</p>
           </div>
         </InfoWindow>
       )}
+
     </GoogleMap>
   );
 }

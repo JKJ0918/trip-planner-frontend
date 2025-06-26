@@ -6,6 +6,18 @@ import { uploadImage } from './uploadImage';
 export type TravelMainEntry = {
   title: string;
   locationSummary: string;
+  useFlight?: boolean; // 항공기 사용여부
+  flightDepartureAirline?: string;
+  flightDepartureName?: string;
+  flightDepartureTime?: string;
+  flightReturnAirline?: string;
+  flightReturnName?: string;
+  flightReturnTime?: string;
+  travelTrans?: string;
+  totalBudget?: string;
+  travelTheme?: string;
+  review?: string;
+  isAfterTravel?: boolean;
 };
 
 export type UploadedImage = {
@@ -147,7 +159,20 @@ export const useTripStore = create<TripState>((set, get) => ({
   travelMainEntry: {
     title: '',
     locationSummary: '',
+    useFlight: false,       // boolean의 초기값 false로 
+    isAfterTravel: false,   
+    flightDepartureAirline: '',
+    flightDepartureName: '',
+    flightDepartureTime: '',
+    flightReturnAirline: '',
+    flightReturnName: '',
+    flightReturnTime: '',
+    travelTrans: '',
+    totalBudget: '',
+    travelTheme: '',
+    review: '',
   },
+
   setTravelMainEntry: (entry) =>
     set((state) => ({
       travelMainEntry: {
@@ -300,7 +325,19 @@ export const useTripStore = create<TripState>((set, get) => ({
         title: travelMainEntry.title,
         locationSummary: travelMainEntry.locationSummary,
         isPublic,
-        pins: processedPins,  // 여기만 수정
+        useFlight: travelMainEntry.useFlight,
+        flightDepartureAirline: travelMainEntry.flightDepartureAirline,
+        flightDepartureName: travelMainEntry.flightDepartureName,
+        flightDepartureTime: travelMainEntry.flightDepartureTime,
+        flightReturnAirline: travelMainEntry.flightReturnAirline,
+        flightReturnName: travelMainEntry.flightReturnName,
+        flightReturnTime: travelMainEntry.flightReturnTime,
+        travelTrans: travelMainEntry.travelTrans,
+        totalBudget: travelMainEntry.totalBudget,
+        travelTheme: travelMainEntry.travelTheme,
+        review: travelMainEntry.review,
+        isAfterTravel: travelMainEntry.isAfterTravel,
+        pins: processedPins,
         journals,
       };
 
