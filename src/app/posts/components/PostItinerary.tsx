@@ -36,9 +36,9 @@ export default function PostItinerary({ itinerary, startDate, endDate }: Props) 
 
   return (
     <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-6">
-        여행 일정 <span className="font-normal text-2xl font-bold mb-6">({startDate} ~ {endDate})</span>
-      </h2>
+      <h3 className="text-xl font-semibold mb-3">
+        여행 일정 <span className="font-normal text-xl font-bold mb-6">({startDate} - {endDate})</span>
+      </h3>
       <ol className="relative border-s border-blue-300 ml-6">
         {itinerary.map((item, index) => (
           <li key={item.day} className="mb-10 ms-6">

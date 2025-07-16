@@ -3,7 +3,6 @@
 import {
   GoogleMap,
   Marker,
-  InfoWindow,
   useJsApiLoader,
 } from '@react-google-maps/api';
 import { useCallback, useState } from 'react';
@@ -28,7 +27,7 @@ type Props = {
   pins: Pin[];
   selectedPin: Pin | null;
   setSelectedPin: (pin: Pin | null) => void;
-  mapRef: { current: google.maps.Map | null }; // ✅ 줄 안 그어지는 타입 사용
+  mapRef: { current: google.maps.Map | null }; // 줄 안 그어지는 타입 사용
 };
 
 const containerStyle = {
@@ -75,7 +74,7 @@ export default function PostMap({
   return (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={defaultCenter} // ✅ 초기값만 지정, 이후엔 자동 유지
+      center={defaultCenter} // 초기값만 지정, 이후엔 자동 유지
       zoom={12}
       onLoad={(map) => {
         mapRef.current = map;
@@ -89,34 +88,6 @@ export default function PostMap({
         />
       ))}
 
-      {selectedPin && (
-        <InfoWindow
-          position={{ lat: selectedPin.lat, lng: selectedPin.lng }}
-          onCloseClick={() => setSelectedPin(null)}
-        >
-          <div className="max-w-xs">
-            <h3 className="font-semibold text-base mb-1">{selectedPin.name}</h3>
-            <p className="text-sm text-gray-600 mb-1">{selectedPin.address}</p>
-            <p className="text-xs text-gray-500 mb-2">카테고리: {selectedPin.category}</p>
-
-            {selectedPin.images && selectedPin.images.length > 0 && (
-              <img
-                src={`http://localhost:8080${selectedPin.images[0]}`}
-                alt="대표 이미지"
-                className="w-full h-24 object-cover rounded mb-2"
-              />
-            )}
-
-            <p className="text-xs text-gray-600">
-              💰 {selectedPin.minCost} ~ {selectedPin.maxCost} {selectedPin.currency}
-            </p>
-            <p className="text-xs text-gray-600">
-              🕒 {selectedPin.openTime} ~ {selectedPin.closeTime}
-            </p>
-            <p className="text-xs text-gray-700 mt-1">{selectedPin.description}</p>
-          </div>
-        </InfoWindow>
-      )}
 
     </GoogleMap>
   );

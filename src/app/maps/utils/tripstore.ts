@@ -6,13 +6,19 @@ import { uploadImage } from './uploadImage';
 export type TravelMainEntry = {
   title: string;
   locationSummary: string;
+  description: string; // 여행 썸네일쪽 내용
   useFlight?: boolean; // 항공기 사용여부
   flightDepartureAirline?: string;
   flightDepartureName?: string;
   flightDepartureTime?: string;
+  flightDepartureAirport?: string;  // 출국편 출발공항
+  flightArrivalAirport?: string;    // 출국편 도착공항
+
   flightReturnAirline?: string;
   flightReturnName?: string;
   flightReturnTime?: string;
+  flightReturnDepartureAirport?: string;  // 출국편 출발공항
+  flightReturnArrivalAirport?: string;    // 귀국편 도착공항
   travelTrans?: string;
   totalBudget?: string;
   travelTheme?: string;
@@ -159,14 +165,19 @@ export const useTripStore = create<TripState>((set, get) => ({
   travelMainEntry: {
     title: '',
     locationSummary: '',
+    description: '', // 여행 썸네일쪽 내용
     useFlight: false,       // boolean의 초기값 false로 
     isAfterTravel: false,   
     flightDepartureAirline: '',
     flightDepartureName: '',
     flightDepartureTime: '',
+    flightDepartureAirport: '', // 출국편 출발공항
+    flightArrivalAirport: '',    // 출국편 도착공항
     flightReturnAirline: '',
     flightReturnName: '',
     flightReturnTime: '',
+    flightReturnDepartureAirport: '',  // 출국편 출발공항
+    flightReturnArrivalAirport: '',    // 귀국편 도착공항
     travelTrans: '',
     totalBudget: '',
     travelTheme: '',
@@ -324,14 +335,19 @@ export const useTripStore = create<TripState>((set, get) => ({
         userId: user.id,
         title: travelMainEntry.title,
         locationSummary: travelMainEntry.locationSummary,
+        description: travelMainEntry.description,
         isPublic,
         useFlight: travelMainEntry.useFlight,
         flightDepartureAirline: travelMainEntry.flightDepartureAirline,
         flightDepartureName: travelMainEntry.flightDepartureName,
         flightDepartureTime: travelMainEntry.flightDepartureTime,
+        flightDepartureAirport: travelMainEntry.flightDepartureAirport,  // 출국편 출발공항
+        flightArrivalAirport: travelMainEntry.flightArrivalAirport,    // 출국편 도착공항
         flightReturnAirline: travelMainEntry.flightReturnAirline,
         flightReturnName: travelMainEntry.flightReturnName,
         flightReturnTime: travelMainEntry.flightReturnTime,
+        flightReturnDepartureAirport: travelMainEntry.flightReturnDepartureAirport,  // 출국편 출발공항
+        flightReturnArrivalAirport: travelMainEntry.flightReturnArrivalAirport,    // 귀국편 도착공항
         travelTrans: travelMainEntry.travelTrans,
         totalBudget: travelMainEntry.totalBudget,
         travelTheme: travelMainEntry.travelTheme,

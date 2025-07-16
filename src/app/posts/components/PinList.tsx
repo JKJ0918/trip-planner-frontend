@@ -1,8 +1,6 @@
 // 상세 보기 안 핀 리스트
 'use client';
 
-import { useEffect } from 'react';
-
 type Pin = {
   lat: number;
   lng: number;
@@ -29,45 +27,50 @@ const BASE_URL = "http://localhost:8080";
 
 export default function PinList({ pins, onSelect, mapRef }: Props) {
   const handleClick = (pin: Pin) => {
-    onSelect(pin); // InfoWindow 열기
+    onSelect(pin);
     if (mapRef.current) {
       mapRef.current.panTo({ lat: pin.lat, lng: pin.lng });
     }
   };
 
   return (
-    <div className="space-y-2 mt-6">
-      <h3 className="text-xl font-semibold mb-2">📌 방문지 목록</h3>
-      <ul className="divide-y divide-gray-200">
-        {pins.map((pin, idx) => (
-          <li
-            key={idx}
-            className="py-3 cursor-pointer hover:bg-gray-100 px-3 rounded"
-            onClick={() => handleClick(pin)}
-          >
-            <div className="font-medium text-lg">{pin.name}</div>
-            <div className="text-sm text-gray-500">{pin.address}</div>
-            <div className="text-xs text-gray-400 mb-1">카테고리: {pin.category}</div>
+    <div className="mt-8">
+      <h3 className="text-xl font-semibold mb-3">방문지 보기</h3>
 
+      {/* 카드 그리드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {pins.map((pin, idx) => (
+          <div
+            key={idx}
+            onClick={() => handleClick(pin)}
+            className="cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 hover:bg-gray-50"
+          >
+            {/* 썸네일 */}
             {pin.images && pin.images.length > 0 && (
               <img
                 src={`http://localhost:8080${pin.images[0]}`}
-                alt="대표 이미지"
-                className="w-full h-36 object-cover rounded mb-2"
+                alt={pin.name}
+                className="w-full h-36 object-cover rounded-lg mb-2"
               />
             )}
 
-            <div className="text-sm text-gray-600">
-              💵 예산: {pin.minCost} ~ {pin.maxCost} {pin.currency}
-            </div>
-            <div className="text-sm text-gray-600">
-              🕒 운영 시간: {pin.openTime} ~ {pin.closeTime}
-            </div>
-            <p className="text-sm text-gray-700 mt-1">{pin.description}</p>
-          </li>
+            {/* 정보 */}
+            <h4 className="font-semibold text-base">{pin.name}</h4>
+            <p className="text-sm text-gray-500 truncate">{pin.address}</p>
+            <p className="text-sm text-gray-400">{pin.category}</p>
+
+            {/* 예산 표시 (있으면) */}
+            {(pin.minCost || pin.maxCost) && (
+              <p className="text-sm text-gray-400">
+                금액 {pin.minCost} ~ {pin.maxCost} {pin.currency}
+              </p>
+            )}
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
+
+
 

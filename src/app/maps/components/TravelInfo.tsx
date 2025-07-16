@@ -18,6 +18,16 @@ export default function TravelInfo() {
       {/* 날짜 */}
       <DateRangePicker />
 
+      {/* 내용 요약 */}
+      <textarea
+          name="description"
+          placeholder="여행과 관련된 내용을 적어주세요!"
+          value={travelMainEntry.description || ''}
+          onChange={handleChange}
+          rows={3}
+          className="w-full p-2 rounded border"
+        />
+
       {/* 도시 */}
       <input name="locationSummary" value={travelMainEntry.locationSummary} onChange={handleChange} placeholder="여행 도시" className="w-full" />
 
@@ -33,32 +43,78 @@ export default function TravelInfo() {
 
 
       {/* 항공편 정보 */}
-
       {travelMainEntry.useFlight && (
-        <div className="grid grid-cols-2 gap-2">
-            <div className="grid grid-cols-2 gap-2">
-            {/* 출국 항공사 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-2">
+            <p className="font-semibold text-gray-600">출국편 정보</p>
             <input
               name="flightDepartureAirline"
-              placeholder="출국 항공사 (예: 대한항공)"
+              placeholder="항공사 (예: 대한항공)"
               value={travelMainEntry.flightDepartureAirline || ''}
               onChange={handleChange}
             />
-            <input name="flightDepartureName" value={travelMainEntry.flightDepartureName || ''} onChange={handleChange} placeholder="출국 항공편명" className="w-full" />
-            <input name="flightDepartureTime" type="datetime-local" value={travelMainEntry.flightDepartureTime || ''} onChange={handleChange} className="w-full" />
+            <input
+              name="flightDepartureName"
+              placeholder="항공편명 (예: KE123)"
+              value={travelMainEntry.flightDepartureName || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightDepartureAirport"
+              placeholder="출발 공항 (예: 인천국제공항)"
+              value={travelMainEntry.flightDepartureAirport || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightArrivalAirport"
+              placeholder="도착 공항 (예: 나리타국제공항)"
+              value={travelMainEntry.flightArrivalAirport || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightDepartureTime"
+              type="datetime-local"
+              value={travelMainEntry.flightDepartureTime || ''}
+              onChange={handleChange}
+            />
+          </div>
 
-            {/* 귀국 항공사 */}
+          <div className="grid grid-cols-1 gap-2">
+            <p className="font-semibold text-gray-600">귀국편 정보</p>
             <input
               name="flightReturnAirline"
-              placeholder="귀국 항공사 (예: 아시아나)"
+              placeholder="항공사 (예: 아시아나)"
               value={travelMainEntry.flightReturnAirline || ''}
               onChange={handleChange}
             />
-            <input name="flightReturnName" value={travelMainEntry.flightReturnName || ''} onChange={handleChange} placeholder="귀국 항공편명" className="w-full" />
-            <input name="flightReturnTime" type="datetime-local" value={travelMainEntry.flightReturnTime || ''} onChange={handleChange} className="w-full" />
+            <input
+              name="flightReturnName"
+              placeholder="항공편명 (예: OZ456)"
+              value={travelMainEntry.flightReturnName || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightReturnDepartureAirport"
+              placeholder="출발 공항 (예: 나리타국제공항)"
+              value={travelMainEntry.flightReturnDepartureAirport || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightReturnArrivalAirport"
+              placeholder="도착 공항 (예: 인천국제공항)"
+              value={travelMainEntry.flightReturnArrivalAirport || ''}
+              onChange={handleChange}
+            />
+            <input
+              name="flightReturnTime"
+              type="datetime-local"
+              value={travelMainEntry.flightReturnTime || ''}
+              onChange={handleChange}
+            />
           </div>
         </div>
       )}
+
 
       {/* 교통 수단 */}
       <input name="travelTrans" value={travelMainEntry.travelTrans || ''} onChange={handleChange} placeholder="교통 (예:버스, 자전거, 택시)" className="w-full" />
