@@ -71,6 +71,7 @@ export default function TravelPostPage() {
   const mapRef = useRef<google.maps.Map | null>(null);
 
 
+
   useEffect(() => {
     if (!id) return;
     fetch(`http://localhost:8080/api/journals/public/${id}`)
@@ -145,45 +146,47 @@ export default function TravelPostPage() {
 
       <h3 className="text-xl font-semibold mb-3 pb-2 py-4">참고 사항</h3>
 
-      <div className="px-6 py-10 mt-10 bg-gray-50 rounded-xl border border-gray-200 space-y-8">
-  {/* 섹션 제목 */}
-  <h2 className="text-xl font-bold text-gray-800 border-b pb-2">여행 전 꼭 확인하세요</h2>
+      <div className="px-6 py-10 mt-10 bg-gray-0 rounded-xl border border-gray-200 space-y-8">
+      {/* 섹션 제목 */}
+      <h2 className="text-xl font-bold text-gray-800 border-b pb-2">여행 전 꼭 확인하세요</h2>
 
-  {/* 여권/비자 안내 */}
-  <div>
-    <h3 className="text-lg font-semibold text-blue-600 mb-2">● 여권/비자 안내</h3>
-    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-      <li>◈ 여권은 반드시 복수여권으로 6개월 이상의 유효기간이 남아 있어야 하며 90일간 무비자로 체류 가능합니다.(일부국가 제외)</li>
-      <li>◈ 외국인의 경우 대사관에 반드시 확인바랍니다.</li>
-      <li>◈ 만 18세 이하 미성년자가 유럽 여행 시에는 부모 동반 여부에 따라 필요한 서류가 다르니 사전에 반드시 준비하세요.</li>
-      <li className="text-red-600 mt-2">※ 여권/비자의 경우 경미한 훼손이라도 출입국 시 불이익을 받을 수 있으니 미리 확인해주세요.</li>
-    </ul>
-  </div>
+      {/* 여권/비자 안내 */}
+      <div>
+        <h3 className="text-lg font-semibold text-blue-600 mb-2">● 여권/비자 안내</h3>
+        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <li>◈ 여권은 반드시 복수여권으로 6개월 이상의 유효기간이 남아 있어야 하며 90일간 무비자로 체류 가능합니다.(일부국가 제외)</li>
+          <li>◈ 외국인의 경우 대사관에 반드시 확인바랍니다.</li>
+          <li>◈ 만 18세 이하 미성년자가 유럽 여행 시에는 부모 동반 여부에 따라 필요한 서류가 다르니 사전에 반드시 준비하세요.</li>
+          <li className="text-red-600 mt-2">※ 여권/비자의 경우 경미한 훼손이라도 출입국 시 불이익을 받을 수 있으니 미리 확인해주세요.</li>
+        </ul>
+      </div>
 
-  {/* 여행 시 주의사항 */}
-  <div>
-    <h3 className="text-lg font-semibold text-orange-600 mb-2">● 여행 시 주의사항</h3>
-    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-      <li>공항에서는 액체, 젤류, 에어로졸은 100ml 이하만 기내 반입이 가능합니다.</li>
-      <li>EU 국가에서 환승 시 면세품 포장 개봉 금지 (압수될 수 있음)</li>
-      <li>축산물, 식물류 반입 시 검역 필수 – 위반 시 최대 1,000만 원 과태료</li>
-      <li>가축 전염병 발생국 방문자는 검역본부에 신고 후 소독 필수</li>
-    </ul>
-  </div>
+      {/* 여행 시 주의사항 */}
+      <div>
+        <h3 className="text-lg font-semibold text-orange-600 mb-2">● 여행 시 주의사항</h3>
+        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <li>공항에서는 액체, 젤류, 에어로졸은 100ml 이하만 기내 반입이 가능합니다.</li>
+          <li>EU 국가에서 환승 시 면세품 포장 개봉 금지 (압수될 수 있음)</li>
+          <li>축산물, 식물류 반입 시 검역 필수 – 위반 시 최대 1,000만 원 과태료</li>
+          <li>가축 전염병 발생국 방문자는 검역본부에 신고 후 소독 필수</li>
+        </ul>
+      </div>
 
-  {/* 비상 연락처 */}
-  <div>
-    <h3 className="text-lg font-semibold text-red-600 mb-2">● 비상 연락처</h3>
-    <p className="text-sm text-gray-700 mb-2">
-      상품 관련 문의는 예약처 또는 고객센터(1544-5252)로, 아래는 공항 관련 비상 연락처입니다.
-    </p>
-    <ul className="text-sm text-gray-700 space-y-1">
-      <li>인천공항 안내: 032-743-3700 (05:00~23:00)</li>
-      <li>김해공항 안내: 051-832-0701</li>
-      <li>대구: 053-214-0027 / 청주: 043-902-0080 / 무안: 061-941-9810</li>
-    </ul>
-  </div>
-</div>
+      {/* 비상 연락처 */}
+      <div>
+        <h3 className="text-lg font-semibold text-red-600 mb-2">● 비상 연락처</h3>
+        <p className="text-sm text-gray-700 mb-2">
+          상품 관련 문의는 예약처 또는 고객센터(1544-5252)로, 아래는 공항 관련 비상 연락처입니다.
+        </p>
+        <ul className="text-sm text-gray-700 space-y-1">
+          <li>인천공항 안내: 032-743-3700 (05:00~23:00)</li>
+          <li>김해공항 안내: 051-832-0701</li>
+          <li>대구: 053-214-0027 / 청주: 043-902-0080 / 무안: 061-941-9810</li>
+        </ul>
+      </div>
+    </div>
+
+
 
 
       <CommentSection journalId={post.id} />

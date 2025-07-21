@@ -168,7 +168,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     const list = comments.filter((c) => (c.parentId ?? null) === parentId);
 
     return list.map((comment) => (
-      <div key={comment.id} className={`border p-3 mb-2 rounded ${parentId ? 'ml-6 bg-gray-50' : ''}`}>
+      <div key={comment.id} className={`p-3 mb-2 rounded ${parentId ? 'ml-6 bg-gray-50' : ''}`}>
         <p>{comment.content}</p>
         <div className="text-sm text-gray-500">
           {comment.writerName} • {new Date(comment.createdAt).toLocaleString()}
@@ -231,7 +231,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
         {repliesVisibleMap[comment.id] &&
           repliesMap[comment.id]?.map((reply) => (
-            <div key={reply.id} className="ml-6 mt-2 bg-gray-50 p-2 rounded border text-sm">
+            <div key={reply.id} className="ml-6 mt-2 p-2 rounded text-sm">
               {editMap[reply.id] ? (
                 <>
                   <textarea

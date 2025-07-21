@@ -165,7 +165,7 @@ export default function HeroSection({
 
           {/* 교통수단 */}
           <div className="py-4 border-b">
-            <div className="font-semibold text-gray-700">교통수단</div>
+            <div className="font-semibold text-gray-700">교통수단 </div>
             <div className="ml-4 text-gray-800">{travelTrans}</div>
           </div>
 
