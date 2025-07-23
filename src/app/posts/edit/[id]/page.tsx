@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { DateRange } from 'react-date-range';
+// import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import MapEditor from '../components/MapEditor';
@@ -15,11 +15,29 @@ import TravelInfoEdit from '../components/TravelInfoEdit';
 type TravelJournal = {
   id: number;
   title: string;
-  locationSummary: string;
   dateRange: {
     startDate: string;
     endDate: string;
   };
+  description: string; // 내용 요약
+  locationSummary: string;
+  useFlight: boolean; // 항공편 이용여부
+  flightDepartureAirline: string; // 출국편 항공사
+  flightDepartureName: string; // 출국편 항공편명
+  flightDepartureAirport: string; // 출국편 출발 공항
+  flightArrivalAirport: string; // 출국편 도착 공항
+  flightDepartureTime: string;// 출국편 출발시간
+  flightReturnAirline: string; // 귀국편 항공사
+  flightReturnName: string; // 귀국편 항공편명
+  flightReturnDepartureAirport: string; // 귀국편 출발 공항
+  flightReturnArrivalAirport: string; // 귀국편 도착 공항
+  flightReturnTime: string; // 귀국편 출발시간
+  travelTrans: string; // 교통수단
+  totalBudget: string; // 경비(예산)
+  travelTheme: string; // 여행 테마
+  isAfterTravel: boolean; // 여행 완료 여부
+  review: string; // 여행 후기
+  isPublic: boolean; // 공개 여부
   pins: Pin[];
   itinerary: DayJournal[];
 };

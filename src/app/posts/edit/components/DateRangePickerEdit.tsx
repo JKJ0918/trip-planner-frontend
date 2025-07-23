@@ -1,68 +1,72 @@
 'use client';
 
-import { useState } from 'react';
-import { DateRange } from 'react-date-range';
+import { useState, useEffect } from 'react';
+import { DateRange, RangeKeyDict } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import { useTripStore } from '../utils/tripstore';
-import { generateDateRange } from '../utils/dateUtils';
 
-export default function DateRangePicker() {
-  const [isOpen, setIsOpen] = useState(false);
+type Props = {
+  startDate: Date;
+  endDate: Date;
+  onChange: (startDate: Date, endDate: Date) => void;
+};
+
+export default function DateRangePicker({ startDate, endDate, onChange }: Props) {
   const [range, setRange] = useState([
     {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate,
+      endDate,
       key: 'selection',
     },
   ]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const setTripPeriod = useTripStore((state) => state.setTripPeriod);
-  const setDateRangeList = useTripStore((state) => state.setDateRangeList);
+  // startDate 또는 endDate가 바뀔 때 range 동기화
+  useEffect(() => {
+    setRange([{ startDate, endDate, key: 'selection' }]);
+  }, [startDate, endDate]);
 
-  const handleDateRangeSelect = (startDate: Date, endDate: Date) => {
-    const dates = generateDateRange(startDate, endDate);
-    setTripPeriod(startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]);
-    setDateRangeList(dates);
-  };
-
-  const handleSelect = (ranges: any) => {
-    const { startDate, endDate } = ranges.selection;
-    setRange([ranges.selection]);
-    if (startDate && endDate) {
-      handleDateRangeSelect(startDate, endDate);
+  const handleSelect = (ranges: RangeKeyDict) => {
+    const newRange = ranges.selection;
+    if (newRange.startDate && newRange.endDate) {
+      setRange([{
+        startDate: newRange.startDate,
+        endDate: newRange.endDate,
+        key: 'selection',
+      }]);
+      onChange(newRange.startDate, newRange.endDate);
     }
   };
 
   const format = (date: Date) =>
-    date.toLocaleDateString('ko-KR', {
+  date
+    .toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      weekday: 'short',
+      weekday: 'short', // (수)
     });
 
-  const start = range[0].startDate;
-  const end = range[0].endDate;
+    const start = range[0].startDate;
+    const end = range[0].endDate;
 
   return (
     <div className="space-y-2">
-
       {/* 날짜 요약 버튼 */}
-      <button
+        <button
         onClick={() => setIsOpen(true)}
-        className="text-xl text-gray-800 font-semibold hover:bg-gray-100 transition "
-      >
+        className="text-xl text-gray-800 font-semibold hover:bg-gray-100 transition"
+        >
         {start && end
-          ? `${format(start)} - ${format(end)}`
-          : '여행 기간을 선택하세요'}
-        
-      </button>
+            ? `${format(start)} - ${format(end)}`
+            : '여행 기간을 선택하세요'}
+        </button>
+
 
       {/* 모달 */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* 반투명 배경 + 블러 */}
+          {/* 반투명 배경 */}
           <div
             className="absolute inset-0 bg-white/70 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
