@@ -6,11 +6,11 @@ import { useRouter, useParams } from 'next/navigation';
 // import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import MapEditor from '../components/MapEditor';
 import ItineraryEditor from '../components/ItineraryEditor';
 import { generateDateRange } from '@/app/maps/utils/dateUtils';
 import MyMap from '@/app/maps/components/MyMap';
 import TravelInfoEdit from '../components/TravelInfoEdit';
+import PinListPanelEdit from '../components/PinListPanelEdit';
 
 type TravelJournal = {
   id: number;
@@ -43,11 +43,18 @@ type TravelJournal = {
 };
 
 type Pin = {
-  lat: number;
-  lng: number;
-  name: string;
-  category: string;
-  address: string;
+  lat: number; // 위도
+  lng: number; // 경도
+  name: string; // 위치명
+  address: string; // 주소
+  category: string; // 카테고리
+  images?: string[]; // 이미지 URL 목록
+  minCost?: string; // 금액(최소)
+  maxCost?: string; // 금액(최대)
+  currency?: string; // 화폐 단위
+  openTime?: string; // 오픈시간
+  closeTime?: string; // 마감시간
+  description?: string; // 설명
 };
 
 type DayJournal = { // 일별 일정표
@@ -171,20 +178,28 @@ export default function EditPostPage() {
     const fetchData = async () => {
       try {
         const res = await fetch(`http://localhost:8080/api/journals/public/${id}`);
-        const data = await res.json();
+        const data = await res.json(); // 응답 데이터 JSON으로 파싱
 
-        const enhancedItinerary = data.itinerary.map((entry: any) => ({
-          ...entry,
-          date: entry.date || '',
-          imageUrls: entry.images ?? [],
+        const enhancedItinerary = data.itinerary.map((entry: any) => ({ // data.itinerary.map(...) 파싱된 데이터의 일일 일정 배열들을 순회 하며 새배열 생성
+          // (entry: any) => ({ ... }) 각 요소를 새 객체로 변환 
+          // 결론 :  data.itinerary 배열의 각 요소(entry)를 변형해서 새로운 enhancedItinerary 배열을 만든다
+          ...entry, // 기존 속성 복사
+          date: entry.date || '', // 만약 entry.date가 falsy 값이면 '' (빈 문자열)로 대체
+          imageUrls: entry.images ?? [], // 만약 entry.images가 null 또는 undefined일 경우에만 [] (빈 배열)로 대체
           newImages: [],
           deletedImages: [],
+          // enhancedItinerary는 수정 기능용으로 필요한 필드(newImages, deletedImages 등)를 추가한 버전
         }));
         console.log("data.itinerary:", JSON.stringify(data.itinerary, null, 2));
-        setJournalData({ ...data, itinerary: enhancedItinerary });
+
+        setJournalData({ 
+          ...data, // data 복사
+          itinerary: enhancedItinerary // data 에서 itinerary는 우리가 전처리한 enhancedItinerary를 사용한다.
+        });
+
         setRange([
           {
-            startDate: parseLocalDate(data.dateRange.startDate),
+            startDate: parseLocalDate(data.dateRange.startDate), // parseLocalDate : 문자열로 제공되는 날짜를 LocalDate 객체로 변환
             endDate: parseLocalDate(data.dateRange.endDate),
             key: 'selection',
           },
@@ -194,24 +209,12 @@ export default function EditPostPage() {
       }
     };
 
-    fetchData();
-  }, [id]);
+    fetchData(); // 자바스크립트의 비동기 함수 실행을 위한 패턴
+                 // useEffect() 안에서는 async 함수를 직접 사용할 수없어 이와 같은 형태로 작성하여 
+                 // 비동기 함수를 정의한 다음 즉시 실행하는 일반적인 패턴
 
-  const handleDateChange = (ranges: any) => {
-    const { startDate, endDate } = ranges.selection;
-    setRange([ranges.selection]);
-
-    if (!journalData) return;
-
-    setJournalData({
-      ...journalData,
-      dateRange: {
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-      },
-    });
-
-  };
+  }, [id]); // [id] 는 의존성 배열, 의미 : 이 useEffect()는 오직 id 값이 처음 생기거나 변경될 때만 실행
+            // id 값이 변할 때마다 useEffect가 재실행되는 구조를 만들기 위해 (처음 컴포넌트가 마운트될 때 id = 16 → fetchData() 실행, 사용자가 다른 글을 수정하러 가서 id = 17 → fetchData() 다시 실행)
 
   // 수정 본 저장 함수
   const handleSave = async () => {
@@ -415,20 +418,21 @@ return (
         <div className="space-y-4 text-sm text-gray-600">
           {activeTab === '여행 일정' && (
             <TravelInfoEdit
-              travelMainEntry={journalData}
+              travelMainEntry={journalData} // props.travelMainEntry로 사용할 수 있게됨
               setTravelMainEntry={setTravelMainEntry}
-              handleDateChange={handleChange}
+              handleDataChange={handleChange} // 이건 TravelInfoEdit으로 넘긴 handleChange임 const handleDateChange와 다름
             />
           )}
 
 
           {activeTab === '방문지' && (
-            <MapEditor
-              pins={journalData.pins}
-              onPinsChange={(updatedPins) =>
+            <PinListPanelEdit
+              travelPinEntry={journalData.pins ?? []} // ← 이게 핵심!
+              onTravelPinEntryChange={(updatedPins) =>
                 setJournalData({ ...journalData, pins: updatedPins })
               }
             />
+
           )}
 
           {activeTab === '상세 일정' && (
@@ -460,7 +464,7 @@ return (
       </div>
     )}
 
-    {/* 지도 영역 */}
+    {/* 지도 본체 */}
     <div className="flex-1">
       <MyMap />
     </div>

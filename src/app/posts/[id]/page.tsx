@@ -12,18 +12,18 @@ import CommentSection from '../components/CommentSection';
 import PinSidePanel from '../components/PinSidePanel';
 
 type Pin = {
-  lat: number;
-  lng: number;
-  name: string;
-  address: string;
-  category: string;
-  images?: string[];      // 이미지 URL 목록
-  minCost?: string;
-  maxCost?: string;
-  currency?: string;
-  openTime?: string;
-  closeTime?: string;
-  description?: string;
+  lat: number; // 위도
+  lng: number; // 경도
+  name: string; // 위치명
+  address: string; // 주소
+  category: string; // 카테고리
+  images?: string[]; // 이미지 URL 목록
+  minCost?: string; // 금액(최소)
+  maxCost?: string; // 금액(최대)
+  currency?: string; // 화폐 단위
+  openTime?: string; // 오픈시간
+  closeTime?: string; // 마감시간
+  description?: string; // 설명
 };
 
 
