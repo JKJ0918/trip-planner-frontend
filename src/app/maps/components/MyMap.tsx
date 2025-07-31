@@ -263,12 +263,12 @@ export default function MyMap() {
                   className="w-full p-1 rounded"
                 >
                   <option value="">카테고리 선택</option>
-                  <option value="숙소">🏨 숙소</option>
-                  <option value="음식점">🍽️ 음식점</option>
-                  <option value="의료">🏥 의료</option>
-                  <option value="행정">🏛️ 행정</option>
-                  <option value="공항">✈️ 공항</option>
-                  <option value="도시">🌆 도시</option>
+                  <option value="숙소">숙소</option>
+                  <option value="음식점">음식점</option>
+                  <option value="의료">의료</option>
+                  <option value="행정">행정</option>
+                  <option value="공항">공항</option>
+                  <option value="도시">도시</option>
                 </select>
 
                 <input

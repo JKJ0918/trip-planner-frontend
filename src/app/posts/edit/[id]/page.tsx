@@ -11,6 +11,7 @@ import { generateDateRange } from '@/app/maps/utils/dateUtils';
 import MyMap from '@/app/maps/components/MyMap';
 import TravelInfoEdit from '../components/TravelInfoEdit';
 import PinListPanelEdit from '../components/PinListPanelEdit';
+import MyMapEdit from '../components/MyMapEdit';
 
 type TravelJournal = {
   id: number;
@@ -466,7 +467,7 @@ return (
 
     {/* 지도 본체 */}
     <div className="flex-1">
-      <MyMap />
+      <MyMapEdit pins={journalData.pins ?? []} />
     </div>
   </div>
 );
