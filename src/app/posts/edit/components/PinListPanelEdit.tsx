@@ -10,7 +10,7 @@ type Pin = {
   name: string; // 위치명
   address: string; // 주소
   category: string; // 카테고리
-  images?: string[]; // 이미지 URL 목록
+  images?: (string | File)[]; // images?: string[]; // 이미지 URL 목록
   minCost?: string; // 금액(최소)
   maxCost?: string; // 금액(최대)
   currency?: string; // 화폐 단위
