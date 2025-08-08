@@ -295,18 +295,16 @@ export default function EditPostPage() {
               const data = await res.json(); // { imageUrls: [...] }
               uploadedImages.push(...data.imageUrls);
 
-              const existingUrls = (pin.images || []).filter((img) => typeof img === 'string') as string[];
-
-              return {
-                ...pin,
-                images: [...existingUrls, ...uploadedImages],
-              };
-
             }
+            const existingUrls = (pin.images || []).filter((img) => typeof img === 'string') as string[];
 
+            return {
+              ...pin,
+              images: [...existingUrls, ...uploadedImages],
+            };
 
           })
-    )
+    );
 
 
   } // end handleSave
