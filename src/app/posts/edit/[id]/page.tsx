@@ -218,76 +218,98 @@ export default function EditPostPage() {
   }, [id]); // [id] 는 의존성 배열, 의미 : 이 useEffect()는 오직 id 값이 처음 생기거나 변경될 때만 실행
             // id 값이 변할 때마다 useEffect가 재실행되는 구조를 만들기 위해 (처음 컴포넌트가 마운트될 때 id = 16 → fetchData() 실행, 사용자가 다른 글을 수정하러 가서 id = 17 → fetchData() 다시 실행)
 
-  // 수정 본 저장 함수
-  const handleSave = async () => {
-    if (!journalData) return;
+  // 수정된 게시글 저장
+  const handleSave = async() => { // handleSave 비동기 함수 처리 
 
-    try {
-      const updatedItinerary = await Promise.all(
-        journalData.itinerary.map(async (entry, dayIndex) => {
-          // 1. 새 이미지 업로드
-          const uploadedUrls: string[] = [];
-          if (entry.newImages && entry.newImages.length > 0) {
-            const formData = new FormData();
-            entry.newImages.forEach((file) => formData.append('files', file));
+    // *일정(itinerary) 처리
+    const updatedItinerary = await Promise.all( // 여러 일정의 이미지 작업을 동시에 처리
 
-            const res = await fetch(`http://localhost:8080/api/images/edit/upload`, {
-              method: 'POST',
-              body: formData,
-            });
+      journalData.itinerary.map(async (entry) => {
+        
+        // 새로 업로드된 이미지들을 저장할 배열
+        const uploadedUrls: string[] = [];
 
-            const data = await res.json();
-            uploadedUrls.push(...data.imageUrls); // 백엔드에서 URL 배열 리턴된다고 가정
-          }
+        // 조건: entry.newImages 가 있을 때만 업로드
+        if (entry.newImages && entry.newImages.length>0){
+          const formData = new FormData();
 
-          // 2. 삭제할 이미지 서버에 전달
-          if (entry.deletedImages && entry.deletedImages.length > 0) {
-            await fetch(`http://localhost:8080/api/images/edit/delete`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ imageUrls: entry.deletedImages }),
-            });
-          }
+          entry.newImages.forEach((file) => {
+            formData.append('files',file);
+          });
 
-          // 3. 이미지 URL 최종 조합
-          const finalImages = [
-            ...(entry.imageUrls || []),
-            ...uploadedUrls,
-          ];
+          const res = await fetch('http://localhost:8080/api/images/edit/upload', {
+            method: 'POST',
+            body: formData,
+          });
 
-          return {
-            title: entry.title,
-            content: entry.content,
-            images: finalImages,
-            date: entry.date || null, // 날짜 정보 포함
-          };
-        })
-      );
-    
-      // 4. 전체 업데이트 요청
-      const res = await fetch(`http://localhost:8080/api/journals/public/edit/${journalData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...journalData,
-          itinerary: updatedItinerary,
-        }),
-        credentials: 'include',
-      });
-      console.log(JSON.stringify(res, null, 2));
+          const data = await res.json(); // 예: { imageUrls: ['url1', 'url2'] }
+          uploadedUrls.push(...data.imageUrls)
+        }
 
-      if (res.ok) {
-        alert('수정이 완료되었습니다!');
-      } else {
-        throw new Error('수정 실패');
-      }
-    } catch (err) {
-      console.error('저장 중 오류 발생:', err);
-      alert('저장에 실패했습니다.');
-    }
-  };
+        // 삭제할 이미지 처리
+        if(entry.deletedImages && entry.deletedImages.length > 0) {
+          await fetch('http://localhost:8080/api/image/edit/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrls: entry.deletedImages }),
+          })
+        }
+
+        // 최종 이미지 조합
+        const finalImages = [
+          ...(entry.imageUrls || []),
+          ...uploadedUrls,
+        ];
+
+        // 리턴 : 이 일정의 최종 데이터 반환
+        return {
+          title: entry. title,
+          content: entry.content,
+          images: finalImages,
+          date: entry.date || null,
+        }
+      })
+    );
+
+    // pins 처리
+    // 전체 pins 반복 구조 만들기
+    const processedPins = await Promise.all(
+          journalData.pins.map(async (pin) =>{
+
+            // 서버에 업로드 해서 받은 새 이미지들의 URL을 담는 배열
+            const uploadedImages: string[] = [];
+
+            // File 타입만 골라냄
+            const newImages = pin.images?.filter((img) => img instanceof File) as File[] | undefined;
+
+            // pin 이미지 업로드
+            if(newImages && newImages.length > 0) {
+              const formData = new FormData();
+              newImages.forEach((file) =>  formData.append('files', file));
+
+              const res = await fetch(`http://localhost:8080/api/images/edit/upload`, {
+                method: 'POST',
+                body: formData,
+              });
+
+              const data = await res.json(); // { imageUrls: [...] }
+              uploadedImages.push(...data.imageUrls);
+
+              const existingUrls = (pin.images || []).filter((img) => typeof img === 'string') as string[];
+
+              return {
+                ...pin,
+                images: [...existingUrls, ...uploadedImages],
+              };
+
+            }
+
+
+          })
+    )
+
+
+  } // end handleSave
 
   // 삭제 함수
   const handleDelete = async () => {
