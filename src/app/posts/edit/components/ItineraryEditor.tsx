@@ -100,10 +100,9 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
   return (
     <div className="mt-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">일일 일정</h2>
         <button
           onClick={handleAddEntry}
-          className="bg-blue-500 text-white px-3 py-1 rounded"
+        className="mb-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           + 일정 추가
         </button>
@@ -112,7 +111,6 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
       {localItinerary.map((entry, index) => (
         <div key={index} className="p-4 border rounded relative bg-white">
 
-        <label className="block mb-1 font-medium">날짜 선택</label>
           <select
             value={entry.date || ''}
             onChange={(e) => handleChange(index, 'date', e.target.value)}
@@ -194,7 +192,7 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
             title="일정 삭제"
           >
-            🗑️
+            ✕
           </button>
         </div>
       ))}

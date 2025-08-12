@@ -4,10 +4,39 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchUserInfo } from "../utils/fetchUserInfo";
 
+type User = {
+  id?: number;
+  name?: string;
+  email?: string;
+  socialType?: "naver" | "kakao" | "google" | "local";
+} | null;
+
 function DropdownMenu() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<User>(null); // 로그인 여부
+  const [loading, setLoading] = useState(true); // 로딩 상태
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
+
+  // 1) 마운트 시 유저 정보 가져오기
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const me = await fetchUserInfo(); // 로그인 안되어 있으면 null/undefined 반환하도록 구현
+        if (mounted) setUser(me ?? null);
+      } catch {
+        if (mounted) setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -59,19 +88,33 @@ function DropdownMenu() {
     }
   };
 
-  const handleItemClick = async (item: string) => {
-    setOpen(false);
-    if (item === "Sign out") {
-      await handleLogout();
-    } else {
-      alert(`${item} clicked`);
+  // 로그인 여부에 따라 분기 - 메뉴 아이템
+  const menuItems = (() => {
+    if (loading) return []; // 로딩 중엔 비워둠(열어도 아무것도 안 보이게)
+    if (!user) {
+      // 비로그인
+      return [
+        { label: "로그인", action: () => router.push("/login") },
+        { label: "회원가입", action: () => router.push("/signup") },
+      ];
     }
+    // 로그인
+    return [
+      { label: "마이페이지", action: () => router.push("/mypage") },
+      { label: "로그아웃", action: handleLogout },
+    ];
+  })();
+  const handleItemClick = async (action: () => void | Promise<void>) => {
+    setOpen(false);
+    await action();
   };
 
   return (
     <div style={{ position: "relative", display: "inline-block" }} ref={ref}>
       <button
         onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="menu"
+        aria-expanded={open}
         aria-label="Toggle menu"
         style={{
           background: "transparent",
@@ -84,8 +127,9 @@ function DropdownMenu() {
         &#8942;
       </button>
 
-      {open && (
+      {open && !loading && (
         <div
+          role="menu"
           style={{
             position: "absolute",
             top: "100%",
@@ -95,20 +139,20 @@ function DropdownMenu() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             borderRadius: "6px",
             marginTop: "6px",
-            minWidth: "150px",
+            minWidth: "180px",
             zIndex: 1000,
           }}
         >
           <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
-            {["Account settings", "Support", "License", "Sign out"].map((item) => (
+            {menuItems.map((item) => (
               <li
-                key={item}
-                onClick={() => handleItemClick(item)}
+                key={item.label}
+                onClick={() => handleItemClick(item.action)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") handleItemClick(item);
+                  if (e.key === "Enter" || e.key === " ") handleItemClick(item.action);
                 }}
                 style={{
-                  padding: "10px 20px",
+                  padding: "10px 16px",
                   cursor: "pointer",
                   fontSize: "14px",
                   color: "#333",
@@ -116,7 +160,7 @@ function DropdownMenu() {
                 tabIndex={0}
                 role="menuitem"
               >
-                {item}
+                {item.label}
               </li>
             ))}
           </ul>

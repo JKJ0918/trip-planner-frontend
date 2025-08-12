@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import HeroSection from '../components/HeroSection';
 import PostMap from '../components/PostMap';
@@ -10,6 +10,8 @@ import PinList from '../components/PinList';
 import PostItinerary from '../components/PostItinerary';
 import CommentSection from '../components/CommentSection';
 import PinSidePanel from '../components/PinSidePanel';
+
+
 
 type Pin = {
   lat: number; // 위도
@@ -69,7 +71,13 @@ export default function TravelPostPage() {
   const [post, setPost] = useState<TravelPostDetail | null>(null);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<{ id: number; nickname: string } | null>(null); // 닉네임 체크
 
+  const goEdit = () => { // 수정 페이지 이동
+    if (!post) return;
+    router.push(`/posts/edit/${post.id}`);
+  };
 
 
   useEffect(() => {
@@ -83,6 +91,31 @@ export default function TravelPostPage() {
         }
       });
   }, [id]);
+
+useEffect(() => {
+  const loadMe = async () => {
+    try {
+      const res = await fetch('http://localhost:8080/api/journals/auth/me', {
+        credentials: 'include',
+      });
+      const text = await res.text();
+      console.log('[auth/me] status:', res.status, 'body:', text);
+
+      if (!res.ok) {
+        setCurrentUser(null);
+        return;
+      }
+      const me = JSON.parse(text); // { id, nickname }
+      setCurrentUser(me);
+    } catch (e) {
+      console.error('[auth/me] error:', e);
+      setCurrentUser(null);
+    }
+  };
+  loadMe();
+}, []);
+
+
 
   if (!post) return <p>로딩 중...</p>;
 
@@ -112,6 +145,8 @@ export default function TravelPostPage() {
         review={post.review}
         isAfterTravel={post.isAfterTravel}
       />
+
+
 
       {/* 2-단 그리드: 지도(좌) + 패널(우) */}
       <h3 className="text-xl font-semibold mb-3 pb-2 py-4">지도 정보</h3>
@@ -186,8 +221,16 @@ export default function TravelPostPage() {
       </div>
     </div>
 
-
-
+    {currentUser?.nickname === post.authorNickname && (
+      <div className="flex justify-end">
+        <button
+          onClick={() => router.push(`/posts/edit/${post.id}`)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          수정
+        </button>
+      </div>
+    )}
 
       <CommentSection journalId={post.id} />
     </div>

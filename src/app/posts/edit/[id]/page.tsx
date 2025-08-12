@@ -309,6 +309,8 @@ export default function EditPostPage() {
 
       if (!res.ok) throw new Error('수정 실패');
       alert('수정이 완료되었습니다!');
+      router.push('/posts');                      // 목록으로
+     // router.push(`/posts/${journalData.id}`);      // 상세로
     } catch (err) {
       console.error('저장 중 오류 발생:', err);
       alert('저장에 실패했습니다.');

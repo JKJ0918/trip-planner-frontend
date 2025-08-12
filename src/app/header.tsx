@@ -33,6 +33,9 @@ export default function Header() {
         {/* 메뉴 */}
         <ul className="hidden md:flex space-x-8 text-gray-700 font-medium text-sm">
           <li>
+            <Link href="/main" className="hover:text-indigo-600 transition">계획 하기</Link>
+          </li>
+          <li>
             <Link href="/posts" className="hover:text-indigo-600 transition">여행 일정</Link>
           </li>
           <li>

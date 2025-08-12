@@ -80,7 +80,7 @@ export default function TravelJournal() {
               ✕
             </button>
           </div>
-
+ 
           <input
             type="text"
             placeholder="제목을 입력하세요"
