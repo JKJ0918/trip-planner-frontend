@@ -25,7 +25,7 @@ export default function Header() {
               className="h-12 w-auto"
             />
             <span className="text-xl font-bold text-gray-500 hidden sm:inline-block">
-              TripPlanner
+              {/* 로고 옆 문장 넣을 수 있는 곳 */}
             </span>
           </div>
         </Link>

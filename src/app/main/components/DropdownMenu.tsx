@@ -82,7 +82,8 @@ function DropdownMenu() {
       }
 
       // 3. 홈으로 이동
-      router.push("/");
+      // router.push("/");
+      window.location.replace("/"); // 새로고침
     } catch (error) {
       console.error("로그아웃 중 에러 발생:", error);
     }

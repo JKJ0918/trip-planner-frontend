@@ -52,36 +52,68 @@ export default function Home() {
           </button>
         </Link>
       </section>
-      
       <div className="text-center my-20">
         <span className="text-4xl md:text-4xl font-bold">간편하고 편리하게</span>
         <p className="text-lg md:text-xl mb-8 drop-shadow-md">
           휴가의 설렘을 앞당겨 줄 기능을 만나보세요.
         </p>
       </div>
+
+{/* 이모지 칩 행 */}
+<ul className="mt-6 flex flex-wrap justify-center gap-2">
+  {[
+    { e: "", t: "인스타 스팟" },
+    { e: "", t: "현지 맛집" },
+    { e: "", t: "노을 명소" },
+    { e: "", t: "도보 코스" },
+    { e: "", t: "가성비 숙소" },
+    { e: "", t: "맞춤 동선" },
+  ].map((b, i) => (
+    <li
+      key={i}
+      className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm
+                 shadow-sm hover:shadow transition will-change-transform"
+      title={b.t}
+    >
+      <span className="mr-1">{b.e}</span>
+      {b.t}
+    </li>
+  ))}
+</ul>
+
+
+
       {/* Features */}
-      <section className="grid md:grid-cols-3 gap-6 py-15">
+      <section className="grid md:grid-cols-4 gap-6 py-15">
+        
         {[
+          {
+            title: "한 번에 핀 찍기",
+            description: "지도에서 클릭 한 번으로 맛집과 명소를 바로 저장하세요.",
+            image: "/images/bryan-trogdon-MWXKz_o1Ls0-unsplash.jpg",
+            textColor: "black",
+            bgColor: "bg-white-100",
+          },
           {
             title: "맛집 & 명소 등록",
             description: "지도에 핀을 찍어 나만의 여행 장소를 저장하세요.",
             image: "/images/feature-map.jpg",
             textColor: "black",
-            bgColor: "bg-gray-100",
+            bgColor: "bg-white-100",
           },
           {
             title: "여행 공유하기",
             description: "친구와 일정을 공유하고 피드백도 받아보세요.",
             image: "/images/feature-share.jpg",
             textColor: "black",
-            bgColor: "bg-gray-100",
+            bgColor: "bg-white-100",
           },
           {
             title: "여행일지 작성",
             description: "감정을 기록하고 추억을 사진과 함께 남기세요.",
             image: "/images/feature-journal.jpg",
             textColor: "black",
-            bgColor: "bg-gray-100",
+            bgColor: "bg-white-100",
           },
         ].map(({ title, description, image, textColor, bgColor }, i) => (
           <div
@@ -98,41 +130,61 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Testimonials (슬라이드 스타일) */}
-      <section className="py-20 bg-gray-100 rounded-xl px-6 text-center relative">
-        <h2 className="text-3xl font-bold mb-12">실제 사용자 후기</h2>
+      <div className="text-center my-20">
+        <span className="text-4xl md:text-4xl font-bold">실제 사용자들의 후기</span>
+        <p className="text-lg md:text-xl mb-8 drop-shadow-md">
+          지금바로 시작해 보세요.
+        </p>
+      </div>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
-        >
-          {testimonials.map((t, i) => (
-            <div
-              key={i}
-              className="min-w-[280px] md:min-w-[350px] bg-white p-6 rounded-lg shadow flex-shrink-0 text-left"
-            >
-              <p className="text-gray-800 italic mb-4">“{t.quote}”</p>
+{/* Testimonials (심플 스타일) */}
+<section className="relative overflow-hidden rounded-3xl">
+  {/* 배경: 가벼운 그라디언트 */}
+  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 via-fuchsia-100 to-indigo-100" />
+  {/* 내용 래퍼 */}
+  <div className="relative py-16 px-6 md:px-10 text-black">
+    <div className="max-w-6xl mx-auto">
+
+      {/* 슬라이더 */}
+      <div
+        ref={scrollRef}
+        className="mt-10 flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
+      >
+        {testimonials.map((t, i) => (
+          <div
+            key={i}
+            className="min-w-[280px] md:min-w-[360px] bg-white/95 text-gray-900
+                       p-6 rounded-xl shadow-sm border border-white/20"
+          >
+            {/* 좌측 포인트 라인 + 내용 */}
+            <div className="border-l-2 border-emerald-500 pl-4">
+              <p className="text-gray-800 italic leading-relaxed mb-4">“{t.quote}”</p>
               <p className="text-sm text-gray-500 font-medium">- {t.name}</p>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
-        {/* 좌우 버튼 */}
-        <div className="absolute right-6 bottom-6 flex gap-2">
-          <button
-            onClick={() => scroll("left")}
-            className="p-2 rounded-full bg-white shadow hover:bg-gray-200"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            onClick={() => scroll("right")}
-            className="p-2 rounded-full bg-white shadow hover:bg-gray-200"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      </section>
+      {/* 좌우 버튼 (기존 위치/동작 유지, 색만 살짝) */}
+      <div className="absolute right-6 bottom-6 flex gap-2">
+        <button
+          onClick={() => scroll("left")}
+          className="p-2 rounded-full bg-white/90 text-teal-900 shadow hover:bg-white"
+          aria-label="이전"
+        >
+          <ChevronLeft />
+        </button>
+        <button
+          onClick={() => scroll("right")}
+          className="p-2 rounded-full bg-white/90 text-teal-900 shadow hover:bg-white"
+          aria-label="다음"
+        >
+          <ChevronRight />
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
     </main>
   );
 }
