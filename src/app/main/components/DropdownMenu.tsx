@@ -101,7 +101,7 @@ function DropdownMenu() {
     }
     // 로그인
     return [
-      { label: "마이페이지", action: () => router.push("/mypage") },
+      { label: "마이페이지", action: () => router.push("/myPage") },
       { label: "로그아웃", action: handleLogout },
     ];
   })();

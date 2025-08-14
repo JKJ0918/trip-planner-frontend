@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import ProfilePanel from './components/ProfilePanel';
 
 const sections = [
   '프로필',
@@ -18,7 +19,7 @@ export default function MyPage() {
   const renderSection = () => {
     switch (activeSection) {
       case '프로필':
-        return <div>프로필 편집 영역입니다.</div>;
+        return <ProfilePanel />;
       case '내가 쓴 여행일지':
         return <div>작성한 여행일지 목록</div>;
       case '저장한 여행 플랜':

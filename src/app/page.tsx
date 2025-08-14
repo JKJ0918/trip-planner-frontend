@@ -71,7 +71,7 @@ export default function Home() {
   ].map((b, i) => (
     <li
       key={i}
-      className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm
+      className="px-5 py-1.5 bg-gray-100 text-slate-700 text-xl font-bold
                  shadow-sm hover:shadow transition will-change-transform"
       title={b.t}
     >
@@ -118,7 +118,7 @@ export default function Home() {
         ].map(({ title, description, image, textColor, bgColor }, i) => (
           <div
             key={i}
-            className={`rounded-3xl overflow-hidden shadow-lg ${bgColor} text-${textColor}
+            className={`rounded-xl overflow-hidden shadow-lg ${bgColor} text-${textColor}
                         transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl`}
           >
             <img src={image} alt={title} className="w-full h-80 object-cover" />
