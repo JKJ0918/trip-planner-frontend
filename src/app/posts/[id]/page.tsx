@@ -46,7 +46,12 @@ type TravelPostDetail = {
     date: string;
   }[];
 
-  // 추가된 필드
+  // 추가된 필드 2
+  likeCount: number;     // 좋아요 수
+  likedByMe: boolean;    // 내가 좋아요 눌렀는지
+
+
+  // 추가된 필드 1
   useFlight?: boolean;
   flightDepartureAirline?: string;
   flightDepartureName?: string;
@@ -74,23 +79,80 @@ export default function TravelPostPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<{ id: number; nickname: string } | null>(null); // 닉네임 체크
 
+  const [liking, setLiking] = useState(false); // 중복 클릭 방지_좋아요
+  const API_BASE = "http://localhost:8080/api/journals";
+
+
+  const toggleLike = async () => {
+    if (!post) return;
+
+    // 비로그인 처리: currentUser 없으면 안내하거나 로그인 페이지로 이동
+    if (!currentUser) {
+      alert("로그인 후 이용 가능합니다.");
+      // router.push("/login"); // 필요시 활성화
+      return;
+    }
+
+    // 낙관적 업데이트 준비
+    const prev = post;
+    const optimistic: TravelPostDetail = {
+      ...post,
+      likedByMe: !post.likedByMe,
+      likeCount: post.likedByMe ? Math.max(0, post.likeCount - 1) : post.likeCount + 1,
+    };
+
+    try {
+      setLiking(true);
+      setPost(optimistic);
+
+      const url = `${API_BASE}/${post.id}/like`;
+      const res = await fetch(url, {
+        method: post.likedByMe ? "DELETE" : "PUT",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        // 실패 시 롤백
+        setPost(prev);
+        const text = await res.text();
+        throw new Error(text || "좋아요 처리 실패");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("좋아요 처리 중 오류가 발생했습니다.");
+    } finally {
+      setLiking(false);
+    }
+  };
+
+
   const goEdit = () => { // 수정 페이지 이동
     if (!post) return;
     router.push(`/posts/edit/${post.id}`);
   };
 
-
   useEffect(() => {
-    if (!id) return;
-    fetch(`http://localhost:8080/api/journals/public/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setPost(data);
-        if (data.pins.length > 0) {
-          setSelectedPin(data.pins[0]);
-        }
-      });
-  }, [id]);
+  if (!id) return;
+
+  fetch(`http://localhost:8080/api/journals/public/${id}`, {
+    credentials: "include", // 쿠키 같이 보냄
+  })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("게시글 불러오기 실패");
+      }
+      return res.json();
+    })
+    .then(data => {
+      setPost(data);
+      if (data.pins.length > 0) {
+        setSelectedPin(data.pins[0]);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+    });
+}, [id]);
 
 useEffect(() => {
   const loadMe = async () => {
@@ -220,6 +282,27 @@ useEffect(() => {
         </ul>
       </div>
     </div>
+
+    {/* 좋아요 */}
+    <div className="flex items-center justify-between border rounded-lg px-4 py-3">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggleLike}
+          disabled={liking}
+          className={`text-2xl transition-transform ${
+            liking ? "scale-95 opacity-70" : "hover:scale-110"
+          }`}
+          title={post.likedByMe ? "좋아요 취소" : "좋아요"}
+          aria-pressed={post.likedByMe}
+        >
+          {post.likedByMe ? "❤️" : "🤍"}
+        </button>
+        <span className="text-sm text-gray-700">
+          {post.likeCount.toLocaleString()}명이 좋아합니다
+        </span>
+      </div>
+    </div>
+
 
     {currentUser?.nickname === post.authorNickname && (
       <div className="flex justify-end">

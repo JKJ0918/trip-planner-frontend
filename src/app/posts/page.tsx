@@ -58,6 +58,7 @@ export default function PostListPage() {
         <p>검색 결과가 없습니다.</p>
       ) : (
         posts.map((post) => <PostCard key={post.id} post={post} />)
+        
       )}
 
       {/* 페이지네이션 */}

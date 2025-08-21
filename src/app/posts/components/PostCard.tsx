@@ -28,7 +28,7 @@ export default function PostCard({ post }: Props) {
             <p className="text-sm text-gray-600">{post.locationSummary}</p>
           </div>
           <div className="text-xs text-gray-500">
-            by {post.authorNickname} · {new Date(post.createdAt).toLocaleDateString()}
+            by {post.authorNickname} · {new Date(post.createdAt).toLocaleDateString()} · 좋아요 {post.likeCount}
           </div>
         </div>
       </div>

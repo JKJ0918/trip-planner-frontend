@@ -60,6 +60,7 @@ export type TravelPostSummary = {
   thumbnailUrl: string;
   authorNickname: string;
   createdAt: string;
+  likeCount: number; // 게시글 목록 좋아요 추가
 };
 
 type Pin = {
