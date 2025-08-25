@@ -61,6 +61,7 @@ export type TravelPostSummary = {
   authorNickname: string;
   createdAt: string;
   likeCount: number; // 게시글 목록 좋아요 추가
+  views: number; // 조회수 
 };
 
 type Pin = {

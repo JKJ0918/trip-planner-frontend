@@ -10,6 +10,7 @@ import PinList from '../components/PinList';
 import PostItinerary from '../components/PostItinerary';
 import CommentSection from '../components/CommentSection';
 import PinSidePanel from '../components/PinSidePanel';
+import RegisterView from '@/app/login/components/RegisterView';
 
 
 
@@ -49,7 +50,8 @@ type TravelPostDetail = {
   // 추가된 필드 2
   likeCount: number;     // 좋아요 수
   likedByMe: boolean;    // 내가 좋아요 눌렀는지
-
+  // 추가된 필드 3
+  views: number; // 조회수 
 
   // 추가된 필드 1
   useFlight?: boolean;
@@ -241,50 +243,57 @@ useEffect(() => {
         endDate={post.dateRange.endDate}
       />
 
-      <h3 className="text-xl font-semibold mb-3 pb-2 py-4">참고 사항</h3>
+    <h3 className="text-xl font-semibold mb-3 pb-2 py-4">참고 사항</h3>
 
-      <div className="px-6 py-10 mt-10 bg-gray-0 rounded-xl border border-gray-200 space-y-8">
-      {/* 섹션 제목 */}
-      <h2 className="text-xl font-bold text-gray-800 border-b pb-2">여행 전 꼭 확인하세요</h2>
+    <div className="px-6 py-10 mt-10 bg-gray-0 rounded-xl border border-gray-200 space-y-4">
+      {/* 섹션 1 */}
+      <details className="group rounded-lg border border-gray-200 p-4 open:bg-gray-50">
+        <summary className="flex cursor-pointer items-center justify-between text-xl font-bold text-gray-800">
+          여행 전 꼭 확인하세요
+          <span className="ml-3 text-gray-500 transition-transform group-open:rotate-180">▾</span>
+        </summary>
 
-      {/* 여권/비자 안내 */}
-      <div>
-        <h3 className="text-lg font-semibold text-blue-600 mb-2">● 여권/비자 안내</h3>
-        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-          <li>◈ 여권은 반드시 복수여권으로 6개월 이상의 유효기간이 남아 있어야 하며 90일간 무비자로 체류 가능합니다.(일부국가 제외)</li>
-          <li>◈ 외국인의 경우 대사관에 반드시 확인바랍니다.</li>
-          <li>◈ 만 18세 이하 미성년자가 유럽 여행 시에는 부모 동반 여부에 따라 필요한 서류가 다르니 사전에 반드시 준비하세요.</li>
-          <li className="text-red-600 mt-2">※ 여권/비자의 경우 경미한 훼손이라도 출입국 시 불이익을 받을 수 있으니 미리 확인해주세요.</li>
-        </ul>
-      </div>
+        {/* 여권/비자 안내 */}
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold text-blue-600 mb-2">● 여권/비자 안내</h3>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>◈ 여권은 반드시 복수여권으로 6개월 이상의 유효기간이 남아 있어야 하며 90일간 무비자로 체류 가능합니다.(일부국가 제외)</li>
+            <li>◈ 외국인의 경우 대사관에 반드시 확인바랍니다.</li>
+            <li>◈ 만 18세 이하 미성년자가 유럽 여행 시에는 부모 동반 여부에 따라 필요한 서류가 다르니 사전에 반드시 준비하세요.</li>
+            <li className="text-red-600 mt-2">※ 여권/비자의 경우 경미한 훼손이라도 출입국 시 불이익을 받을 수 있으니 미리 확인해주세요.</li>
+          </ul>
+        </div>
 
-      {/* 여행 시 주의사항 */}
-      <div>
-        <h3 className="text-lg font-semibold text-orange-600 mb-2">● 여행 시 주의사항</h3>
-        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-          <li>공항에서는 액체, 젤류, 에어로졸은 100ml 이하만 기내 반입이 가능합니다.</li>
-          <li>EU 국가에서 환승 시 면세품 포장 개봉 금지 (압수될 수 있음)</li>
-          <li>축산물, 식물류 반입 시 검역 필수 – 위반 시 최대 1,000만 원 과태료</li>
-          <li>가축 전염병 발생국 방문자는 검역본부에 신고 후 소독 필수</li>
-        </ul>
-      </div>
+        {/* 여행 시 주의사항 */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-orange-600 mb-2">● 여행 시 주의사항</h3>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>공항에서는 액체, 젤류, 에어로졸은 100ml 이하만 기내 반입이 가능합니다.</li>
+            <li>EU 국가에서 환승 시 면세품 포장 개봉 금지 (압수될 수 있음)</li>
+            <li>축산물, 식물류 반입 시 검역 필수 – 위반 시 최대 1,000만 원 과태료</li>
+            <li>가축 전염병 발생국 방문자는 검역본부에 신고 후 소독 필수</li>
+          </ul>
+        </div>
 
-      {/* 비상 연락처 */}
-      <div>
-        <h3 className="text-lg font-semibold text-red-600 mb-2">● 비상 연락처</h3>
-        <p className="text-sm text-gray-700 mb-2">
-          상품 관련 문의는 예약처 또는 고객센터(1544-5252)로, 아래는 공항 관련 비상 연락처입니다.
-        </p>
-        <ul className="text-sm text-gray-700 space-y-1">
-          <li>인천공항 안내: 032-743-3700 (05:00~23:00)</li>
-          <li>김해공항 안내: 051-832-0701</li>
-          <li>대구: 053-214-0027 / 청주: 043-902-0080 / 무안: 061-941-9810</li>
-        </ul>
-      </div>
+        {/* 비상 연락처 */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-red-600 mb-2">● 비상 연락처</h3>
+          <p className="text-sm text-gray-700 mb-2">
+            상품 관련 문의는 예약처 또는 고객센터(1544-5252)로, 아래는 공항 관련 비상 연락처입니다.
+          </p>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li>인천공항 안내: 032-743-3700 (05:00~23:00)</li>
+            <li>김해공항 안내: 051-832-0701</li>
+            <li>대구: 053-214-0027 / 청주: 043-902-0080 / 무안: 061-941-9810</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
-    {/* 좋아요 */}
-    <div className="flex items-center justify-between border rounded-lg px-4 py-3">
+
+    {/* 좋아요 + 조회수 */}
+    <div className="flex items-center justify-between px-4 py-3 ">
+      {/* 좋아요 */}
       <div className="flex items-center gap-3">
         <button
           onClick={toggleLike}
@@ -295,13 +304,49 @@ useEffect(() => {
           title={post.likedByMe ? "좋아요 취소" : "좋아요"}
           aria-pressed={post.likedByMe}
         >
-          {post.likedByMe ? "❤️" : "🤍"}
+          {post.likedByMe ? (
+            // 좋아요 했을 때 (빨간색)
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="35"
+              height="35"
+              viewBox="0 0 24 24"
+              fill="#EA4335"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-heart"
+            >
+              <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/>
+            </svg>
+          ) : (
+            // 좋아요 안했을 때 (빈 하트)
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="35"
+              height="35"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-heart"
+            >
+              <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/>
+            </svg>
+          )}
         </button>
         <span className="text-sm text-gray-700">
           {post.likeCount.toLocaleString()}명이 좋아합니다
         </span>
       </div>
+
+      {/* 조회수 */}
+      <span className="text-sm text-gray-700">조회수 {post.views} 회</span>
     </div>
+
 
 
     {currentUser?.nickname === post.authorNickname && (
@@ -314,8 +359,11 @@ useEffect(() => {
         </button>
       </div>
     )}
-
-      <CommentSection journalId={post.id} />
+      <div className="px-6 py-10 mt-10 bg-gray-0 rounded-xl border border-gray-200 space-y-8">
+          <CommentSection journalId={post.id} />
+      </div>
+      
+      <RegisterView postId={post.id} />{/* 조회수 */}
     </div>
   );
 }
