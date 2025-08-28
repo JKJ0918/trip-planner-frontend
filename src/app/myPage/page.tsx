@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import ProfilePanel from './components/ProfilePanel';
 import MyJourney from './components/myJournals';
+import NotificationBell from './components/NotificationBell';
 
 const sections = [
   '프로필',
@@ -23,7 +24,7 @@ export default function MyPage() {
       case '내가 쓴 여행일지':
         return <MyJourney />;
       case '알림':
-        return <div>알림 목록</div>;
+        return <NotificationBell />;
       case '좋아요한 게시물':
         return <div>좋아요한 게시물 목록</div>;
       case '설정':

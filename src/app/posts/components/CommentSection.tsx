@@ -4,16 +4,16 @@ import { useRef, useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 export type Comment = {
-  id: number;
-  content: string;
-  writerName: string;
-  createdAt: string;
-  parentId?: number;
-  edited: boolean;
-  likeCount: number;
-  likedByMe: boolean;
-  author: boolean;
-  replyCount: number;
+  id: number;              // 댓글 고유 ID
+  content: string;         // 댓글 내용 (텍스트)
+  writerName: string;      // 작성자 이름
+  createdAt: string;       // 작성 시각 (ISO 문자열)
+  parentId?: number;       // 부모 댓글 ID (대댓글일 경우에만 존재)
+  edited: boolean;         // 수정 여부 (true면 "수정됨" 표시)
+  likeCount: number;       // 좋아요 수
+  likedByMe: boolean;      // 내가 좋아요 눌렀는지 여부
+  author: boolean;         // 이 댓글 작성자가 현재 로그인한 나인지 여부
+  replyCount: number;      // 이 댓글에 달린 답글(대댓글) 개수
 };
 
 type CommentPage = {
@@ -34,37 +34,34 @@ export default function CommentSection({ journalId }: { journalId: number }) {
   const [repliesVisibleMap, setRepliesVisibleMap] = useState<{ [parentId: number]: boolean }>({});
   const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteQuery<CommentPage>({
-    queryKey: ['comments', journalId, sortOrder],
+  // 목록 불러오기
+  const {data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, } = useInfiniteQuery<CommentPage>({
+    queryKey: ['comments', journalId, sortOrder], // 어떤 종류의 데이터인지, 어떤 게시글의 댓글인지, 정렬 방식 캐시키(라벨로씀)
     initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0 }) => { // queryKey에 해당하는 데이터를 가져오는 방법
       const res = await fetch(
         `http://localhost:8080/api/comments/${journalId}?page=${pageParam}&size=10&sort=${sortOrder}`,
         { credentials: 'include' }
       );
       return res.json();
     },
-    getNextPageParam: (lastPage, allPages) => {
+    getNextPageParam: (lastPage, allPages) => { // queryFn 의 pageParam을 갱신시켜줌
       return lastPage.last ? undefined : allPages.length;
     },
   });
 
+  // 무한 스크롤
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1 }
+    const observer = new IntersectionObserver((entries) => { // IntersectionObserver는 콜백 함수를 실행할 때, 관찰 중인 요소들의 상태를 배열(entries) 형태로 전달
+      // new IntersectionObserver(callback, options) 형태로 만듬, 첫번째가 callback이니, entries는 콜백 함수
+      // entries 안에 "지금 감시하고 있는 요소의 교차 상태"들이 들어 있음. → 보통 한 개만 감시하니까 entries[0]을 씀.
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) { // 바닥 감시용 div가 화면에 보일 때 && 다음 페이지가 존재할 떄 && 지금 불러오는 중이 아닐 때
+            fetchNextPage(); // 알아서 React Query 내부 로직으로 들어가, getNextPageParam으로 다음 페이지 번호를 계산하고, queryFn을 다시 실행해서 서버에서 데이터를 불러옴.
+          }
+        },
+      { threshold: 1 } // div 가 얼만큼 보여야 하는지 결정 , div 가 100% 화면 안에 들어와야 entries[0].isIntersecting = true
     );
 
     if (observerRef.current) {
@@ -74,7 +71,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     return () => {
       if (observerRef.current) observer.disconnect();
     };
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage]); // 의존성 배열, 이 값들이 변하면 이펙트를 다시 세팅
 
   const fetchReplies = async (parentId: number) => {
     try {
@@ -164,8 +161,9 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     }
   };
 
+  {/*댓글 가져오기 */}
   const renderComments = (comments: Comment[], parentId: number | null = null) => {
-    const list = comments.filter((c) => (c.parentId ?? null) === parentId);
+    const list = comments.filter((c) => (c.parentId ?? null) === parentId); // ?? : 병합 연산자, A가 null 또는 undefine이면, null을 반환
 
     return list.map((comment) => (
       <div key={comment.id} className={`p-3 mb-2 rounded ${parentId ? 'ml-6 bg-gray-50' : ''}`}>
@@ -291,6 +289,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
   return (
     <div className="mt-8">
+      {/*최신순/인기순 버튼*/}
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-lg font-semibold">댓글</h3>
         <select
@@ -303,6 +302,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         </select>
       </div>
 
+      {/*댓글 입력 란 */}
       {data?.pages.map((page) => renderComments(page.content))}
       <div ref={observerRef} className="h-6" />
       {isFetchingNextPage && <p>불러오는 중...</p>}
