@@ -23,6 +23,7 @@ export default function NotificationBell() {
                 .then(r => r.json());
             // page.content 형태라고 가정
             setItems(page.content ?? []);
+            console.log("댓글목록 확인"+items);
         })();
     }, []);
 
@@ -84,7 +85,7 @@ export default function NotificationBell() {
                 >
                     <div className="text-sm">{it.message}</div>
                     <div className="text-xs text-gray-500">
-                    {new Date(it.createdAt).toLocaleString()}
+                        {new Date(it.createdAt).toLocaleString()}
                     </div>
                 </button>
                 </li>

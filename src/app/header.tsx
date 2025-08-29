@@ -14,7 +14,7 @@ export default function Header() {
 
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-white/70 shadow-md sticky top-0 z-50 backdrop-blur-md">
       <nav className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
         {/* 로고 */}
         <Link href="/">
@@ -22,7 +22,7 @@ export default function Header() {
             <img
               src="/images/logo.png"
               alt="Travel Planner Logo"
-              className="h-12 w-auto"
+              className="h-10 w-auto"
             />
             <span className="text-xl font-bold text-gray-500 hidden sm:inline-block">
               {/* 로고 옆 문장 넣을 수 있는 곳 */}
