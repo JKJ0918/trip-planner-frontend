@@ -96,7 +96,7 @@ function DropdownMenu() {
       // 비로그인
       return [
         { label: "로그인", action: () => router.push("/login") },
-        { label: "회원가입", action: () => router.push("/signup") },
+        { label: "회원가입", action: () => router.push("/join") },
       ];
     }
     // 로그인

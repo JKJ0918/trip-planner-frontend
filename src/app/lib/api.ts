@@ -1,8 +1,19 @@
+"use client";
+
+export async function apiGet(path: string, signal?: AbortSignal) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}${path}`, {
+    method: "GET",
+    credentials: "include", // JWT 쿠키 포함
+    signal,
+  });
+  return res; // 호출한 쪽에서 status 보고 처리
+}
+
 export async function apiPost(path: string, body?: unknown, signal?: AbortSignal) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // JWT 쿠키 포함
+    credentials: "include", 
     body: body ? JSON.stringify(body) : undefined,
     signal,
   });
@@ -11,5 +22,14 @@ export async function apiPost(path: string, body?: unknown, signal?: AbortSignal
     // throw new Error(`POST ${path} failed: ${res.status}`);
     return res; // 실패해도 조용히 리턴
   }
-  return res;
+  return res; 
+}
+
+// (옵션) JSON 파싱 헬퍼
+export async function toJsonSafe<T>(res: Response): Promise<T | null> {
+  try {
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
 }

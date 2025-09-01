@@ -5,13 +5,9 @@ import Link from "next/link";
 import DropdownMenu from "./main/components/DropdownMenu";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
+import SessionTimer from "./main/components/SessionTimer";
 
 export default function Header() {
-  // 특정 페이지 header 제외
-  const pathname = usePathname();
-  const hideHeaderPages = ['/maps'];
-  if (hideHeaderPages.includes(pathname)) return null;
-
 
   return (
     <header className="bg-white/70 shadow-md sticky top-0 z-50 backdrop-blur-md">
@@ -50,6 +46,10 @@ export default function Header() {
         </ul>
 
         {/* 프로필 드롭다운 */}
+        <div className="hidden md:block">
+          <SessionTimer />
+        </div>
+
         <div className="hidden md:block">
           <DropdownMenu />
         </div>

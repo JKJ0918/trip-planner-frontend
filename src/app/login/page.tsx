@@ -66,7 +66,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium shadow-md transition"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium shadow-md transition"
               onClick={handleLogin}
             >
               로그인 하기

@@ -114,7 +114,7 @@ export default function Home() {
                 {/* big hero image */}
                 <div className="rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(2,6,23,0.15)] border border-slate-200">
                   <img
-                    src="/images/feature-map.jpg"
+                    src="/images/landing2.jpg"
                     alt="지도에서 핀을 찍고 여행지를 관리하는 화면 예시"
                     className="w-full h-[440px] object-cover"
                     loading="lazy"
@@ -134,15 +134,6 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-
-                  <div className="absolute -top-6 -right-6 rounded-2xl overflow-hidden border border-slate-200 shadow">
-                    <img
-                      src="/images/feature-journal.jpg"
-                      alt="여행일지 예시"
-                      className="w-44 h-28 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -151,64 +142,102 @@ export default function Home() {
       </section>
 
 
-      {/* Section 3: TESTIMONIALS (Fullscreen stripe) */}
-      <section id="testimonials" className="relative min-h-screen flex items-center py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800" />
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6">
-          <div className="text-center text-white mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold">실제 사용자들의 후기</h2>
-            <p className="text-lg md:text-xl text-white/80 mt-3">지금 바로 시작해 보세요.</p>
-          </div>
+      {/* Section 3: STORIES (Image Left · Copy Right) */}
+      <section id="stories" className="py-24 bg-white">
+        <div className="w-full max-w-7xl mx-auto px-6 space-y-20">
 
-          <div className="relative">
-            <div
-              ref={scrollRef}
-              className="mt-6 flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-1"
-              aria-label="후기 슬라이더"
+          {/* Section 4 header (center) */}
+<div className="text-center mb-14">
+  <span className="inline-flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
+    추천 여행지
+  </span>
+  <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+    이번 달 인기 여행지
+  </h2>
+  <p className="mt-4 text-lg text-slate-600">
+    사진과 이야기로 미리 떠나보기 — TripPlanner가 엄선한 베스트 셀렉션입니다.
+  </p>
+  <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
+</div>
+
+
+          {[
+            {
+              badge: "터키-튀르키예",
+              title: "카파도키아",
+              desc:
+                "카파도키아는 튀르키예 중앙아나톨리아에 위치한 지역으로, 화산 활동으로 생성된 기괴한 암석과 동굴, 그리고 수많은 석굴 사원으로 유명하며, 초기 기독교인들이 박해를 피해 만든 지하 도시와 초기 기독교 학습의 중심지로도 알려져 있습니다. 특히 '요정의 굴뚝'이라 불리는 독특한 지형과 열기구 투어가 유명하여 국제적인 관광지로, 도시 전체가 유네스코 문화유산으로 지정될 만큼 아름다운 자연과 역사를 지닌 곳입니다. ",
+              author: { name: "TripPlanner.com", role: "액티비티" },
+              image: "/images/landing1.jpg",
+            },
+            {
+              badge: "태국-방콕",
+              title: "왓 아룬 사원",
+              desc:
+                "태국은 동남아시아에 위치한 왕국으로, 수도는 방콕이고 불교 문화가 강하며, 타이족이 주를 이룹니다. 맛과 향이 조화로운 독특한 태국 음식을 맛볼 수 있으며, 아름다운 해변과 사원 등 다양한 볼거리를 갖추고 있습니다. 외세의 지배를 받은 적이 없는 입헌군주제 국가이며, 머리를 만지거나 발로 물건을 가리키는 등의 행동은 무례하게 여겨지므로 주의해야 합니다.",
+              author: { name: "TripPlanner.com", role: "크루즈" },
+              image: "/images/landing3.jpg",
+            },
+          ].map((item, i) => (
+            <article
+              key={i}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center"
             >
-              {testimonials.map((t, i) => (
-                <div
-                  key={i}
-                  className="min-w-[280px] md:min-w-[360px] bg-white/95 text-gray-900 p-6 rounded-xl shadow-sm border border-white/20"
-                >
-                  <div className="border-l-2 border-emerald-500 pl-4">
-                    <p className="text-gray-800 italic leading-relaxed mb-4">“{t.quote}”</p>
-                    <p className="text-sm text-gray-500 font-medium">- {t.name}</p>
+              {/* Left: Image */}
+              <div className="lg:col-span-5">
+                <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-[0_12px_40px_rgba(2,6,23,0.10)]">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-[360px] md:h-[420px] object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              {/* Right: Copy */}
+              <div className="lg:col-span-7">
+                <p className="text-sm font-semibold text-slate-500">{item.badge}</p>
+                <h3 className="mt-2 text-3xl md:text-4xl font-bold leading-tight tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="mt-4 text-slate-600 leading-relaxed">
+                  {item.desc}
+                </p>
+
+                {/* Author / Meta */}
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white grid place-items-center font-semibold">
+                    {item.author.name.split(" ").map(s => s[0]).join("").slice(0,2).toUpperCase()}
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-medium text-slate-900">{item.author.name}</p>
+                    <p className="text-slate-500">{item.author.role}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
-            {/* Controls */}
-            <div className="absolute right-2 -bottom-14 md:right-6 md:-bottom-12 flex gap-2">
-              <button
-                onClick={() => scroll("left")}
-                className="p-2 rounded-full bg-white/90 text-teal-900 shadow hover:bg-white"
-                aria-label="이전"
-              >
-                <ChevronLeft />
-              </button>
-              <button
-                onClick={() => scroll("right")}
-                className="p-2 rounded-full bg-white/90 text-teal-900 shadow hover:bg-white"
-                aria-label="다음"
-              >
-                <ChevronRight />
-              </button>
-            </div>
-          </div>
-
-          {/* Back to top */}
-          <div className="text-center mt-16">
-            <a
-              href="#hero"
-              className="inline-block text-white/90 hover:text-white underline-offset-4 hover:underline"
-            >
-              맨 위로 돌아가기 ↑
-            </a>
+      {/* Section 4: Powered by */}
+      <section className="py-16 bg-gray-50">
+        <div className="w-full max-w-6xl mx-auto px-6">
+          <h2 className="text-center text-xl font-semibold text-gray-700 mb-10">
+            Powered by
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 items-center justify-items-center opacity-80">
+            <img src="/images/logos/nextjs.svg" alt="Next.js" className="h-10" />
+            <img src="/images/logos/springboot.svg" alt="Spring Boot" className="h-10" />
+            <img src="/images/logos/tailwindcss.svg" alt="Tailwind CSS" className="h-10" />
+            <img src="/images/logos/typescript.svg" alt="TypeScript" className="h-10" />
+            <img src="/images/logos/googlemaps.svg" alt="Google Maps API" className="h-10" />
           </div>
         </div>
       </section>
+
+
     </main>
   );
 }
