@@ -3,7 +3,7 @@
 
 import { tr } from "date-fns/locale";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { apiGet, toJsonSafe } from "../lib/api";
+import { apiGet, apiPost, toJsonSafe } from "../lib/api";
 
 type SessionInfo = {
   nowEpoch: number;         // 서버현재(초)
@@ -17,6 +17,7 @@ export default function useSessionTimer() {
     const [loading, setLoading] = useState<boolean>(true);
     const timerRef = useRef<number | null>(null);
 
+    // 세션 시간 표현
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -44,7 +45,23 @@ export default function useSessionTimer() {
         }
     }, []);
 
-    // 세션 연장 구현 예정
+    // 세션 연장 구현
+    const refresh = useCallback(async () => {
+        try {
+            const res = await apiPost("/reissue");
+            if(!res.ok) {
+                // 연장 실패시
+                const json = await toJsonSafe<{ message?: string }>(res);
+                setError(json?.message ?? "세션 연장 실패");
+                return;
+            }
+            // 성공 후 세 쿠키로 다시 세션 조회해서 remainingSeconds 재설정
+            await load();
+            setError(null);
+        } catch {
+                setError("세션 연장 실패");
+        } 
+    }, [load]);
 
 
     // 최초 로드
@@ -83,9 +100,9 @@ export default function useSessionTimer() {
         loading,
         error,
         remaining,                        // 남은 초 (null 이면 비로그인/오류)
-        isExpiringSoon: (remaining ?? Infinity) <= 60,
+        isExpiringSoon: (remaining ?? Infinity) <= 1800,
         reload: load,
-        // refresh,                          // 수동 연장 (POST /refresh) (구현 예정)
+        refresh,                          // 수동 연장 (POST /refresh) (구현 예정)
 
     };
 }

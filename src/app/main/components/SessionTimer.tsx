@@ -13,7 +13,7 @@ function fmt(sec: number | null) {
 }
 
 export default function SessionTimer() {
-    const { loading, error, remaining, isExpiringSoon, reload } = useSessionTimer(); // refresh(구현 예정)
+    const { loading, error, remaining, isExpiringSoon, reload, refresh } = useSessionTimer(); // refresh(구현 예정)
 
     if(loading){
         return <span className="text-gray-500">check Session...</span>
@@ -40,10 +40,15 @@ export default function SessionTimer() {
     return(
         <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full border
-            ${isExpiringSoon ? "bg-yellow-50 border-yellow-300 text-yellow-800" : "bg-gray-50 border-gray-200 text-gray-800"}`}
-            title={isExpiringSoon ? "세션 만료 임박" : "세션 정상"}
+            ${isExpiringSoon ? "bg-red-50 border-gray-300 text-yellow-800" : "bg-gray-50 border-gray-200 text-gray-800"}`}
+            title={isExpiringSoon ? "세션 연장" : "세션 연장"}
         >
             <span className="font-mono">{fmt(remaining)}</span>
+            {isExpiringSoon && (
+            <button onClick={refresh} className="text-sm cursor-pointer">
+            연장
+            </button>
+            )}
 
         </div>
     );

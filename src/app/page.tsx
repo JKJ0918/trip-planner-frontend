@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useRef } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle, MapPin, Camera, Share2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { CheckCircle, MapPin, Camera, Share2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const testimonials = [
   { name: "지민 (서울)", quote: "이 앱 덕분에 처음으로 혼자 여행을 완벽하게 준비할 수 있었어요!" },
@@ -12,6 +12,43 @@ const testimonials = [
 ];
 
 export default function Home() {
+
+  const [loading, setLoading] = useState(false); // 다중 클릭 방지
+  const router = useRouter();
+  const BASE_URL = 'http://localhost:8080';
+
+  // 로그인 감지
+  const handleStart = async () => {
+
+    if(loading){
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${BASE_URL}/auth/me`, {credentials:"include"});
+
+      if(response.ok){
+        // 로그인 O 유저
+        router.push("/main"); // 메인 페이지 이동
+      } else if(response.status === 401) {
+        // 로그인 X 유저
+        // const next = encodeURIComponent("/login");
+        router.push("/login");
+
+      } else {
+        // 기타 에러
+        alert("잠시 후 다시 시도해 주세요.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("네트워크 오류가 발생 하였습니다._랜딩 페이지");
+    } finally {
+      setLoading(false);
+    }
+
+  };
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -40,11 +77,14 @@ export default function Home() {
           <p className="text-lg md:text-2xl mb-10 text-white/90">
             항공권부터 숙소, 맛집까지. 완벽한 여행 일정을 지금 만들어보세요.
           </p>
-          <Link href="/login">
-            <button className="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl text-lg font-semibold shadow-lg cursor-pointer">
-              여행 계획 시작하기
-            </button>
-          </Link>
+
+          <button
+            onClick={handleStart}
+            disabled={loading}
+            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+          >
+            {loading ? "확인 중..." : "야행계획 시작하기"}
+          </button>
         </div>
 
         {/* Scroll indicator */}
@@ -147,18 +187,18 @@ export default function Home() {
         <div className="w-full max-w-7xl mx-auto px-6 space-y-20">
 
           {/* Section 4 header (center) */}
-<div className="text-center mb-14">
-  <span className="inline-flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
-    추천 여행지
-  </span>
-  <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
-    이번 달 인기 여행지
-  </h2>
-  <p className="mt-4 text-lg text-slate-600">
-    사진과 이야기로 미리 떠나보기 — TripPlanner가 엄선한 베스트 셀렉션입니다.
-  </p>
-  <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
-</div>
+        <div className="text-center mb-14">
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
+            추천 여행지
+          </span>
+          <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+            이번 달 인기 여행지
+          </h2>
+          <p className="mt-4 text-lg text-slate-600">
+            사진과 이야기로 미리 떠나보기 — TripPlanner가 엄선한 베스트 셀렉션입니다.
+          </p>
+          <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
+        </div>
 
 
           {[
