@@ -81,9 +81,9 @@ export default function Home() {
           <button
             onClick={handleStart}
             disabled={loading}
-            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
           >
-            {loading ? "확인 중..." : "야행계획 시작하기"}
+            {loading ? "시작합니다." : "여행계획 시작하기"}
           </button>
         </div>
 

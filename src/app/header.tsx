@@ -4,7 +4,6 @@
 import Link from "next/link";
 import DropdownMenu from "./main/components/DropdownMenu";
 import { Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
 import SessionTimer from "./main/components/SessionTimer";
 
 export default function Header() {
@@ -46,11 +45,8 @@ export default function Header() {
         </ul>
 
         {/* 프로필 드롭다운 */}
-        <div className="hidden md:block">
+        <div className="ml-auto flex items-center space-x-5">
           <SessionTimer />
-        </div>
-
-        <div className="hidden md:block">
           <DropdownMenu />
         </div>
 

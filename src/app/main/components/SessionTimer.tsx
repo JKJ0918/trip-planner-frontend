@@ -40,10 +40,10 @@ export default function SessionTimer() {
     return(
         <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full border
-            ${isExpiringSoon ? "bg-red-50 border-gray-300 text-yellow-800" : "bg-gray-50 border-gray-200 text-gray-800"}`}
+            ${isExpiringSoon ? "bg-gray-50 border-gray-300 text-gray-800" : "bg-gray-50 border-gray-200 text-gray-800"}`}
             title={isExpiringSoon ? "세션 연장" : "세션 연장"}
         >
-            <span className="font-mono">{fmt(remaining)}</span>
+            <span className="text-sm text-gray-600">{fmt(remaining)}</span>
             {isExpiringSoon && (
             <button onClick={refresh} className="text-sm cursor-pointer">
             연장

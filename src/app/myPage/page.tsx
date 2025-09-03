@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import ProfilePanel from './components/ProfilePanel';
 import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
+import { useMe } from '../hooks/useMe';
 
 const sections = [
   '프로필',
@@ -15,12 +16,33 @@ const sections = [
 ]; 
 
 export default function MyPage() {
+  const base = process.env.NEXT_PUBLIC_API_BASE;
   const [activeSection, setActiveSection] = useState<string>('프로필');
+  const { me, isLoading, error /*, refresh*/ } = useMe();
+  const [nickname, setNickname] = useState<string>(""); // 전달 받은 Props
+  const [email, setEmail] =useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const resolvedAvatar = avatarUrl
+  ? avatarUrl.startsWith("http")
+    ? avatarUrl                // 절대경로 그대로 사용
+    : `${base}${avatarUrl}`    // 상대경로면 base 붙이기
+  : `${base}/uploads/basic_profile.png`;
+
+  //useMe(), me 로드
+  useEffect(() => {
+    if(me?.nickname) {
+       setNickname(me.nickname);
+       setEmail(me.email);
+       setAvatarUrl(me.avatarUrl);
+       
+    }
+  }, [me]);
 
   const renderSection = () => {
     switch (activeSection) {
       case '프로필':
-        return <ProfilePanel />;
+        // ProfilePanel 닉네임 저장 성공시 상단에 반영
+        return <ProfilePanel userNickname={(nick) => setNickname(nick)} />;
       case '내가 쓴 여행일지':
         return <MyJourney />;
       case '알림':
@@ -39,11 +61,21 @@ export default function MyPage() {
       {/* 좌측 사이드바 */}
       <aside className="w-72 p-6 bg-white border-r shadow-sm">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
-            <Image src="/profile.jpg" alt="프로필 이미지" width={96} height={96} className="w-full h-full object-cover" />
+          <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-200">
+            <img
+              src={resolvedAvatar}
+              alt="프로필 이미지"
+              width={160}
+              height={160}
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h2 className="mt-4 text-xl font-semibold">홍길동</h2>
-          <p className="text-sm text-gray-500">여행을 사랑하는 개발자</p>
+          <h2 className="mt-4 text-xl font-semibold">
+            {isLoading ? '불러오는 중…' : (nickname || '닉네임 없음')}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {isLoading ? '불러오는 중…' : (email || '이메일 없음')}
+          </p>
         </div>
 
         <nav className="space-y-2">

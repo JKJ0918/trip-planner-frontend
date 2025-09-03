@@ -8,7 +8,7 @@ const fetcher = (url: string) =>
     return r.json();
   });
 
-export type Me = { id: number; nickname: string; email: string };
+export type Me = { id: number; nickname: string; email: string; avatarUrl:string };
 
 export function useMe() {
   const { data, error, isLoading, mutate } = useSWR<Me>(
