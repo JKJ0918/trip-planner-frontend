@@ -15,8 +15,8 @@ export type JournalSummary = {
   // coverImage?: string;
   createdAt: string;
   // updatedAt?: string;
-  // likes?: number;
-  // views?: number;
+  likeCount?: number;
+  views?: number;
 };
 
 export type JournalListResponse = {

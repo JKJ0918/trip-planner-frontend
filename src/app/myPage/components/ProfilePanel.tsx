@@ -1,228 +1,234 @@
-"use client"
+"use client";
 
 import { useMe } from "@/app/hooks/useMe";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+
 
 type FormValues = { nickname: string; avatarUrl?: string };
 
-// 부모(myPage/page.tsx)에게 전달
 type Props = {
-    userNickname? : (nickname: string) => void;
+  userNickname?: (nickname: string) => void;
 };
 
-export default function ProfilePanel({userNickname}: Props){
-    const base = process.env.NEXT_PUBLIC_API_BASE;
-    const { me, isLoading, error, refresh } = useMe();
+export default function ProfilePanel({ userNickname }: Props) {
+  const base = process.env.NEXT_PUBLIC_API_BASE;
+  const { me, isLoading, error, refresh } = useMe();
 
-    const [localAvatarUrl, setLocalAvatarUrl] = useState<string | undefined>(); // 새로 업로드 이미지(미저장) 미리보기 URL
-    const [uploading, setUploading] = useState(false);
-    const fileRef = useRef<HTMLInputElement | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [selectedFile, setSelectedFile] = useState<File>();
+  const [submitting, setSubmitting] = useState(false);
+  const [banner, setBanner] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
-    const [previewUrl, setPreviewUrl] = useState<string>();   // blob:... 즉시 미리보기
-    const [selectedFile, setSelectedFile] = useState<File>(); // 저장 시 업로드할 파일
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const dropRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-    return () => {
-        if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-    };
-    }, [previewUrl]);
+  useEffect(() => () => {
+    if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
+  const { register, handleSubmit, reset, watch, setValue, formState } = useForm<FormValues>({
+    values: me ? { nickname: me.nickname, avatarUrl: me.avatarUrl } : { nickname: "", avatarUrl: undefined },
+    mode: "onChange",
+  });
 
-    const { register, handleSubmit, reset, watch, setValue } = useForm<FormValues>({
-        values: me ? { nickname: me.nickname, avatarUrl: me.avatarUrl } : { nickname: "", avatarUrl: undefined },
-    });
-
+  const currentAvatar = useMemo(() => {
     const toAbs = (p?: string) => (p ? (p.startsWith("http") ? p : `${base}${p}`) : undefined);
+    return previewUrl ?? toAbs(watch("avatarUrl")) ?? `${base}/uploads/basic_profile.png`;
+  }, [base, previewUrl, watch]);
 
-    const currentAvatar =
-    previewUrl                            // 선택 직후 즉시 보여줌 (blob)
-    ?? toAbs(watch("avatarUrl"))          // 기존 서버 값
-    ?? `${base}/uploads/basic_profile.png`;
+  const onPickFile = () => inputRef.current?.click();
 
-
-    if (isLoading) {
-        return <div className="animate-pulse text-gray-400">불러오는 중…</div>;
-    } 
-    if (error) {
-        return <div className="text-red-500">로그인이 필요하거나 오류가 발생했어요.</div>;
-    } 
-    if (!me) {
-        return null;
+  const onDrop = (files: FileList | null) => {
+    const f = files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) {
+      setBanner({ type: "error", msg: "이미지 파일만 업로드할 수 있어요." });
+      return;
     }
+    const url = URL.createObjectURL(f);
+    setPreviewUrl(url);
+    setSelectedFile(f);
+    setBanner(null);
+  };
 
-    // 이미지 업로드
-    const handlePickFile = (() => {
-        fileRef.current?.click();
-    })
+  const onChangeFile = (e: React.ChangeEvent<HTMLInputElement>) => onDrop(e.target.files);
 
-    const uploadImage = async (file: File) => {
-        setUploading(true); // 중복 클릭 방지
-        try{
-            const fd = new FormData();
-            fd.append("file", file);
-            const res = await fetch(`${base}/api/images/upload`, {
-                method: "POST",
-                body: fd,
-                credentials: "include",
-            });
-            if(!res.ok){
-                throw new Error("ProfilePanel.tsx/uploadImage:upload fail");
-            }
-            const json = await res.json(); // {url: string}
-            setLocalAvatarUrl(json.url);
-        } catch (e) {
-            alert("프로필 이미지 업로드 중 오류가 발생했습니다.");
-        } finally {
-            setUploading(false);
-        }
-    };
-    
+  const onSubmit = async (v: FormValues) => {
+    setSubmitting(true);
+    setBanner(null);
+    try {
+      let uploadedPath: string | null = null;
+      if (selectedFile) {
+        const fd = new FormData();
+        fd.append("file", selectedFile);
+        const resUp = await fetch(`${base}/api/images/upload`, { method: "POST", body: fd, credentials: "include" });
+        if (!resUp.ok) throw new Error("프로필 이미지 업로드 실패");
+        const json = await resUp.json();
+        uploadedPath = json.url;
+      }
 
-    const onChangeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const f = e.target.files?.[0];
-        if(!f){
-            return;
-            // 간단한 클라이언트 검즘(옵션)
-        }
-        if(!f.type.startsWith("image/")) {
-            alert("이미지 파일만 업로드할 수 있어요.");
-            return;
-        }
-        // 미리보기만 설정
-        const objUrl = URL.createObjectURL(f);
-        setPreviewUrl(objUrl);
-        setSelectedFile(f);
+      const payload = { nickname: v.nickname, avatarUrl: uploadedPath ?? v.avatarUrl ?? null };
+      const res = await fetch(`${base}/users/me`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("저장 중 오류가 발생했습니다.");
 
+      await refresh();
+      userNickname?.(v.nickname);
+      reset({ nickname: v.nickname, avatarUrl: payload.avatarUrl ?? undefined });
+      setSelectedFile(undefined);
+      setPreviewUrl(undefined);
+      setBanner({ type: "success", msg: "프로필이 저장되었습니다." });
+    } catch (e: any) {
+      setBanner({ type: "error", msg: e?.message ?? "오류가 발생했습니다." });
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    const onSubmit = async (v: FormValues) => {
-        // 1) 파일이 선택되어 있으면 업로드
-        let uploadedPath: string | null = null;
-        if(selectedFile) {
-            const fd = new FormData();
-            fd.append("file", selectedFile);
-            const resUp = await fetch(`${base}/api/images/upload`, {
-                method: "POST",
-                body: fd,
-                credentials: "include",
-            });
-            if(!resUp) {
-                alert("프로필 이미지 업로드 실패");
-                return;
-            }
-            const json = await resUp.json(); // { url: "/uploads/xxx.png" }
-            uploadedPath = json.url;
-        }
-        
-        // 2) PUT /user/me
-        const payload = {
-            nickname: v.nickname,
-            avatarUrl: uploadedPath ?? v.avatarUrl ?? null, // null로 보내면 제거로 처리할 수도 있음
-        };
+  const resetAvatar = () => {
+    setPreviewUrl(undefined);
+    setSelectedFile(undefined);
+    setValue("avatarUrl", "");
+  };
 
-        const res = await fetch(`${base}/users/me`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify(payload),
-        });
+  const somethingChanged = useMemo(() => {
+    const nicknameDirty = formState.dirtyFields.nickname;
+    return Boolean(nicknameDirty || selectedFile || watch("avatarUrl") === "");
+  }, [formState.dirtyFields.nickname, selectedFile, watch]);
 
-        if(res.ok){
-            await refresh();
-            userNickname?.(v.nickname);
-            alert("프로필이 저장되었습니다.");
-            reset({ nickname: v.nickname, avatarUrl: payload.avatarUrl ?? undefined });
-            // setLocalAvatarUrl(undefined); // 저장 후 로컬 미리보기 상태 초기화
-            setPreviewUrl(undefined);
-            setSelectedFile(undefined);
-        } else {
-            alert("저장 중 오류가 발생했습니다.");
-        }
-    };
-
-    const resetToDefault = () => {
-        // setLocalAvatarUrl(undefined);
-        setPreviewUrl(undefined);
-        setSelectedFile(undefined);
-        setValue("avatarUrl", ""); // 서버에서 기본화(null)로 처리
-    };
-
+  if (isLoading) {
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-6">
-        {/* 아바타 섹션 */}
-        <section className="flex items-center gap-4">
-            <div className="w-24 h-24 rounded-full overflow-hidden border bg-gray-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src={currentAvatar}
-                alt="프로필 이미지"
-                className="w-full h-full object-cover"
-            />
-            </div>
-
-            <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-                <button
-                type="button"
-                onClick={handlePickFile}
-                className="px-3 py-2 rounded bg-gray-800 text-white hover:bg-black disabled:opacity-60"
-                disabled={uploading}
-                >
-                {uploading ? "업로드 중…" : "사진 변경"}
-                </button>
-                <button
-                type="button"
-                onClick={resetToDefault}
-                className="px-3 py-2 rounded border hover:bg-gray-50"
-                >
-                기본 이미지로
-                </button>
-            </div>
-            <p className="text-xs text-gray-500">
-                JPG/PNG, 5MB 이하 권장. 정사각형 이미지가 가장 예쁘게 보여요.
-            </p>
-            </div>
-
-            <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={onChangeFile}
-            />
-        </section>
-
-        {/* 이메일 */}
-        <div>
-            <label className="block text-sm text-gray-600 mb-1">이메일</label>
-            <input
-            value={me.email}
-            readOnly
-            className="w-full rounded border bg-gray-100 px-3 py-2"
-            />
-        </div>
-
-        {/* 닉네임 */}
-        <div>
-            <label className="block text-sm text-gray-600 mb-1">닉네임</label>
-            <input
-            {...register("nickname", { required: true, minLength: 2, maxLength: 20 })}
-            placeholder="닉네임"
-            className="w-full rounded border px-3 py-2"
-            />
-            <p className="text-xs text-gray-500 mt-1">2~20자. 추후 금칙어/중복검사 추가 가능</p>
-        </div>
-
-        {/* 숨김 필드: 서버에 저장된 아바타 URL 보관 */}
-        <input type="hidden" {...register("avatarUrl")} />
-
-        <button
-            type="submit"
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-            저장
-        </button>
-        </form>
+      <div className="max-w-5xl space-y-8">
+        <div className="h-6 w-40 rounded bg-gray-200 animate-pulse" />
+        <div className="h-32 rounded-lg bg-gray-100 animate-pulse" />
+      </div>
     );
+  }
+  if (error) {
+    return <div className="max-w-5xl p-4 rounded-lg bg-red-100 text-red-600">로그인이 필요하거나 오류가 발생했어요.</div>;
+  }
+  if (!me) return null;
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-gray-900">Account</h1>
+        <p className="text-sm text-gray-500">개인 정보를 업데이트하세요.</p>
+      </div>
+
+      {banner && (
+        <div
+          className={`mb-6 rounded-lg px-4 py-3 text-sm ${
+            banner.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+          }`}
+          role="status"
+        >
+          {banner.msg}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div>
+          <h2 className="text-base font-medium text-gray-900">Personal Information</h2>
+          <p className="mt-1 text-sm text-gray-500">영구적인 메일 주소와 닉네임을 관리합니다.</p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="lg:col-span-2">
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-6 pt-0 sm:grid-cols-6">
+              <div className="sm:col-span-2">
+                <div
+                  ref={dropRef}
+                  className="group relative w-36 h-36 rounded-lg overflow-hidden bg-gray-200 cursor-pointer"
+                  onClick={onPickFile}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    dropRef.current?.classList.add("ring-2", "ring-blue-400");
+                  }}
+                  onDragLeave={() => dropRef.current?.classList.remove("ring-2", "ring-blue-400")}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    dropRef.current?.classList.remove("ring-2", "ring-blue-400");
+                    onDrop(e.dataTransfer.files);
+                  }}
+                  aria-label="프로필 이미지 변경"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={currentAvatar} alt="프로필 이미지" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
+                    <span className="opacity-0 group-hover:opacity-100 text-white text-[11px] px-2 py-1 rounded bg-black/50">
+                      Change avatar
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">JPG, GIF 또는 PNG. 1MB 이하 권장.</p>
+                <div className="mt-3 flex gap-2">
+                  <button type="button" onClick={onPickFile} className="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                    사진 업로드
+                  </button>
+                  <button type="button" onClick={resetAvatar} className="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                    초기화
+                  </button>
+                </div>
+                <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onChangeFile} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 pt-8 sm:grid-cols-6">
+              <div className="sm:col-span-3">
+                <label className="block text-sm text-gray-700 mb-1">Nickname</label>
+                <input
+                  {...register("nickname", { required: true, minLength: 2, maxLength: 20 })}
+                  placeholder="닉네임"
+                  className={`block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+                    formState.errors.nickname ? "border-red-400 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
+                />
+                <p className="mt-1 text-xs text-gray-500">2~20자. 추후 중복검사/금칙어 적용 가능</p>
+              </div>
+
+              <div className="sm:col-span-4">
+                <label className="block text-sm text-gray-700 mb-1">Email address</label>
+                <input
+                  value={me.email}
+                  readOnly
+                  className="block w-full rounded-md border border-gray-300 bg-gray-100 text-gray-600 px-3 py-2 placeholder:text-gray-400"
+                />
+              </div>
+
+              <input type="hidden" {...register("avatarUrl")} />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-8">
+              <button
+                type="button"
+                onClick={() => {
+                  reset({ nickname: me.nickname, avatarUrl: me.avatarUrl ?? undefined });
+                  setSelectedFile(undefined);
+                  setPreviewUrl(undefined);
+                  setBanner(null);
+                }}
+                disabled={submitting}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || !somethingChanged}
+                className="px-4 py-2 text-sm rounded-md bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

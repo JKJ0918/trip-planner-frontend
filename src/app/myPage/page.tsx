@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import ProfilePanel from './components/ProfilePanel';
 import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
@@ -59,7 +58,7 @@ export default function MyPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* 좌측 사이드바 */}
-      <aside className="w-72 p-6 bg-white border-r shadow-sm">
+      <aside className="w-72 p-6 bg-white shadow-sm">
         <div className="flex flex-col items-center mb-6">
           <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-200">
             <img

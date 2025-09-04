@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchUserInfo } from "../utils/fetchUserInfo";
 import { useMe } from "@/app/hooks/useMe";
+import NotificationBell from "@/app/myPage/components/NotificationBell";
+import { NotificationPreviewPanel } from "@/app/myPage/components/NotificationPreview";
+import { useNotifications } from "@/app/hooks/useNotifications";
 
 type User = {
   id?: number;
@@ -19,10 +22,14 @@ export default function DropDownMenu() {
   const { me, isLoading, error } = useMe(); // 로그인 사용자 정보 (nickname, email, avatarUrl 등)
   const [open, setOpen] = useState(false); // 드롭다운 메뉴
   const ref = useRef<HTMLDivElement | null>(null);
+  const [showNotif, setShowNotif] = useState(false);
 
   // API BASE (말미 슬래시 제거)
   const baseRaw = process.env.NEXT_PUBLIC_API_BASE ?? "";
   const base = baseRaw.replace(/\/$/, "");
+
+  // 알람 공유 훅
+  const notif = useNotifications(base, {limit: 5});
 
   // 상대/절대 URL 해석
   const resolve = (p?: string | null) => 
@@ -121,32 +128,63 @@ export default function DropDownMenu() {
   return (
     <div className="relative" ref={ref}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={avatar}
-        alt="내 프로필"
-        className="w-8 h-8 rounded-full object-cover cursor-pointer"
-        onClick={() => setOpen((o) => !o)}
-      />
+      {/* 아바타 + 빨간 배지 */}
+      <button
+        className="relative"
+        onClick={() => { setOpen(o => !o); if (open) setShowNotif(false); }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatar} alt="내 프로필" className="w-8 h-8 rounded-full object-cover" />
+        {notif.unread > 0 && (
+          <span
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600
+                       text-white text-[11px] leading-[18px] text-center"
+            aria-label={`읽지 않은 알림 ${notif.unread}개`}
+          >
+            {notif.unread > 99 ? "99+" : notif.unread}
+          </span>
+        )}
+      </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white shadow-lg overflow-hidden">
-          <div className="px-3 py-2 ">
+        <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white shadow-lg overflow-hidden z-50">
+          <div className="px-3 py-2">
             <div className="text-sm truncate">{me.nickname}님, 안녕하세요</div>
           </div>
           <nav className="py-1 text-sm">
+            {/* 알림 항목 + 오른쪽 배지 */}
             <button
-              className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
-              onClick={() => router.push("/myPage")}
+              className="w-full px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition flex items-center justify-between"
+              onClick={() => setShowNotif(v => !v)}
             >
+              <span>알림</span>
+              {notif.unread > 0 && (
+                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 text-white text-xs px-1">
+                  {notif.unread > 99 ? "99+" : notif.unread}
+                </span>
+              )}
+            </button>
+
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
+                    onClick={() => router.push("/myPage")}>
               마이페이지
             </button>
-            <button
-              className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"              onClick={handleLogout}
-            >
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
+                    onClick={handleLogout}>
               로그아웃
             </button>
           </nav>
         </div>
+      )}
+
+      {/* 미리보기 패널에 공유 상태 주입 */}
+      {open && showNotif && (
+        <NotificationPreviewPanel
+          base={base}
+          controller={notif}                         // ← 같은 상태 공유
+          mypageHref="/myPage?tab=notifications"
+          onClose={() => { setShowNotif(false); setOpen(false); }}
+        />
       )}
     </div>
   );
