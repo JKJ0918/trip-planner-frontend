@@ -5,6 +5,7 @@ import ProfilePanel from './components/ProfilePanel';
 import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
 import { useMe } from '../hooks/useMe';
+import LikedPostsPage from './components/LikedPostsPage';
 
 const sections = [
   '프로필',
@@ -47,7 +48,7 @@ export default function MyPage() {
       case '알림':
         return <NotificationBell />;
       case '좋아요한 게시물':
-        return <div>좋아요한 게시물 목록</div>;
+        return <LikedPostsPage />;
       case '설정':
         return <div>비밀번호 변경 및 계정 설정</div>;
       default:
