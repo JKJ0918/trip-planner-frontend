@@ -13,7 +13,7 @@ import PinSidePanel from '../components/PinSidePanel';
 import RegisterView from '@/app/login/components/RegisterView';
 
 
-
+ 
 type Pin = {
   lat: number; // 위도
   lng: number; // 경도
@@ -359,11 +359,12 @@ useEffect(() => {
         </button>
       </div>
     )}
+      {/* 댓글 */}
       <div className="px-6 py-10 mt-10 bg-gray-0 rounded-xl border border-gray-200 space-y-8">
           <CommentSection journalId={post.id} />
       </div>
-      
-      <RegisterView postId={post.id} />{/* 조회수 */}
+      {/* 조회수 */}
+      <RegisterView postId={post.id} />
     </div>
   );
 }

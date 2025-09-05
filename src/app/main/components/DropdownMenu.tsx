@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchUserInfo } from "../utils/fetchUserInfo";
 import { useMe } from "@/app/hooks/useMe";
-import NotificationBell from "@/app/myPage/components/NotificationBell";
 import { NotificationPreviewPanel } from "@/app/myPage/components/NotificationPreview";
 import { useNotifications } from "@/app/hooks/useNotifications";
 

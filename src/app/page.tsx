@@ -15,7 +15,6 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false); // 다중 클릭 방지
   const router = useRouter();
-  const BASE_URL = 'http://localhost:8080';
 
   // 로그인 감지
   const handleStart = async () => {
@@ -26,7 +25,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/auth/me`, {credentials:"include"});
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/me`, {credentials:"include"});
 
       if(response.ok){
         // 로그인 O 유저
@@ -81,7 +80,7 @@ export default function Home() {
           <button
             onClick={handleStart}
             disabled={loading}
-            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
+            className="px-5 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 cursor-pointer"
           >
             {loading ? "시작합니다." : "여행계획 시작하기"}
           </button>
