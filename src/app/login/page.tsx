@@ -14,6 +14,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     const success = await Login(username, password);
     if (success) {
+      // 로그인 성공시, 사용자 socialType - zustand 상태 저장
       window.location.replace("/main"); // 로그인 성공시 새로고침 기능
       // router.push("/main");
     }

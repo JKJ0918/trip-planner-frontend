@@ -6,6 +6,8 @@ import { fetchUserInfo } from "../utils/fetchUserInfo";
 import { useMe } from "@/app/hooks/useMe";
 import { NotificationPreviewPanel } from "@/app/myPage/components/NotificationPreview";
 import { useNotifications } from "@/app/hooks/useNotifications";
+import { useLogout } from "@/app/hooks/useLogout";
+import { useAuthStore } from "@/app/util/useAuthStore";
 
 type User = {
   id?: number;
@@ -22,6 +24,7 @@ export default function DropDownMenu() {
   const [open, setOpen] = useState(false); // 드롭다운 메뉴
   const ref = useRef<HTMLDivElement | null>(null);
   const [showNotif, setShowNotif] = useState(false);
+  const {handleLogout} = useLogout(); // 로그아웃
 
   // API BASE (말미 슬래시 제거)
   const baseRaw = process.env.NEXT_PUBLIC_API_BASE ?? "";
@@ -53,6 +56,11 @@ export default function DropDownMenu() {
       try {
         const me = await fetchUserInfo();
         if (mounted) setUser(me ?? null);
+        // 유저 socialType zustand에 저장
+        if(!me === null){
+            useAuthStore.getState().setSocialType(me.socialType);
+        }
+
       } catch {
         if (mounted) setUser(null);
       } finally {
@@ -63,40 +71,6 @@ export default function DropDownMenu() {
       mounted = false;
     };
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      const me = await fetchUserInfo();
-      const socialType = me?.socialType || "local";
-
-      // 1) 서버 로그아웃
-      await fetch(`${base}/logout`, { method: "POST", credentials: "include", });
-
-      // 2) 소셜 로그아웃
-      switch (socialType) {
-        case "naver":
-          window.open("https://nid.naver.com/nidlogin.logout", "_blank", "width=1,height=1");
-          break;
-        case "kakao":
-          window.open(
-            "https://kauth.kakao.com/oauth/logout?client_id=d4763cac8fdb45bc680dcaf5597e0d61&logout_redirect_uri=http://localhost:8080/",
-            "_blank",
-            "width=500,height=600"
-          );
-          break;
-        case "google":
-          window.open("https://accounts.google.com/Logout", "_blank", "width=500,height=600");
-          break;
-        case "local":
-          break;
-      }
-
-      // 홈으로 이동(새로고침)
-      window.location.replace("/");
-    } catch (e) {
-      console.error("로그아웃 중 에러:", e);
-    }
-  };
 
   // 로딩 상태
   if (isLoading) {
@@ -169,7 +143,7 @@ export default function DropDownMenu() {
               마이페이지
             </button>
             <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
-                    onClick={handleLogout}>
+                    onClick={() => handleLogout('/')}>
               로그아웃
             </button>
           </nav>

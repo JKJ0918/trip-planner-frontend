@@ -1,9 +1,9 @@
 // hooks/useSessionTimer.ts
 "use client";
 
-import { tr } from "date-fns/locale";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiGet, apiPost, toJsonSafe } from "../lib/api";
+import { useLogout } from "./useLogout";
 
 type SessionInfo = {
   nowEpoch: number;         // 서버현재(초)
@@ -16,6 +16,8 @@ export default function useSessionTimer() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const timerRef = useRef<number | null>(null);
+    const {handleAutoLogout} = useLogout();
+    const fired = useRef(false);
 
     // 세션 시간 표현
     const load = useCallback(async () => {
@@ -89,11 +91,15 @@ export default function useSessionTimer() {
 
     // 만료 처리 
     useEffect(() => {
-        if(remaining === 0) {
-            // 예: 전역 상태 리셋, 라우팅 등..
-            // router.push("login?expired=1");
+        if(remaining === 0 && !fired.current) {
+            fired.current = true;
+            // alert("로그인 유효 시간이 만료되었습니다. 다시 로그인해 주세요.");
+            
+            // 팝업 없이 자동 처리
+            handleAutoLogout('/login?reason=expired');
+            
         }
-    }, [remaining]);
+    }, [remaining, handleAutoLogout]);
         
 
     return {
@@ -102,7 +108,7 @@ export default function useSessionTimer() {
         remaining,                        // 남은 초 (null 이면 비로그인/오류)
         isExpiringSoon: (remaining ?? Infinity) <= 1800,
         reload: load,
-        refresh,                          // 수동 연장 (POST /refresh) (구현 예정)
+        refresh,                          // 수동 연장 (POST /refresh)
 
     };
 }
