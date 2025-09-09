@@ -57,7 +57,7 @@ export default function DropDownMenu() {
         const me = await fetchUserInfo();
         if (mounted) setUser(me ?? null);
         // 유저 socialType zustand에 저장
-        if(!me === null){
+        if(me){
             useAuthStore.getState().setSocialType(me.socialType);
         }
 

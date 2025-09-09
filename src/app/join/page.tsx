@@ -1,3 +1,4 @@
+// src/app/join (회원가입 page.tsx)
 "use client";
 
 import { useState } from "react";
@@ -136,7 +137,7 @@ export default function JoinPage() {
                 </div>
 
                 <div className="max-md:mt-8">
-                    <img src="/images/plannerlogin.png" className="w-full aspect-[71/50] max-md:w-4/5 mx-auto block object-cover" alt="login img" />
+                    <img src="/images/plannerlogin.jpg" className="w-full aspect-[71/50] max-md:w-4/5 mx-auto block object-cover" alt="login img" />
                 </div>
                 
 

@@ -16,7 +16,7 @@ export default function useSessionTimer() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const timerRef = useRef<number | null>(null);
-    const {handleAutoLogout} = useLogout();
+    const {handleLogout} = useLogout();
     const fired = useRef(false);
 
     // 세션 시간 표현
@@ -93,13 +93,16 @@ export default function useSessionTimer() {
     useEffect(() => {
         if(remaining === 0 && !fired.current) {
             fired.current = true;
-            // alert("로그인 유효 시간이 만료되었습니다. 다시 로그인해 주세요.");
+            alert("로그인 유효 시간이 만료되었습니다. 다시 로그인해 주세요.");
             
             // 팝업 없이 자동 처리
-            handleAutoLogout('/login?reason=expired');
+            // 팝업 차단 문제로 만료에 의한 소셜로그아웃 까지는 안됨, 직접 로그아웃을 눌러야함
+            //  iframe 우회도 해봤지만, iframe을 거절하는 곳도 있음
+
+            handleLogout('/login?reason=expired');
             
         }
-    }, [remaining, handleAutoLogout]);
+    }, [remaining]);
         
 
     return {
