@@ -1,150 +1,294 @@
-// src/app/join (회원가입 page.tsx)
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Join } from "./utils/join";
-
-
+import Modal from "./components/Modal";
+import TermsContent from "./components/TermsContent";
+import PrivacyContent from "./components/PrivacyContent";
+import { allPassed, checkPassword } from "./utils/passwordRules";
+import PasswordRules from "./components/PasswordRules";
+import { usernameCheck } from "./utils/usernameCheck";
+import { nicknameCheck } from "./utils/nicknameCheck";
 
 export default function JoinPage() {
-
   const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [nickname, setNickname] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState("");   // First + Last → Name 하나로 통일
   const [email, setEmail] = useState("");
 
+  // 약관 모달
+  const [open, setOpen] = useState<null | "terms" | "privacy">(null);
+  const openTerms = () => setOpen("terms");
+  const openPrivacy = () => setOpen("privacy");
+  const close = () => setOpen(null);
+
+  // 비밀번호 유효성검사
+  const pwCheck = checkPassword(password, confirmPassword);
+
+  // 아이디(username) 유효성검사
+  const [uStatus, setUStatus] = useState<"idle"|"checking"|"ok"|"taken"|"error">("idle");
+  const [uMsg, setUMsg] = useState<string>("");
+
+  // 닉네임(nickname) 유효성검사
+  const [nStatus, setNStatus] = useState<"idle"|"checking"|"ok"|"taken"|"error">("idle");
+  const [nMsg, setNMsg] = useState<string>("");
+
+  // 제출 버튼 (유효성 검사)
+  const canSubmit = allPassed(pwCheck) && uStatus === "ok" && nStatus === "ok"&&  email && name;
+
+
   const handleJoin = async () => {
-    const success = await Join(username, password, nickname, name, email);
-    if (success){
-        router.push("/login");
+    if (!username || !password || !email || !name) {
+      alert("필수 항목을 입력해 주세요.");
+      return;
     }
+    if (password !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const success = await Join(username, password, nickname, name, email);
+    if (success) {
+      router.push("/login");
+    }
+  };
+
+  // 아이디(username) 유효성검사 코드
+  async function handleCheckUsername() {
+    if(!username){
+        return;
+    }
+    setUStatus("checking");
+    setUMsg("");
+    
+    try {
+        const { available, message } = await usernameCheck(username.trim());
+        if(available){
+            setUStatus("ok");
+            setUMsg(message ?? "사용 가능한 아이디입니다.");
+        } else {
+            setUStatus("taken");
+            setUMsg(message ?? "이미 사용 중인 아이디입니다.");
+        }
+    } catch (e) {
+        setUStatus("error");
+        setUMsg("확인 중 오류가 발생했습니다.");
+    }
+
+  }
+
+  // 닉네임 (nickname) 유효성검사 코드
+  async function handleCheckNickname() {
+    if(!nickname){
+        return;
+    }
+    setNStatus("checking");
+    setNMsg("");
+    
+    try {
+        const { available, message } = await nicknameCheck(nickname.trim());
+        if(available){
+            setNStatus("ok");
+            setNMsg(message ?? "사용 가능한 닉네임입니다.");
+        } else {
+            setNStatus("taken");
+            setNMsg(message ?? "이미 사용 중인 닉네임입니다.");
+        }
+    } catch (e) {
+        setNStatus("error");
+        setNMsg("확인 중 오류가 발생했습니다.");
+    }
+
   }
 
   return (
-    <div className="min-h-screen flex fle-col items-center justify-center">
-        <div className="py-6 px-4">
-            <div className="grid md:grid-cols-2 items-center gap-6 max-w-6xl w-full">
-                <div className="border border-slate-300 rounded-lg p-6 max-w-md shadow-[0_2px_22px_-4px_rgba(93,96,127,0.2)] max-md:mx-auto">
-                    <form className="space-y-6">
-                    <div className="mb-12">
-                        <h3 className="text-slate-900 text-3xl font-semibold">회원가입</h3>
-                        <p className="text-slate-500 text-sm mt-6 leading-relaxed">빠르고 간편한 비교를 통해 여행을 손쉽게 계획하세요</p>
-                    </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
+      {/* 상단 로고 + 타이틀 */}
+      <div className="text-center mb-6">
+        <img src="images/logo.png" alt="TripPlanner" className="mx-auto h-10 w-auto" />
+        <h1 className="mt-4 text-slate-600">Sign up into your account</h1>
+      </div>
 
-                    <div>
-                        <label className="text-slate-800 text-sm font-medium mb-2 block">아이디</label>
-                        <div className="relative flex items-center">
-                        <input 
-                            name="username"
-                            type="text" 
-                            required 
-                            className="w-full text-sm text-slate-800 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)} />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4" viewBox="0 0 24 24">
-                            <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
-                            <path d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z" data-original="#000000"></path>
-                        </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="text-slate-800 text-sm font-medium mb-2 block">비밀번호</label>
-                        <div className="relative flex items-center">
-                        <input 
-                            name="password"
-                            type="password" 
-                            required 
-                            className="w-full text-sm text-slate-800 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                            <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-                        </svg>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="text-slate-800 text-sm font-medium mb-2 block">닉네임</label>
-                        <div className="relative flex items-center">
-                        <input 
-                            name="nickname"
-                            type="text" 
-                            required 
-                            className="w-full text-sm text-slate-800 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600"
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
-                            />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                            <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-                        </svg>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="text-slate-800 text-sm font-medium mb-2 block">이름</label>
-                        <div className="relative flex items-center">
-                        <input 
-                            name="name"
-                            type="text" 
-                            required 
-                            className="w-full text-sm text-slate-800 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                            <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-                        </svg>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="text-slate-800 text-sm font-medium mb-2 block">이메일</label>
-                        <div className="relative flex items-center">
-                        <input 
-                            name="email"
-                            type="text" 
-                            required 
-                            className="w-full text-sm text-slate-800 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                            <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-                        </svg>
-                        </div>
-                    </div>
-
-                    <div className="!mt-12">
-                        <button type="button" className="w-full shadow-xl py-2.5 px-4 text-[15px] font-medium tracking-wide rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                        onClick={handleJoin}>
-                        완료
-                        </button>
-                    </div>
-                    </form>
-
-                    <div className="my-4 flex items-center gap-4">
-                    <hr className="w-full border-slate-300" />
-                    </div>
-
-                    <div className="flex flex-col space-y-3">
-                    </div>
-
-                    <p className="text-sm !mt-6 text-center text-slate-500">계속 진행하시면 TripPlanner의 서비스 약관 및 개인정보처리방침에 동의하시는 것으로 간주됩니다.</p>
-                </div>
-
-                <div className="max-md:mt-8">
-                    <img src="/images/plannerlogin.jpg" className="w-full aspect-[71/50] max-md:w-4/5 mx-auto block object-cover" alt="login img" />
-                </div>
-                
-
-
+      {/* 회원가입 카드 */}
+      <div className="w-full max-w-3xl">
+        <div className="rounded-xl border border-slate-200 p-8 shadow-[0_2px_22px_-4px_rgba(93,96,127,0.08)]">
+          {/* 폼 */}
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Name */}
+            <div className="md:col-span-2 flex flex-col">
+              <label className="text-sm font-medium text-slate-800 mb-1.5">
+                이름
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                className="h-11 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
+
+            {/* Username */}
+            <div className="md:col-span-2 flex flex-col">
+            <label className="text-sm font-medium text-slate-800 mb-1.5">아이디</label>
+                <div className="flex gap-2">
+                    <input
+                    type="text"
+                    placeholder="Enter username"
+                    className={`h-11 flex-1 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2
+                        ${uStatus === "ok" ? "focus:ring-green-500" :
+                        uStatus === "taken" || uStatus === "error" ? "focus:ring-red-500" :
+                        "focus:ring-blue-500"}`}
+                    value={username}
+                    onChange={(e) => { setUsername(e.target.value); setUStatus("idle"); setUMsg(""); }}
+                    />
+                    <button
+                    type="button"
+                    onClick={handleCheckUsername}
+                    disabled={!username || uStatus === "checking"}
+                    className={`h-11 shrink-0 rounded-lg border px-3 text-sm font-medium
+                        ${uStatus === "checking" ? "bg-gray-100 text-gray-500 cursor-wait" : "hover:bg-gray-50"}`}
+                    >
+                    {uStatus === "checking" ? "확인중..." : "중복검사"}
+                    </button>
+                </div>
+                {uMsg && (
+                    <p className={`mt-1 text-xs ${
+                    uStatus === "ok" ? "text-green-600" :
+                    uStatus === "taken" || uStatus === "error" ? "text-red-600" : "text-gray-500"
+                    }`}>
+                    {uMsg}
+                    </p>
+                )}
+            </div>
+
+            {/* Nickname */}
+            <div className="md:col-span-2 flex flex-col">
+            <label className="text-sm font-medium text-slate-800 mb-1.5">닉네임</label>
+                <div className="flex gap-2">
+                    <input
+                    type="text"
+                    placeholder="Enter nickname"
+                    className={`h-11 flex-1 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2
+                        ${nStatus === "ok" ? "focus:ring-green-500" :
+                        nStatus === "taken" || nStatus === "error" ? "focus:ring-red-500" :
+                        "focus:ring-blue-500"}`}
+                    value={nickname}
+                    onChange={(e) => { setNickname(e.target.value); setNStatus("idle"); setNMsg(""); }}
+                    />
+                    <button
+                    type="button"
+                    onClick={handleCheckNickname}
+                    disabled={!nickname || nStatus === "checking"}
+                    className={`h-11 shrink-0 rounded-lg border px-3 text-sm font-medium
+                        ${nStatus === "checking" ? "bg-gray-100 text-gray-500 cursor-wait" : "hover:bg-gray-50"}`}
+                    >
+                    {nStatus === "checking" ? "확인중..." : "중복검사"}
+                    </button>
+                </div>
+                {nMsg && (
+                    <p className={`mt-1 text-xs ${
+                    nStatus === "ok" ? "text-green-600" :
+                    nStatus === "taken" || nStatus === "error" ? "text-red-600" : "text-gray-500"
+                    }`}>
+                    {nMsg}
+                    </p>
+                )}
+            </div>
+
+            {/* Password Rules */}
+            <div className="flex flex-col">
+                <label className="text-sm font-medium text-slate-800 mb-1.5">비밀번호</label>
+                <input
+                    type="password"
+                    placeholder="Enter password"
+                    className="h-11 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <PasswordRules check={pwCheck} />
+            </div>
+
+            {/* Confirm Password */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-slate-800 mb-1.5">
+                비밀번호 확인
+              </label>
+              <input
+                type="password"
+                placeholder="Enter confirm password"
+                className="h-11 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-slate-800 mb-1.5">
+                이메일
+              </label>
+              <input
+                type="email"
+                placeholder="Enter email"
+                className="h-11 rounded-lg bg-slate-100/50 px-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+          </div>
+
+          {/* 가입 버튼 */}
+          <div className="mt-8 flex justify-center">
+            <button
+            type="button"
+            onClick={handleJoin}
+            disabled={!canSubmit}
+            className={`min-w-[160px] rounded-lg px-6 py-3 text-white text-sm font-medium focus:outline-none
+                ${canSubmit ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"}`}
+            >
+            Sign up
+            </button>
+          </div>
+
+          {/* 약관/개인정보 문구 */}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            계속 진행하시면{" "}
+            <button
+              type="button"
+              onClick={openTerms}
+              className="underline decoration-gray-300 underline-offset-4 hover:text-gray-800 cursor-pointer"
+            >
+              서비스 약관
+            </button>
+            {" "}및{" "}
+            <button
+              type="button"
+              onClick={openPrivacy}
+              className="underline decoration-gray-300 underline-offset-4 hover:text-gray-800 cursor-pointer"
+            >
+              개인정보처리방침
+            </button>
+            에 동의하시는 것으로 간주됩니다.
+          </p>
+
+          {/* 약관 모달 */}
+          <Modal open={open === "terms"} onClose={close} title="서비스 약관">
+            <TermsContent />
+          </Modal>
+
+          {/* 개인정보 모달 */}
+          <Modal open={open === "privacy"} onClose={close} title="개인정보처리방침">
+            <PrivacyContent />
+          </Modal>
         </div>
+      </div>
     </div>
   );
 }
-

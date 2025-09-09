@@ -1,7 +1,6 @@
 // 로그아웃 훅
 
 import { useRef } from "react";
-import { fetchUserInfo } from "../main/utils/fetchUserInfo";
 import { useAuthStore } from "../util/useAuthStore";
 
 type SocialType = 'naver' | 'kakao' | 'google' | 'local';
