@@ -5,11 +5,21 @@ import { useRouter } from "next/navigation";
 import { Login } from "./utils/login";
 import SocialLoginButton from "./components/SocialLoginButton";
 import Link from "next/link";
+import Modal from "../join/components/Modal";
+import TermsContent from "../join/components/TermsContent";
+import PrivacyContent from "../join/components/PrivacyContent";
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  // 약관 모달
+  const [open, setOpen] = useState<null | "terms" | "privacy">(null);
+  const openTerms = () => setOpen("terms");
+  const openPrivacy = () => setOpen("privacy");
+  const close = () => setOpen(null);
+
 
   const handleLogin = async () => {
     const success = await Login(username, password);
@@ -91,9 +101,37 @@ export default function LoginPage() {
 
           <SocialLoginButton />
 
-          <p className="text-xs text-center mt-6 text-slate-400">
-            계속 진행하시면 TripPlanner의 서비스 약관 및 개인정보처리방침에 동의하시는 것으로 간주됩니다.
+          {/* 약관/개인정보 문구 */}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            계속 진행하시면 TripPlaner의{" "} 
+            <button
+              type="button"
+              onClick={openTerms}
+              className="underline decoration-gray-300 underline-offset-4 hover:text-gray-800 cursor-pointer"
+            >
+              서비스 약관
+            </button>
+            {" "}및{" "}
+            <button
+              type="button"
+              onClick={openPrivacy}
+              className="underline decoration-gray-300 underline-offset-4 hover:text-gray-800 cursor-pointer"
+            >
+              개인정보처리방침
+            </button>
+            에 동의하시는 것으로 간주됩니다.
           </p>
+
+          {/* 약관 모달 */}
+          <Modal open={open === "terms"} onClose={close} title="서비스 약관">
+            <TermsContent />
+          </Modal>
+
+          {/* 개인정보 모달 */}
+          <Modal open={open === "privacy"} onClose={close} title="개인정보처리방침">
+            <PrivacyContent />
+          </Modal>
+
         </div>
 
         {/* 이미지 영역 */}

@@ -39,7 +39,7 @@ export default function JoinPage() {
   const [nMsg, setNMsg] = useState<string>("");
 
   // 제출 버튼 (유효성 검사)
-  const canSubmit = allPassed(pwCheck) && uStatus === "ok" && nStatus === "ok"&&  email && name;
+  const canSubmit = allPassed(pwCheck) && uStatus === "ok" && nStatus === "ok" &&  email && name;
 
 
   const handleJoin = async () => {
@@ -259,7 +259,7 @@ export default function JoinPage() {
 
           {/* 약관/개인정보 문구 */}
           <p className="mt-6 text-center text-sm text-gray-500">
-            계속 진행하시면{" "}
+            계속 진행하시면 TripPlaner의{" "}
             <button
               type="button"
               onClick={openTerms}
