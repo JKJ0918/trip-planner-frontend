@@ -1,72 +1,40 @@
-// src / app / join / components / Modal.tsx
-'use client'
-
-import { useEffect, useRef } from "react";
+import { ReactNode } from "react";
 
 type ModalProps = {
-    open: boolean;
-    onClose: () => void;
-    title?: string;
-    children: React.ReactNode;
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
 };
 
-export default function Modal({ open, onClose, title, children}: ModalProps) {
-    
-    const panelRef = useRef<HTMLDivElement>(null);
+export default function Modal({ open, onClose, children }: ModalProps) {
+  if (!open) return null;
 
-    // ESC 닫기 + 스크롤 잠금
-    useEffect (() => {
-        const onKey = (e: KeyboardEvent) => {
-            if(e.key === 'Escape') {
-                onClose();
-            };
-        };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg">
+        {/* 상단 헤더 */}
+        <div className="flex justify-between items-center shadow px-4 py-2">
+          <h2 className="text-lg font-semibold">서비스 약관</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        </div>
 
-        if (open) {
-            document.addEventListener('keydown', onKey);
-            document.body.style.overflow = 'hidden';
-        }
-        return () => {
-            document.removeEventListener('keydown', onKey);
-            document.body.style.overflow = '';  
-        };
-    }, [open, onClose]);
+        {/* 본문: 스크롤 가능 영역 */}
+        <div className="max-h-[70vh] overflow-y-auto px-6 py-4">
+          {children}
+        </div>
 
-    if (!open) return null;
-
-    return (
-        <div
-        aria-hidden={!open}
-        className="fixed inset-0 z-[100] flex items-center justify-center"
-        >
-        {/* backdrop */}
-        <div
-            className="absolute inset-0 bg-black/40"
+        {/* 하단 버튼 */}
+        <div className="px-4 py-2 flex justify-end">
+          <button
             onClick={onClose}
-            aria-hidden
-        />
-        {/* panel */}
-        <div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={title}
-            className="relative z-[101] w-[min(92vw,800px)] max-h-[85vh] overflow-auto rounded-2xl bg-white p-6 shadow-xl"
-        >
-            <div className="mb-4 flex items-start justify-between gap-4">
-            <h2 className="text-lg font-semibold">{title}</h2>
-            <button
-                onClick={onClose}
-                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100"
-                aria-label="닫기"
-            >
-                ✕
-            </button>
-            </div>
-            <div className="prose max-w-none prose-sm sm:prose-base">
-            {children}
-            </div>
+            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+          >
+            확인
+          </button>
         </div>
-        </div>
-    );
-    }
+      </div>
+    </div>
+  );
+}

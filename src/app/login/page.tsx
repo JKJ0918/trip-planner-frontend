@@ -77,7 +77,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium shadow-md transition"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium shadow-md transition cursor-pointer"
               onClick={handleLogin}
             >
               로그인 하기
@@ -123,12 +123,12 @@ export default function LoginPage() {
           </p>
 
           {/* 약관 모달 */}
-          <Modal open={open === "terms"} onClose={close} title="서비스 약관">
+          <Modal open={open === "terms"} onClose={close} >
             <TermsContent />
           </Modal>
 
           {/* 개인정보 모달 */}
-          <Modal open={open === "privacy"} onClose={close} title="개인정보처리방침">
+          <Modal open={open === "privacy"} onClose={close}>
             <PrivacyContent />
           </Modal>
 

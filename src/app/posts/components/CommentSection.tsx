@@ -24,6 +24,17 @@ type ReplyPage = {
 
 const REPLIES_PAGE_SIZE = 3;
 
+/** 안전 JSON 파서: 204/빈바디/비JSON 대응 */
+async function safeJson<T>(res: Response): Promise<T | null> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 /** 최상단 댓글 입력창 (리렌더 최소화) */
 const CommentInput = memo(function CommentInput({
   value, loading, onChange, onSubmit,
@@ -80,6 +91,7 @@ const CommentCard = memo(function CommentCard({
   hasMoreReplies,
   loadingMore,
   onShowMoreReplies,
+  onToggleReplyInput,
 }: {
   comment: Comment;
   depth?: number;
@@ -109,6 +121,9 @@ const CommentCard = memo(function CommentCard({
   hasMoreReplies: boolean;
   loadingMore: boolean;
   onShowMoreReplies: (id: number) => void;
+
+  // 입력창 전용 토글
+  onToggleReplyInput: (id: number) => void;
 }) {
   const isReply = depth > 0;
 
@@ -117,11 +132,11 @@ const CommentCard = memo(function CommentCard({
       <div className="flex-1 min-w-0">
         {/* 헤더 */}
         <div className={`flex gap-3 ${isReply ? 'ml-10' : ''} mb-4`}>
-          {/* 아바타: 왼쪽 고정 폭 */}
+          {/* 아바타 */}
           <img
             src={`${process.env.NEXT_PUBLIC_API_BASE}${comment.avatarUrl}`}
             alt={`${comment.writerName} 프로필`}
-            className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5" // mt-0.5로 살짝 수직맞춤
+            className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5"
             loading="lazy"
             decoding="async"
           />
@@ -135,11 +150,8 @@ const CommentCard = memo(function CommentCard({
               <time>{new Date(comment.createdAt).toLocaleString()}</time>
               {comment.edited && <span className="ml-1 text-gray-400">(수정됨)</span>}
             </div>
-
-            {/* 내용/편집 영역 ... 기존 그대로 */}
           </div>
         </div>
-
 
         {/* 본문/수정 */}
         {isEditing ? (
@@ -188,7 +200,7 @@ const CommentCard = memo(function CommentCard({
           {depth === 0 && (
             <button
               type="button"
-              onClick={() => onToggleReplies(comment.id, comment.replyCount)}
+              onClick={() => onToggleReplyInput(comment.id)}  // 입력창만 토글
               className="hover:underline text-blue-600"
             >
               {openReply ? '답글 닫기' : '답글 달기'}
@@ -240,7 +252,7 @@ const CommentCard = memo(function CommentCard({
           <button
             type="button"
             className="text-blue-500 text-xs hover:underline mt-2"
-            onClick={() => onToggleReplies(comment.id, comment.replyCount)}
+            onClick={() => onToggleReplies(comment.id, comment.replyCount)} // 목록 토글 & 필요 시 로드
           >
             {showReplies ? '답글 숨기기' : `답글 보기 ${comment.replyCount}개`}
           </button>
@@ -251,7 +263,7 @@ const CommentCard = memo(function CommentCard({
           <>
             {replies.map((r) => (
               <CommentCard
-                key={r.id}
+                key={`r-${r.id}`}  // replies prefix
                 comment={r}
                 depth={1}
                 openReply={false}
@@ -272,6 +284,7 @@ const CommentCard = memo(function CommentCard({
                 hasMoreReplies={false}
                 loadingMore={false}
                 onShowMoreReplies={() => {}}
+                onToggleReplyInput={() => {}}
               />
             ))}
 
@@ -293,14 +306,10 @@ const CommentCard = memo(function CommentCard({
 });
 
 /** 목록 + 무한 스크롤 + 로컬 상태/로직 */
-function CommentList({
-  journalId,
-}: {
-  journalId: number;
-}) {
+function CommentList({ journalId }: { journalId: number }) {
   const queryClient = useQueryClient();
 
-  // 상위 입력과 분리된 로컬 상태들
+  // 로컬 상태
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [replyMap, setReplyMap] = useState<Record<number, string>>({});
   const [editMap, setEditMap] = useState<Record<number, boolean>>({});
@@ -314,9 +323,7 @@ function CommentList({
   const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
 
   // 메인 댓글 (무한 스크롤)
-  const {
-    data, fetchNextPage, hasNextPage, isFetchingNextPage,
-  } = useInfiniteQuery<CommentPage>({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<CommentPage>({
     queryKey: ['comments', journalId, sortOrder],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
@@ -344,7 +351,10 @@ function CommentList({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // ----- replies API -----
+  // 유틸: id 기준 중복제거
+  const uniqById = (arr: Comment[]) => Array.from(new Map(arr.map(x => [x.id, x])).values());
+
+  // 대댓글 페이지 로드
   const fetchRepliesPage = useCallback(async (parentId: number, page: number) => {
     const url =
       `${process.env.NEXT_PUBLIC_API_BASE}/api/comments/${parentId}/replies` +
@@ -353,15 +363,22 @@ function CommentList({
     if (!res.ok) throw new Error('대댓글 로딩 실패');
     const pageData: ReplyPage = await res.json();
 
-    setRepliesMap((prev) => ({
-      ...prev,
-      [parentId]: [...(prev[parentId] ?? []), ...pageData.content],
-    }));
+    setRepliesMap((prev) => {
+      const existing = prev[parentId] ?? [];
+      // page=0 은 교체, 그 외에는 이어붙인 뒤 중복 제거
+      const merged = page === 0 ? pageData.content : [...existing, ...pageData.content];
+      return {
+        ...prev,
+        [parentId]: uniqById(merged),
+      };
+    });
+
     setRepliesPageMap((prev) => ({ ...prev, [parentId]: pageData.number }));
     setRepliesHasNextMap((prev) => ({ ...prev, [parentId]: !pageData.last }));
     setRepliesLoaded((prev) => ({ ...prev, [parentId]: true }));
   }, []);
 
+  // 대댓글 보기/숨기기 (목록 토글 & 필요 시 로드)
   const toggleReplies = useCallback(async (parentId: number, replyCount: number) => {
     const isOpen = !!repliesVisibleMap[parentId];
     if (!isOpen && !repliesLoaded[parentId] && replyCount > 0) {
@@ -388,10 +405,12 @@ function CommentList({
   }, [fetchRepliesPage, repliesHasNextMap, repliesPageMap]);
 
   // ----- optimistic updates (좋아요/수정/삭제/답글등록) -----
+  const queryKey = ['comments', journalId, sortOrder] as const;
+
   const patchCommentLocal = useCallback((id: number, patch: Partial<Comment>) => {
     // 메인 페이지들
     queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
-      ['comments', journalId, sortOrder],
+      queryKey,
       (old) => {
         if (!old) return old as any;
         const pages = old.pages.map((pg) => ({
@@ -410,12 +429,12 @@ function CommentList({
       }
       return next;
     });
-  }, [journalId, sortOrder, queryClient]);
+  }, [queryClient, queryKey]);
 
   const removeCommentLocal = useCallback((id: number) => {
     // 메인
     queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
-      ['comments', journalId, sortOrder],
+      queryKey,
       (old) => {
         if (!old) return old as any;
         const pages = old.pages.map((pg) => ({
@@ -434,7 +453,7 @@ function CommentList({
       }
       return next;
     });
-  }, [journalId, sortOrder, queryClient]);
+  }, [queryClient, queryKey]);
 
   const addReplyLocal = useCallback((parentId: number, reply: Comment) => {
     setRepliesMap((prev) => ({
@@ -449,7 +468,7 @@ function CommentList({
     let snapshot: { likedByMe: boolean; likeCount: number } | null = null;
     // 현재 값 추출
     const findCurrent = (): Comment | undefined => {
-      const pages = queryClient.getQueryData<{ pages: CommentPage[]; pageParams: any[] }>(['comments', journalId, sortOrder])?.pages ?? [];
+      const pages = queryClient.getQueryData<{ pages: CommentPage[]; pageParams: any[] }>(queryKey)?.pages ?? [];
       for (const p of pages) {
         const f = p.content.find((c) => c.id === id);
         if (f) return f;
@@ -478,7 +497,7 @@ function CommentList({
       // 실패 롤백
       if (snapshot) patchCommentLocal(id, snapshot);
     }
-  }, [journalId, sortOrder, patchCommentLocal, queryClient, repliesMap]);
+  }, [queryClient, queryKey, repliesMap, patchCommentLocal]);
 
   const onStartEdit = useCallback((id: number, content: string) => {
     setEditMap((p) => ({ ...p, [id]: true }));
@@ -512,7 +531,6 @@ function CommentList({
 
   const onDelete = useCallback(async (id: number) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-    const backup = { id }; // 간단 백업 플래그
     removeCommentLocal(id);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/comments/${id}`, {
@@ -521,20 +539,20 @@ function CommentList({
       });
       if (!res.ok) throw new Error();
     } catch {
-      // 실패 시 전체 무효화(간단 복구) — 필요시 더 정교하게 롤백 구현 가능
-      queryClient.invalidateQueries({ queryKey: ['comments', journalId, sortOrder] });
+      // 실패 시 전체 무효화(간단 복구)
+      queryClient.invalidateQueries({ queryKey: ['comments', journalId] });
     }
-  }, [journalId, sortOrder, removeCommentLocal, queryClient]);
+  }, [journalId, removeCommentLocal, queryClient]);
 
-  const onToggleRepliesUI = useCallback((id: number, _replyCount: number) => {
-    // 답글창 토글만 맡고, 목록 토글은 toggleReplies 호출
+  // 입력창 전용 토글
+  const onToggleReplyInput = useCallback((id: number) => {
     setReplyTo((cur) => (cur === id ? null : id));
   }, []);
 
   const onSubmitReply = useCallback(async (parentId: number) => {
     const content = replyMap[parentId]?.trim();
     if (!content) return;
-    // 낙관적: 가짜 id/시간
+
     const optimistic: Comment = {
       id: Number(`9${Date.now()}`),
       content,
@@ -548,9 +566,9 @@ function CommentList({
       author: true,
       replyCount: 0,
     };
+
     addReplyLocal(parentId, optimistic);
     setReplyMap((p) => ({ ...p, [parentId]: '' }));
-    // setReplyTo(null); // 포커스 유지하려면 닫지 않기
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/comments/${journalId}`, {
@@ -559,19 +577,27 @@ function CommentList({
         body: JSON.stringify({ content, parentId }),
         credentials: 'include',
       });
-      if (!res.ok) throw new Error();
-      const saved: Comment = await res.json();
-      // 낙관적 항목을 실제 데이터로 교체
-      setRepliesMap((prev) => {
-        const arr = prev[parentId] ?? [];
-        const idx = arr.findIndex((c) => c.id === optimistic.id);
-        if (idx >= 0) {
-          const next = [...arr];
-          next[idx] = saved;
-          return { ...prev, [parentId]: next };
-        }
-        return { ...prev, [parentId]: [saved, ...arr] };
-      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const saved = await safeJson<Comment>(res);
+
+      if (saved) {
+        // 낙관적 항목을 실제 데이터로 교체
+        setRepliesMap((prev) => {
+          const arr = prev[parentId] ?? [];
+          const idx = arr.findIndex((c) => c.id === optimistic.id);
+          if (idx >= 0) {
+            const next = [...arr];
+            next[idx] = saved;
+            return { ...prev, [parentId]: next };
+          }
+          return { ...prev, [parentId]: [saved, ...arr] };
+        });
+      } else {
+        // 응답 바디가 없으면 1페이지 재동기화
+        await fetchRepliesPage(parentId, 0);
+      }
     } catch {
       // 실패 시 낙관적 항목 제거
       setRepliesMap((prev) => {
@@ -580,16 +606,18 @@ function CommentList({
       });
       alert('답글 작성 실패');
     }
-  }, [journalId, replyMap, addReplyLocal]);
+  }, [journalId, replyMap, addReplyLocal, fetchRepliesPage]);
 
-  // 파생 데이터
-  const topLevelComments = useMemo(
-    () =>
-      (data?.pages ?? [])
-        .flatMap((p) => p.content)
-        .filter((c) => (c.parentId ?? null) === null),
-    [data]
-  );
+  // 파생 데이터: 최상위 댓글 + id 기반 중복 제거
+  const topLevelComments = useMemo(() => {
+    const flat = (data?.pages ?? [])
+      .flatMap((p) => p.content)
+      .filter((c) => (c.parentId ?? null) === null);
+
+    const map = new Map<number, Comment>();
+    for (const c of flat) map.set(c.id, c);
+    return Array.from(map.values());
+  }, [data]);
 
   return (
     <>
@@ -606,10 +634,10 @@ function CommentList({
         </select>
       </div>
 
-      {/* 댓글 목록 */}
+      {/* (최상위) 댓글 목록 */}
       {topLevelComments.map((c) => (
         <CommentCard
-          key={c.id}
+          key={`c-${c.id}`}  // tops prefix
           comment={c}
           depth={0}
           // reply UI
@@ -628,22 +656,8 @@ function CommentList({
           onChangeEditValue={(id, v) => setEditContentMap((p) => ({ ...p, [id]: v }))}
           // replies
           showReplies={!!repliesVisibleMap[c.id]}
-          onToggleReplies={(id, replyCount) => {
-            onToggleRepliesUI(id, replyCount);  // 답글창 토글
-            // 목록 토글/로드
-            (async () => {
-              const isOpen = !!repliesVisibleMap[id];
-              if (!isOpen && !repliesLoaded[id] && c.replyCount > 0) {
-                try {
-                  setRepliesLoadingMap((p) => ({ ...p, [id]: true }));
-                  await fetchRepliesPage(id, 0);
-                } finally {
-                  setRepliesLoadingMap((p) => ({ ...p, [id]: false }));
-                }
-              }
-              setRepliesVisibleMap((prev) => ({ ...prev, [id]: !isOpen }));
-            })();
-          }}
+          onToggleReplies={toggleReplies}              // 목록 토글/로드 담당
+          onToggleReplyInput={onToggleReplyInput}      // 입력창만 토글
           replies={repliesMap[c.id] ?? []}
           hasMoreReplies={!!repliesHasNextMap[c.id]}
           loadingMore={!!repliesLoadingMap[c.id]}
@@ -652,7 +666,7 @@ function CommentList({
       ))}
 
       <div ref={observerRef} className="h-6" />
-      {/* 로딩 표시 */}
+      {/* 필요 시 스피너 등 추가 */}
     </>
   );
 }
@@ -669,7 +683,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
     if (!content) return;
     setLoading(true);
 
-    // 간단 낙관적 추가: 첫 페이지에 삽입 (popular일 땐 서버 정렬에 맡기세요)
+    // 낙관적 추가
     const optimistic: Comment = {
       id: Number(`8${Date.now()}`),
       content,
@@ -683,6 +697,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
       author: true,
       replyCount: 0,
     };
+
     queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
       ['comments', journalId, sortOrder],
       (old) => {
@@ -703,25 +718,33 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         body: JSON.stringify({ content, parentId: null }),
         credentials: 'include',
       });
-      if (!res.ok) throw new Error();
-      const saved: Comment = await res.json();
-      // 낙관 아이템 교체
-      queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
-        ['comments', journalId, sortOrder],
-        (old) => {
-          if (!old) return old as any;
-          const pages = [...old.pages];
-          if (pages.length > 0) {
-            const idx = pages[0].content.findIndex((c) => c.id === optimistic.id);
-            if (idx >= 0) {
-              const arr = [...pages[0].content];
-              arr[idx] = saved;
-              pages[0] = { ...pages[0], content: arr };
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const saved = await safeJson<Comment>(res);
+
+      if (saved) {
+        // 낙관 항목 교체
+        queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
+          ['comments', journalId, sortOrder],
+          (old) => {
+            if (!old) return old as any;
+            const pages = [...old.pages];
+            if (pages.length > 0) {
+              const idx = pages[0].content.findIndex((c) => c.id === optimistic.id);
+              if (idx >= 0) {
+                const arr = [...pages[0].content];
+                arr[idx] = saved;
+                pages[0] = { ...pages[0], content: arr };
+              }
             }
+            return { ...old, pages };
           }
-          return { ...old, pages };
-        }
-      );
+        );
+      } else {
+        // 바디가 없으면 목록 재검증
+        queryClient.invalidateQueries({ queryKey: ['comments', journalId] });
+      }
     } catch {
       // 실패 시 낙관 제거
       queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(

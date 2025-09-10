@@ -1,5 +1,5 @@
 'use client'
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; 
 import { useState } from "react";
 import { nicknameCheck } from "../join/utils/nicknameCheck";
 
@@ -10,7 +10,7 @@ export default function SocialJoin() {
   const [nStatus, setNStatus] = useState<"idle"|"checking"|"ok"|"taken"|"error">("idle");
   const [nMsg, setNMsg] = useState<string>("");
 
-  // 닉네임 중복검사 함수 (컴포넌트 안에!)
+  // 닉네임 중복검사 함수
   async function handleCheckNickname() {
     if (!nickname) {
       return;
