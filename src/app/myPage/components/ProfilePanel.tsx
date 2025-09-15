@@ -22,10 +22,10 @@ export default function ProfilePanel({ userNickname }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dropRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ 닉네임 기본 규칙(허용문자 + 길이)
+  // 닉네임 기본 규칙(허용문자 + 길이)
   const NICK_RE = /^[a-zA-Z0-9가-힣._-]{2,20}$/;
 
-  // ✅ 수동 중복검사 상태
+  // 수동 중복검사 상태
   const [nickPending, setNickPending] = useState(false);    // 검사 진행중
   const [nickAvailable, setNickAvailable] = useState(true); // 사용 가능 여부
   const [nickChecked, setNickChecked] = useState(true);     // 수동 검사 완료 여부(초기: 기존 닉네임은 통과 간주)
@@ -117,7 +117,7 @@ export default function ProfilePanel({ userNickname }: Props) {
 
   const nickname = watch("nickname");
 
-  // ✅ 값이 바뀌면 "검사 필요"로 되돌림 (현재 닉네임이면 검사 불필요)
+  // 값이 바뀌면 "검사 필요"로 되돌림 (현재 닉네임이면 검사 불필요)
   useEffect(() => {
     if (!me) return;
     if (nickname === me.nickname) {
@@ -136,7 +136,7 @@ export default function ProfilePanel({ userNickname }: Props) {
     return Boolean(nicknameDirty || selectedFile || watch("avatarUrl") === "");
   }, [formState.dirtyFields.nickname, selectedFile, watch]);
 
-  // ✅ 기본 규칙 통과 여부(버튼 활성 조건)
+  // 기본 규칙 통과 여부(버튼 활성 조건)
   const basicValid =
     !!nickname &&
     !formState.errors.nickname &&
@@ -144,14 +144,14 @@ export default function ProfilePanel({ userNickname }: Props) {
     nickname.trim() === nickname &&
     !/\s/.test(nickname);
 
-  // ✅ Save 활성 조건
+  // Save 활성 조건
   const canSave =
     somethingChanged &&
     basicValid &&
     !nickPending &&
     (me && nickname === me.nickname ? true : (nickChecked && nickAvailable));
 
-  // ✅ 수동 중복검사
+  // 수동 중복검사
   const handleCheckNickname = async () => {
     if (!basicValid) return; // 기본 규칙 통과 전에는 무시
     if (!me) return;
@@ -269,7 +269,7 @@ export default function ProfilePanel({ userNickname }: Props) {
             </div>
 
             <div className="grid grid-cols-1 gap-6 pt-8 sm:grid-cols-6">
-              {/* ✅ 닉네임 + 유효성 검사 버튼 */}
+              {/* 닉네임 + 유효성 검사 버튼 */}
               <div className="sm:col-span-3">
                 <label className="block text-sm text-gray-700 mb-1">Nickname</label>
                 <div className="flex gap-2">
@@ -297,7 +297,7 @@ export default function ProfilePanel({ userNickname }: Props) {
                     className="shrink-0 px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                     aria-disabled={!basicValid || nickPending}
                   >
-                    {nickPending ? "확인 중…" : "유효성 검사"}
+                    {nickPending ? "확인 중…" : "중복확인"}
                   </button>
                 </div>
 

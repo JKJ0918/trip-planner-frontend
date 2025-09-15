@@ -17,12 +17,12 @@ export type Comment = {
   replyCount: number;
 };
 
-type CommentPage = { content: Comment[]; last: boolean };
-type ReplyPage = {
+type CommentPage = { content: Comment[]; last: boolean }; // 댓글
+type ReplyPage = { // 대댓글
   content: Comment[]; last: boolean; number: number; size: number; totalPages: number; totalElements: number;
 };
 
-const REPLIES_PAGE_SIZE = 3;
+const REPLIES_PAGE_SIZE = 3; // 대댓글 더보기 요청 시 페이지 크기
 
 /** 안전 JSON 파서: 204/빈바디/비JSON 대응 */
 async function safeJson<T>(res: Response): Promise<T | null> {
@@ -135,7 +135,7 @@ const CommentCard = memo(function CommentCard({
           {/* 아바타 */}
           <img
             src={`${process.env.NEXT_PUBLIC_API_BASE}${comment.avatarUrl}`}
-            alt={`${comment.writerName} 프로필`}
+            alt={`${comment.writerName} 프로필`} // 이미지 미로드 대체 텍스트 
             className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5"
             loading="lazy"
             decoding="async"
@@ -148,7 +148,7 @@ const CommentCard = memo(function CommentCard({
               <span className="font-semibold text-gray-900">{comment.writerName}</span>
               <span>·</span>
               <time>{new Date(comment.createdAt).toLocaleString()}</time>
-              {comment.edited && <span className="ml-1 text-gray-400">(수정됨)</span>}
+              {comment.edited && <span className="ml-1 text-gray-400">(수정됨)</span>} {/* Code 1 : true일 떄만 (수정됨) */}
             </div>
           </div>
         </div>
@@ -342,12 +342,12 @@ function CommentList({ journalId }: { journalId: number }) {
   // 옵저버
   const observerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+    const observer = new IntersectionObserver((entries) => { // Code 2 : 감지하면 콜백함수실행, 이 콜백 함수의 첫 번째 인자가 entries
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {  //* 스크롤을 내려서 observerRef.current가 화면에 보이면 → entries[0].isIntersecting === true가 됨
         fetchNextPage();
       }
     }, { threshold: 1 });
-    if (observerRef.current) observer.observe(observerRef.current);
+    if (observerRef.current) observer.observe(observerRef.current); // <div ref={observerRef}> 가 DOM에 렌더링되면, observer.observe(observerRef.current)가 실행 “이 div가 뷰포트에 들어올 때 알려줄게” 상태
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
@@ -364,23 +364,23 @@ function CommentList({ journalId }: { journalId: number }) {
     const pageData: ReplyPage = await res.json();
 
     setRepliesMap((prev) => {
-      const existing = prev[parentId] ?? [];
+      const existing = prev[parentId] ?? []; // ?? [] = 없으면 빈 배열로 초기화
       // page=0 은 교체, 그 외에는 이어붙인 뒤 중복 제거
-      const merged = page === 0 ? pageData.content : [...existing, ...pageData.content];
-      return {
+      const merged = page === 0 ? pageData.content : [...existing, ...pageData.content]; // Code 3 : (...) 스프레드 문법을 두 번 쓰면 두 배열이 이어 붙음
+      return { // Code 4 : React 상태는 불변성, 항상 return { ...prev, [parentId]: newValue } 같은 방식으로 새 객체를 만들어 반환
         ...prev,
         [parentId]: uniqById(merged),
       };
     });
 
-    setRepliesPageMap((prev) => ({ ...prev, [parentId]: pageData.number }));
+    setRepliesPageMap((prev) => ({ ...prev, [parentId]: pageData.number })); // 현재 불러온 대댓글 페이지 번호를 저장
     setRepliesHasNextMap((prev) => ({ ...prev, [parentId]: !pageData.last }));
-    setRepliesLoaded((prev) => ({ ...prev, [parentId]: true }));
+    setRepliesLoaded((prev) => ({ ...prev, [parentId]: true })); // 이 댓글의 대댓글 목록을 한 번이라도 불러왔는지
   }, []);
 
   // 대댓글 보기/숨기기 (목록 토글 & 필요 시 로드)
   const toggleReplies = useCallback(async (parentId: number, replyCount: number) => {
-    const isOpen = !!repliesVisibleMap[parentId];
+    const isOpen = !!repliesVisibleMap[parentId]; //Code 5: 확실히 true/false 값으로 정리해주기 위해서 !!
     if (!isOpen && !repliesLoaded[parentId] && replyCount > 0) {
       try {
         setRepliesLoadingMap((p) => ({ ...p, [parentId]: true }));
@@ -425,7 +425,7 @@ function CommentList({ journalId }: { journalId: number }) {
       const next = { ...prev };
       for (const pid of Object.keys(next)) {
         const parentId = Number(pid);
-        next[parentId] = next[parentId]?.map((c) => (c.id === id ? { ...c, ...patch } : c)) ?? [];
+        next[parentId] = next[parentId]?.map((c) => (c.id === id ? { ...c, ...patch } : c)) ?? []; // Code 6 : ?. optional Chaining 있으면 map 돌리고, 없으면(undefine, null) 그냥 undefined ??는 병합연산자
       }
       return next;
     });
@@ -638,7 +638,7 @@ function CommentList({ journalId }: { journalId: number }) {
       {topLevelComments.map((c) => (
         <CommentCard
           key={`c-${c.id}`}  // tops prefix
-          comment={c}
+          comment={c} // type Comment 참고
           depth={0}
           // reply UI
           openReply={replyTo === c.id}
@@ -673,8 +673,8 @@ function CommentList({ journalId }: { journalId: number }) {
 
 /** 최상위 섹션: 입력창 + 목록 분리 */
 export default function CommentSection({ journalId }: { journalId: number }) {
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [newComment, setNewComment] = useState(''); // 새로 작성된 댓글
+  const [loading, setLoading] = useState(false); // button 중복 방지(true일 때)
   const queryClient = useQueryClient();
   const sortOrder: 'recent' | 'popular' = 'recent'; // 입력 영역에서는 사용 X
 
@@ -704,9 +704,12 @@ export default function CommentSection({ journalId }: { journalId: number }) {
         if (!old) return old as any;
         const pages = [...old.pages];
         if (pages.length > 0) {
-          pages[0] = { ...pages[0], content: [optimistic, ...pages[0].content] };
+          pages[0] = { ...pages[0], content: [optimistic, ...pages[0].content] }; // 새 댓글은 항상 첫번째 페이지에 추가됨
+        // “pages[0] 객체를 복사해서 새 객체를 만드는데,
+        // 그 안의 content 속성만은 새 배열 [optimistic, ...기존 content] 로 교체하라.
+        // 그리고 그 새 객체를 pages[0]에 대입하라.”
         }
-        return { ...old, pages };
+        return { ...old, pages }; // 이제 응용하여 이해할 수 있음
       }
     );
     setNewComment('');
@@ -723,7 +726,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
 
       const saved = await safeJson<Comment>(res);
 
-      if (saved) {
+      if (saved) { // 바디가 있을 경우
         // 낙관 항목 교체
         queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
           ['comments', journalId, sortOrder],
@@ -755,7 +758,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
           if (pages.length > 0) {
             pages[0] = {
               ...pages[0],
-              content: pages[0].content.filter((c) => !String(c.id).startsWith('8')),
+              content: pages[0].content.filter((c) => !String(c.id).startsWith('8')), // 낙관적추가된 것이 id가 8로 시작
             };
           }
           return { ...old, pages };

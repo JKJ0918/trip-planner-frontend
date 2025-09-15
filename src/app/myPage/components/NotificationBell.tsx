@@ -28,8 +28,6 @@ type PageResp<T> = {
   size: number;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ?? "";
-
 export default function NotificationsTable() {
   const router = useRouter();
   const [page, setPage] = useState(0); // 0-based
@@ -54,7 +52,7 @@ export default function NotificationsTable() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/notifications?page=${page}&size=${size}`, creds);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/notifications?page=${page}&size=${size}`, creds);
       if (!res.ok) throw new Error("알림을 불러오지 못했습니다.");
       const json: PageResp<NotificationItem> = await res.json();
       setItems(json.content ?? []);
@@ -72,12 +70,12 @@ export default function NotificationsTable() {
   }, [page, size]);
 
   const markRead = async (id: number) => {
-    await fetch(`${API_BASE}/api/notifications/${id}/read`, { method: "POST", credentials: "include" });
+    await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/notifications/${id}/read`, { method: "POST", credentials: "include" });
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
   };
 
   const markAllRead = async () => {
-    await fetch(`${API_BASE}/api/notifications/read-all`, { method: "POST", credentials: "include" });
+    await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/notifications/read-all`, { method: "POST", credentials: "include" });
     setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
@@ -216,7 +214,7 @@ export default function NotificationsTable() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-3 flex items-center justify-end gap-2">
+        <div className="mt-4 flex justify-center items-center gap-2">
           <button
             disabled={disablePrev}
             onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -224,6 +222,9 @@ export default function NotificationsTable() {
           >
             이전
           </button>
+          <span className="px-2 py-1 text-sm text-gray-600">
+            {totalPages === 0 ? '1 / 1' : `${page + 1} / ${totalPages}`}
+          </span>
           <button
             disabled={disableNext}
             onClick={() => setPage((p) => p + 1)}

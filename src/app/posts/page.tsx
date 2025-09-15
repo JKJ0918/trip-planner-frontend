@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { TravelPostSummary } from '../maps/utils/tripstore';
 import PostCard from '../posts/components/PostCard';
 
@@ -60,7 +59,7 @@ export default function PostListPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">여행 게시판</h1>
+      <h1 className="text-2xl font-bold tracking-tight">여행 일정</h1>
 
       {/* === 상단 툴바 === */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -71,14 +70,14 @@ export default function PostListPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="제목 또는 도시명으로 검색"
-            className="w-full sm:w-96 rounded-md border px-3 py-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="제목 또는 도시명으로 검색해주세요."
+            className="w-full sm:w-96 rounded-4xl bg-gray-100 px-3 py-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
           <button
             onClick={handleSearch}
-            className="rounded-md bg-blue-600 text-white px-4 py-2 hover:bg-blue-500"
+            className="rounded-4xl bg-gray-800 text-white px-4 py-2 hover:bg-gray-500"
           >
-            검색
+            Search
           </button>
         </div>
 
@@ -96,7 +95,7 @@ export default function PostListPage() {
               setSort(e.target.value as SortKey);
               setPage(0);
             }}
-            className="rounded-md border px-3 py-2 text-sm"
+            className="rounded-4xl bg-gray-100 shadow px-3 py-2 text-sm"
             aria-label="정렬"
           >
             <option value="latest">최신순</option>
@@ -111,7 +110,7 @@ export default function PostListPage() {
               setSize(Number(e.target.value));
               setPage(0);
             }}
-            className="rounded-md border px-3 py-2 text-sm"
+            className="rounded-4xl bg-gray-100 shadow px-3 py-2 text-sm"
             aria-label="페이지당 개수"
           >
             <option value={3}>3개</option>

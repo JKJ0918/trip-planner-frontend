@@ -14,27 +14,25 @@ const fmt = (iso?: string) =>
   iso ? new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(new Date(iso)) : '';
 
 export default function LikedPostsPage() {
-  const BASE_URL = 'http://localhost:8080';
   const [items, setItems] = useState<MeLikePostDTO[]>([]);
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10); // 테이블이므로 10개 기본
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [afterTravel, setAfterTravel] = useState<boolean | null>(null); // null=전체
 
   const query = useMemo(() => {
-    const p = new URLSearchParams({ page: String(page), size: String(size) });
+    const p = new URLSearchParams({ page: String(page) });
     if (afterTravel !== null) p.set('afterTravel', String(afterTravel));
     return p.toString();
-  }, [page, size, afterTravel]);
+  }, [page, afterTravel]);
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${BASE_URL}/me/likeJournals?${query}`, { credentials: 'include' });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/me/likeJournals?${query}`, { credentials: 'include' });
         if (!res.ok) {
           if (res.status === 401) throw new Error('로그인이 필요합니다.');
           throw new Error(`오류: ${res.status}`);
@@ -77,23 +75,14 @@ export default function LikedPostsPage() {
               여행 다녀오기 전
             </button>
           </div>
-
-          {/* 페이지당 개수 (선택) */}
-          <div className="flex items-center gap-2">
-            <span>페이지당</span>
-            <select
-              value={size}
-              onChange={(e) => { setSize(Number(e.target.value)); setPage(0); }}
-              className="h-9 rounded-md border border-gray-300 text-sm px-2 bg-white"
-            >
-              {[10, 15, 20].map(n => <option key={n} value={n}>{n}개</option>)}
-            </select>
-          </div>
         </div>
       </section>
 
       {/* Right: table content */}
       <section className="lg:col-span-2">
+        <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm text-gray-500">총 페이지: {totalPages}</div>
+        </div>
         {/* Error banner */}
         {error && (
           <div className="mb-4 rounded-lg px-4 py-3 text-sm bg-red-50 text-red-700">
@@ -116,7 +105,7 @@ export default function LikedPostsPage() {
                 <th className="sticky left-0 bg-gray-50 text-left px-4 py-3 font-medium">제목</th>
                 <th className="text-left px-4 py-3 font-medium">작성자</th>
                 <th className="text-left px-4 py-3 font-medium">작성일</th>
-                <th className="px-4 py-3 text-right font-medium">보기</th>
+                <th className="px-4 py-3 text-right font-medium"></th>
               </tr>
             </thead>
 

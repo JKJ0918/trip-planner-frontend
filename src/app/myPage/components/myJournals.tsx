@@ -1,17 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useMemo, useCallback } from "react";
 import { useMyJournals } from "@/app/hooks/useMyJournals";
 
 export default function MyJourney() {
-  const { journals, isLoading, error } = useMyJournals(1, 12);
+  // 0-based 페이지 상태
+  const [page, setPage] = useState(0);
+  const size = 12;
 
-  const fmt = (s: string) =>
-    new Intl.DateTimeFormat("ko-KR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(new Date(s));
+  const { journals, meta, isLoading, error } = useMyJournals(page, size);
+
+  const fmt = useCallback(
+    (s: string) =>
+      new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(new Date(s)),
+    []
+  );
+
+  const canPrev = page > 0;
+  const canNext = (meta?.totalPages ?? 1) > 0 && page + 1 < (meta?.totalPages ?? 1);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -31,23 +42,10 @@ export default function MyJourney() {
             목록을 불러오는 중 오류가 발생했습니다.
           </div>
         )}
-
-        {/* Empty state */}
-        {!error && !isLoading && (!journals || journals.length === 0) && (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-gray-600">
-            아직 작성한 여행일지가 없습니다.
-            <div className="mt-3">
-              <Link
-                href="/posts/new"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500"
-              >
-                새 여행일지 작성
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Table wrapper for horizontal scroll */}
+        <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm text-gray-500">총 페이지: {meta.totalPages}</div>
+        </div>
+        {/* Table wrapper */}
         <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 text-gray-600">
@@ -74,6 +72,12 @@ export default function MyJourney() {
                     <td className="px-4 py-3 text-right">
                       <div className="inline-block h-8 w-20 bg-gray-100 animate-pulse rounded" />
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-block h-8 w-20 bg-gray-100 animate-pulse rounded" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-block h-8 w-24 bg-gray-100 animate-pulse rounded" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -93,12 +97,14 @@ export default function MyJourney() {
                       </Link>
                     </td>
 
-                    {/* 작성일 date */}
+                    {/* 작성일 */}
                     <td className="px-4 py-3 text-gray-600 align-middle">{fmt(p.createdAt)}</td>
-                    {/* 좋아요 date */}
-                    <td className="px-4 py-3 text-right">{p.likeCount}</td>
-                    {/* 조회수 date */}
-                    <td className="px-4 py-3 text-right">{p.views}</td>
+
+                    {/* 좋아요 */}
+                    <td className="px-4 py-3 text-right">{p.likeCount ?? 0}</td>
+
+                    {/* 조회수 */}
+                    <td className="px-4 py-3 text-right">{p.views ?? 0}</td>
 
                     {/* 수정/삭제 */}
                     <td className="px-4 py-3 text-right align-middle">
@@ -122,6 +128,29 @@ export default function MyJourney() {
               </tbody>
             )}
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-4 flex justify-center items-center gap-2">
+          <button
+            className="px-3 py-1.5 rounded-md border text-sm disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={!canPrev}
+          >
+            이전
+          </button>
+
+          <span className="px-2 py-1 text-sm text-gray-600">
+            {(meta?.totalPages ?? 1) === 0 ? "1 / 1" : `${page + 1} / ${meta?.totalPages ?? 1}`}
+          </span>
+
+          <button
+            className="px-3 py-1.5 rounded-md border text-sm disabled:opacity-50"
+            onClick={() => setPage((p) => (canNext ? p + 1 : p))}
+            disabled={!canNext}
+          >
+            다음
+          </button>
         </div>
       </section>
     </div>
