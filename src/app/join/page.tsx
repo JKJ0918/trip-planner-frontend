@@ -279,12 +279,12 @@ export default function JoinPage() {
           </p>
 
           {/* 약관 모달 */}
-          <Modal open={open === "terms"} onClose={close} title="서비스 약관">
+          <Modal open={open === "terms"} onClose={close}>
             <TermsContent />
           </Modal>
 
           {/* 개인정보 모달 */}
-          <Modal open={open === "privacy"} onClose={close} title="개인정보처리방침">
+          <Modal open={open === "privacy"} onClose={close}>
             <PrivacyContent />
           </Modal>
         </div>

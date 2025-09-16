@@ -6,13 +6,14 @@ import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
 import { useMe } from '../hooks/useMe';
 import LikedPostsPage from './components/LikedPostsPage';
+import ChattingPage from './components/ChattingPage';
 
 const sections = [
   '프로필',
   '내가 쓴 여행일지',
   '알림',
   '좋아요한 게시물',
-  '설정',
+  '채팅',
 ]; 
 
 export default function MyPage() {
@@ -49,8 +50,8 @@ export default function MyPage() {
         return <NotificationBell />;
       case '좋아요한 게시물':
         return <LikedPostsPage />;
-      case '설정':
-        return <div>비밀번호 변경 및 계정 설정</div>;
+      case '채팅':
+        return <ChattingPage />;
       default:
         return <div>선택된 섹션이 없습니다.</div>;
     }

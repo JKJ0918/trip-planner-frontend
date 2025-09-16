@@ -57,7 +57,7 @@ const CommentInput = memo(function CommentInput({
         <div className="mt-2">
           <button
             type="button"
-            className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
+            className="bg-gray-800 text-white px-4 py-2 rounded text-sm cursor-pointer"
             onClick={onSubmit}
             disabled={loading}
           >

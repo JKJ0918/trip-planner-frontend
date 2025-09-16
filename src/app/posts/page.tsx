@@ -54,7 +54,7 @@ export default function PostListPage() {
   const gridClass = useMemo(() => {
     if (view === 'list') return 'grid grid-cols-1 gap-4';
     // grid 모드: 1→2→3열
-    return 'grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6';
+    return 'grid [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))] gap-6';
   }, [view]);
 
   return (
@@ -113,7 +113,7 @@ export default function PostListPage() {
             className="rounded-4xl bg-gray-100 shadow px-3 py-2 text-sm"
             aria-label="페이지당 개수"
           >
-            <option value={3}>3개</option>
+            <option value={4}>4개</option>
             <option value={6}>6개</option>
             <option value={12}>12개</option>
           </select>
@@ -123,7 +123,7 @@ export default function PostListPage() {
 
       {/* === 컨텐츠 === */}
       {loading ? (
-        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+        <div className="grid [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))] gap-6">
           {Array.from({ length: Math.min(size, 9) }).map((_, i) => (
             <div key={i} className="h-64 rounded-xl bg-gray-100 animate-pulse" />
           ))}
@@ -144,8 +144,8 @@ export default function PostListPage() {
           <button
             key={idx}
             onClick={() => setPage(idx)}
-            className={`px-3 py-1 rounded-md ${
-              page === idx ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
+            className={`px-3 py-1 rounded-xl ${
+              page === idx ? 'bg-red-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
             }`}
           >
             {idx + 1}
