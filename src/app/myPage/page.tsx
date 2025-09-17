@@ -6,7 +6,9 @@ import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
 import { useMe } from '../hooks/useMe';
 import LikedPostsPage from './components/LikedPostsPage';
-import ChattingPage from './components/ChattingPage';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 
 const sections = [
   '프로필',
@@ -28,6 +30,8 @@ export default function MyPage() {
     ? avatarUrl                // 절대경로 그대로 사용
     : `${base}${avatarUrl}`    // 상대경로면 base 붙이기
   : `${base}/uploads/basic_profile.png`;
+  
+  const router = useRouter();
 
   //useMe(), me 로드
   useEffect(() => {
@@ -51,7 +55,8 @@ export default function MyPage() {
       case '좋아요한 게시물':
         return <LikedPostsPage />;
       case '채팅':
-        return <ChattingPage />;
+        router.push("/myPage/chatroom");
+        return null;   // 우측에 아무것도 안 그림
       default:
         return <div>선택된 섹션이 없습니다.</div>;
     }
@@ -80,17 +85,27 @@ export default function MyPage() {
         </div>
 
         <nav className="space-y-2">
-          {sections.map((section) => (
-            <button
-              key={section}
-              onClick={() => setActiveSection(section)}
-              className={`w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition ${
-                activeSection === section ? 'bg-blue-100 font-semibold' : ''
-              }`}
-            >
-              {section}
-            </button>
-          ))}
+          {sections.map((section) =>
+            section === "채팅" ? (
+              <Link
+                key={section}
+                href="/myPage/chatroom"
+                className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition"
+              >
+                {section}
+              </Link>
+            ) : (
+              <button
+                key={section}
+                onClick={() => setActiveSection(section)}
+                className={`w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition ${
+                  activeSection === section ? 'bg-blue-100 font-semibold' : ''
+                }`}
+              >
+                {section}
+              </button>
+            )
+          )}
         </nav>
       </aside>
 
