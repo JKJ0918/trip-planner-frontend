@@ -82,8 +82,6 @@ export default function TravelPostPage() {
   const [currentUser, setCurrentUser] = useState<{ id: number; nickname: string } | null>(null); // 닉네임 체크
 
   const [liking, setLiking] = useState(false); // 중복 클릭 방지_좋아요
-  const API_BASE = "http://localhost:8080/api/journals";
-
 
   const toggleLike = async () => {
     if (!post) return;
@@ -107,7 +105,7 @@ export default function TravelPostPage() {
       setLiking(true);
       setPost(optimistic);
 
-      const url = `${API_BASE}/${post.id}/like`;
+      const url = `${process.env.NEXT_PUBLIC_API_BASE}/${post.id}/like`;
       const res = await fetch(url, {
         method: post.likedByMe ? "DELETE" : "PUT",
         credentials: "include",

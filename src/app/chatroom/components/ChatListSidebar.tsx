@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link";
 
-type ChatRoom = {
+type Messages = {
   id: string;
   roomId: string | number;
   title: string;
@@ -19,7 +19,7 @@ export default function ChatListSidebar () {
     // 사용자 입력을 저장할 변수
     const [inputValue, setInputValue] = useState('');
 
-    const [chatRoom, setChatRoom] = useState<ChatRoom[]>([]);
+    const [chatRoom, setChatRoom] = useState<Messages[]>([]);
     // const [rooms, setRooms] = useState<ChatRoom[]>([]);
 
     useEffect(() => {
@@ -90,7 +90,7 @@ export default function ChatListSidebar () {
                         {chatRoom.map((room, index) => (
                         <Link 
                             key={room.id} 
-                            href={`/myPage/chatroom/${room.id}`} 
+                            href={`/chatroom/${room.id}`}
                             className="block px-4 py-3 hover:bg-gray-100 border-b"
                         >
                             {room.title}

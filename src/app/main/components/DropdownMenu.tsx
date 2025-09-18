@@ -137,11 +137,17 @@ export default function DropDownMenu() {
                 </span>
               )}
             </button>
-
+            {/* 채팅 탭 */}
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
+                    onClick={() => router.push("/chatroom")}>
+              채팅
+            </button>
+            {/* 마이페이지 탭 */}
             <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
                     onClick={() => router.push("/myPage")}>
               마이페이지
             </button>
+            {/* 로그아웃 탭 */}
             <button className="w-full text-left px-3 py-2 hover:bg-gray-50 active:bg-gray-100 transition"
                     onClick={() => handleLogout('/')}>
               로그아웃

@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import ChatListSidebar from "../components/ChatListSidebar";
+import ChatListSidebar from "./components/ChatListSidebar";
 
 export default function ChatRoomLayout({ children }: { children: ReactNode }) {
 

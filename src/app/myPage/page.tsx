@@ -6,7 +6,6 @@ import MyJourney from './components/myJournals';
 import NotificationBell from './components/NotificationBell';
 import { useMe } from '../hooks/useMe';
 import LikedPostsPage from './components/LikedPostsPage';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 
@@ -15,7 +14,7 @@ const sections = [
   '내가 쓴 여행일지',
   '알림',
   '좋아요한 게시물',
-  '채팅',
+  '추가예정',
 ]; 
 
 export default function MyPage() {
@@ -54,9 +53,8 @@ export default function MyPage() {
         return <NotificationBell />;
       case '좋아요한 게시물':
         return <LikedPostsPage />;
-      case '채팅':
-        router.push("/myPage/chatroom");
-        return null;   // 우측에 아무것도 안 그림
+      case '추가예정':
+        return;
       default:
         return <div>선택된 섹션이 없습니다.</div>;
     }
@@ -83,18 +81,8 @@ export default function MyPage() {
             {isLoading ? '불러오는 중…' : (email || '이메일 없음')}
           </p>
         </div>
-
         <nav className="space-y-2">
           {sections.map((section) =>
-            section === "채팅" ? (
-              <Link
-                key={section}
-                href="/myPage/chatroom"
-                className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition"
-              >
-                {section}
-              </Link>
-            ) : (
               <button
                 key={section}
                 onClick={() => setActiveSection(section)}
@@ -105,7 +93,7 @@ export default function MyPage() {
                 {section}
               </button>
             )
-          )}
+          }
         </nav>
       </aside>
 

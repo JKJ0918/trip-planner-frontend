@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import AuthorDropdown from './AuthorDropdown';
 
 export type Comment = {
   id: number;
@@ -145,7 +146,9 @@ const CommentCard = memo(function CommentCard({
           <div className="flex-1 min-w-0">
             {/* 헤더(이름 · 시간 · 수정됨) */}
             <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span className="font-semibold text-gray-900">{comment.writerName}</span>
+                <AuthorDropdown
+                  writerName={comment.writerName}// 라우팅 규칙에 맞게 수정
+                />
               <span>·</span>
               <time>{new Date(comment.createdAt).toLocaleString()}</time>
               {comment.edited && <span className="ml-1 text-gray-400">(수정됨)</span>} {/* Code 1 : true일 떄만 (수정됨) */}
