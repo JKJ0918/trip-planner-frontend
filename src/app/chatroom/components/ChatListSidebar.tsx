@@ -16,11 +16,7 @@ type Messages = {
 
 export default function ChatListSidebar () {
 
-    // 사용자 입력을 저장할 변수
-    const [inputValue, setInputValue] = useState('');
-
     const [chatRoom, setChatRoom] = useState<Messages[]>([]);
-    // const [rooms, setRooms] = useState<ChatRoom[]>([]);
 
     useEffect(() => {
         fetchRooms(); // 채팅방 로드
@@ -46,51 +42,14 @@ export default function ChatListSidebar () {
         }
     }
 
-    const createRoom = async () => {
-        if(inputValue) {
-            const body = {
-                title : inputValue
-            };
-            try{
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/create`, {
-                    method: "POST",
-                    credentials: "include", 
-                    headers: {"Content-Type" : "application/json"},
-                    body: body ? JSON.stringify(body) : undefined,
-                });
-
-                if(res.status === 201){
-                    const data = await res.json();
-                    setInputValue('');
-                    setChatRoom((prev) => [...prev, data])
-                }
-
-            } catch (error) {
-                console.error("채팅방 생성 실패(const createRoom)", error);
-            }
-
-        }
-    }
-
-
     return (
         <div>
             <ul>
-                <div>
-                    { /* 입력 필드 */ }
-                    <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    />
-                    {/* 채팅방 추가 */}
-                    <button onClick={createRoom}>입력</button>
-                        </div>
                         {/* 채팅방 리스트 출력 */}
                         {chatRoom.map((room, index) => (
                         <Link 
-                            key={room.id} 
-                            href={`/chatroom/${room.id}`}
+                            key={room.roomId} 
+                            href={`/chatroom/${room.roomId}`}
                             className="block px-4 py-3 hover:bg-gray-100 border-b"
                         >
                             {room.title}

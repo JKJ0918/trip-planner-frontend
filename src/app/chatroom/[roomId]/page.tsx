@@ -34,11 +34,10 @@ export default function ChatRoom({ params }: chatRoomProps) {
     // 로그인이 없다는 가정하에 임시 방편들
     // 선택한 회원 번호
     const [selectedNumber, setSelectedNumber] = useState([]);
-    const numbers = [1, 2, 3, 4, 5]; // 회원 번호를 위한 숫자 배열
 
-    const handleNumberClick = (number: any) => {
-        setSelectedNumber(number);
-    };
+    //const handleNumberClick = (number: any) => {
+    //    setSelectedNumber(number);
+    //};
 
     useEffect(() => {
         connect(); // 1. 웹 소켓 연결
@@ -52,7 +51,10 @@ export default function ChatRoom({ params }: chatRoomProps) {
         // 웹소켓 연결
         const socket = new WebSocket("ws://localhost:8080/ws-stomp");
         stompClient.current = Stomp.over(socket);
-        stompClient.current.connect({}, () => {
+
+        stompClient.current.connect(
+            {}, // 헤더를 비워둬도 쿠키 자동전송
+            () => {
             // 메시지 수신 ( 1은 roomId를 임시로 표현)
             stompClient.current?.subscribe(`/sub/chatroom/` + roomId, (message) => {
                 // 누군가 발송했던 메시지를 리스트에 추가
@@ -94,11 +96,11 @@ export default function ChatRoom({ params }: chatRoomProps) {
     const sendMessage = () => {
         if(stompClient.current && inputValue) {
             //selectdNumber는 userId로 선택된 값
-            if (stompClient.current && inputValue && selectedNumber) {
+            if (stompClient.current && inputValue) {
                 const body = {
                 roomId : roomId,
                 content : inputValue,
-                writerId : selectedNumber
+                // writerId : selectedNumber
             };
             stompClient.current.send(`/pub/message`, {}, JSON.stringify(body));
             setInputValue('');
@@ -109,28 +111,6 @@ export default function ChatRoom({ params }: chatRoomProps) {
     return (
         <div>
             <ul>
-                {/* userId 선택 칸 */}
-                <div style={{ display: 'flex' }}>
-                    {numbers.map((number, index) => (
-                        <div 
-                        key={index} 
-                        className={`num-${number}`}
-                        onClick={() => handleNumberClick(number)} 
-                        style={{ 
-                            marginRight: '5px',
-                            padding: '5px',
-                            width: '40px',
-                            height: '25px',
-                            border: '1px solid black',
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                        }}
-                        >
-                        {number}
-                        </div>
-                    ))}
-                    <p style={{ marginTop: '7px'}}>회원 번호: {selectedNumber}</p>
-                </div>
                 {/* 입력 필드 */}        
                 <div>
                     <input

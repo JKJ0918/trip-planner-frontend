@@ -8,6 +8,7 @@ export type Comment = {
   id: number;
   content: string;
   writerName: string;
+  writerId: number;
   avatarUrl: string;
   createdAt: string;
   parentId?: number | null;
@@ -147,7 +148,9 @@ const CommentCard = memo(function CommentCard({
             {/* 헤더(이름 · 시간 · 수정됨) */}
             <div className="flex items-center gap-2 text-xs text-gray-500">
                 <AuthorDropdown
-                  writerName={comment.writerName}// 라우팅 규칙에 맞게 수정
+                    writerId={comment.writerId}                 
+                    writerName={comment.writerName}             // 표시용
+                    writerAvatarUrl={comment.avatarUrl}   // 선택(프로필)
                 />
               <span>·</span>
               <time>{new Date(comment.createdAt).toLocaleString()}</time>
@@ -560,6 +563,7 @@ function CommentList({ journalId }: { journalId: number }) {
       id: Number(`9${Date.now()}`),
       content,
       writerName: 'Me',
+      writerId: 0,
       avatarUrl: '',
       createdAt: new Date().toISOString(),
       parentId,
@@ -691,6 +695,7 @@ export default function CommentSection({ journalId }: { journalId: number }) {
       id: Number(`8${Date.now()}`),
       content,
       writerName: 'Me',
+      writerId: 0,
       avatarUrl: '',
       createdAt: new Date().toISOString(),
       parentId: null,

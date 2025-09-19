@@ -1,16 +1,28 @@
 'use client';
 
+import { useChatTargetStore } from "@/app/chatroom/stores/chatTargetStore";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-// props 보낼 예정 틀만 구현중
+// Props from CommentSection.tsx(부모)
 type Props = {
-    writerName: string;
+    writerId: number; // 상대 유저 Id
+    writerName: string; // 상대 유저(작성자) nickname
+    writerAvatarUrl?: string; // 프로필 이미지
 }
 
-export default function AuthorDropdown( {writerName}:Props) {
+export default function AuthorDropdown({
+    writerId,
+    writerName,
+    writerAvatarUrl,
+}: Props) {
     const[open, setOpen] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const router = useRouter();
+    // zustand
+    const setTargetUser = useChatTargetStore((s) => s.setTargetUser);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -37,6 +49,17 @@ export default function AuthorDropdown( {writerName}:Props) {
         };
     }, [open])
 
+    // 1:1 채팅 클릭 -> targetUser 저장
+    const handleStartDmClick = () => {
+        setTargetUser({
+            id: writerId,
+            nickname: writerName,
+            avatarUrl: writerAvatarUrl,
+        });
+        setOpen(false);
+        router.push("/chatroom"); //DM 작성 페이지로 이동
+    }
+
     return (
         <span className="relative inline-block">
             <button
@@ -56,13 +79,14 @@ export default function AuthorDropdown( {writerName}:Props) {
                     tabIndex={-1}
                     className="absolute right z-50 mt-2 w-40 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5"
                 >
-                    <a
-                        href={'/'}
+                    <button
+                        type="button"
                         role="menuitem"
-                        className="block px-4 py-2 text-sm hover:bg-gray-50"
+                        onClick={handleStartDmClick}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                     >
                         1:1 채팅(구현중)
-                    </a>
+                    </button>
                 </div>
             )}
 
