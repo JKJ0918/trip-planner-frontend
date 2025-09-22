@@ -4,13 +4,6 @@ import { useRef, useState } from "react";
 import { CheckCircle, MapPin, Camera, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const testimonials = [
-  { name: "지민 (서울)", quote: "이 앱 덕분에 처음으로 혼자 여행을 완벽하게 준비할 수 있었어요!" },
-  { name: "Alex (LA)", quote: "Everything was organized! This app is a life-saver for solo travelers." },
-  { name: "유리 (부산)", quote: "지도에 핀을 찍는 방식이 직관적이고 간편했어요." },
-  { name: "Daniel (NY)", quote: "사진을 기록과 함께 남길 수 있어 정말 유용했어요." },
-];
-
 export default function Home() {
 
   const [loading, setLoading] = useState(false); // 다중 클릭 방지

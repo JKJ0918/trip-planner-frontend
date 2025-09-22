@@ -109,24 +109,49 @@ export default function ChatRoom({ params }: chatRoomProps) {
     }
 
     return (
-        <div>
-            <ul>
-                {/* 입력 필드 */}        
-                <div>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                    />
-                    {/* 메시지 전송, 메시지 리스트에 추가 */}
-                    <button onClick={sendMessage}>입력</button>
+        <div className="flex flex-col h-[80vh] w-200 bg-white">
+            {/* 메시지 영역: 위에서 아래로, 스크롤 */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-5 bg-gray-50">
+            {messages.map((item, index) => {
+                {/* 여기 '1'은 임시임 나중에 받 */}
+                const isMe = item.writerId === 1;
+                return (
+                <div key={index} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                    <div
+                    className={`max-w-[75%] px-3 py-2 rounded-2xl shadow
+                        ${isMe
+                        ? "bg-blue-500 text-white rounded-br-md"
+                        : "bg-white text-gray-900 rounded-bl-md"
+                        }`}
+                    >
+                    <p className="whitespace-pre-wrap break-words">{item.content}</p>
+                    </div>
                 </div>
-                {/* 메시지 리스트 출력 */}
-                {messages.map((item, index) => (
-                    <div key={index} className={`list-items num-${item.writerId}`}>{item.content}</div>
-                ))}
-            </ul>
+                );
+            })}
+            </div>
 
+            {/* 하단 입력창 고정 */}
+            <div className=" p-3">
+                <div className="flex gap-2">
+                    <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") sendMessage();
+                    }}
+                    placeholder="메시지를 입력하세요"
+                    className="flex-1 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <button
+                    onClick={sendMessage}
+                    className="rounded-xl bg-blue-500 px-4 py-2 text-white font-medium hover:bg-blue-600"
+                    >
+                    입력
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

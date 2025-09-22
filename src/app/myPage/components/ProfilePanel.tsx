@@ -52,8 +52,8 @@ export default function ProfilePanel({ userNickname }: Props) {
   });
 
   const currentAvatar = useMemo(() => {
-    const toAbs = (p?: string) => (p ? (p.startsWith("http") ? p : `${base}${p}`) : undefined);
-    return previewUrl ?? toAbs(watch("avatarUrl")) ?? `${base}/uploads/basic_profile.png`;
+    const toAbs = (p?: string) => (p ? (p.startsWith("http") ? p : ` ${process.env.NEXT_PUBLIC_API_BASE}${p}`) : undefined);
+    return previewUrl ?? toAbs(watch("avatarUrl")) ?? ` ${process.env.NEXT_PUBLIC_API_BASE}/uploads/basic_profile.png`;
   }, [base, previewUrl, watch]);
 
   const onPickFile = () => inputRef.current?.click();
@@ -81,14 +81,14 @@ export default function ProfilePanel({ userNickname }: Props) {
       if (selectedFile) {
         const fd = new FormData();
         fd.append("file", selectedFile);
-        const resUp = await fetch(`${base}/api/images/upload`, { method: "POST", body: fd, credentials: "include" });
+        const resUp = await fetch(` ${process.env.NEXT_PUBLIC_API_BASE}/api/images/upload`, { method: "POST", body: fd, credentials: "include" });
         if (!resUp.ok) throw new Error("프로필 이미지 업로드 실패");
         const json = await resUp.json();
         uploadedPath = json.url;
       }
 
       const payload = { nickname: v.nickname, avatarUrl: uploadedPath ?? v.avatarUrl ?? null };
-      const res = await fetch(`${base}/users/me`, {
+      const res = await fetch(` ${process.env.NEXT_PUBLIC_API_BASE}/users/me`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

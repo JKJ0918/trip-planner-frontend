@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useChatTargetStore } from "./stores/chatTargetStore";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function ChatRoomIndex() {
@@ -70,17 +69,31 @@ export default function ChatRoomIndex() {
   }, []);
 
   if(!targetUser) {
-    return (
-      <div className="max-w-lg mx-auto py-10">
-        <h1 className="text-xl font-semibold mb-4">새 1:1 채팅</h1>
-        <p className="text-gray-600">
-          대상을 먼저 선택해 주세요. 댓글 작성자의 이름을 클릭해 &rarr; <b>1:1 채팅</b>을 누르면 이 화면으로 이동합니다.
-        </p>
-        <Link href="/posts" className="text-blue-600 hover:underline mt-4 inline-block">
-          목록으로 돌아가기 (구현 예정)
-        </Link>
+  return (
+  <div className="mx-auto flex w-full max-w-4xl items-center justify-center gap-10 px-6 py-90">
+    {/* Left image */}
+      <div className="w-40 shrink-0">
+      <img
+      src="/images/chatIcon.png"
+      alt="채팅 아이콘"
+      className="w-full h-auto object-cover"
+      loading="lazy"
+      />
       </div>
-    );
+
+      {/* Right text */}
+      <div>
+      <h1 className="text-4xl font-bold text-gray-500 dark:text-white mb-3">
+      다른 이용자와 대화를 진행해 보세요!
+      </h1>
+      <p className="text-gray-400 dark:text-gray-300 leading-relaxed">
+      대화 시작을 위해 채팅방이나 대상을 먼저 선택해 주세요.
+      <br />
+      이용자의 프로필을 선택하여 대화하기 버튼으로 대화를 시작할 수 있습니다.
+      </p>
+      </div>
+  </div>
+  );
   }
 
   return (
