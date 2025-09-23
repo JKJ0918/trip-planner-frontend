@@ -12,7 +12,7 @@ type ChatRoom = {
   createdAt: string; // or number/Date
 
   // 아래는 구현 예정
-  profileUrl: string; // 프로필 url
+  avatarUrl: string; // 프로필 url
   lastMessageAt: string; // ISO string
   lastMessage: string; // 마지막 메시지
   memberCount: number; // 대화 수
@@ -32,7 +32,7 @@ export default function ChatListSidebar () {
     // 채팅 리스트 반환
     const fetchRooms = async () => {
         try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chatList`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chatList2`, {
                 method: "GET",
                 credentials: "include", 
                 headers: { "Accept": "application/json" }, // GET에는 Content-Type 불필요
@@ -43,6 +43,7 @@ export default function ChatListSidebar () {
             }
 
             const data = await res.json(); // JSON 변환
+            console.log(data);
             setChatRoom(data);
         } catch (error) {
             console.error("채팅방 리스트 불러오기 실패", error);
@@ -60,7 +61,7 @@ return (
             >
                 {/* 프로필 이미지 */}
                 <img
-                src={room.profileUrl || "/images/avatar-default.png"}
+                src={room.avatarUrl || "/images/avatar-default.png"}
                 alt="프로필"
                 className="w-12 h-12 rounded-full object-cover mr-3"
                 />

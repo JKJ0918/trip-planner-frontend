@@ -1,5 +1,6 @@
 "use client";
 
+import { useMe } from "@/app/hooks/useMe";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -16,7 +17,7 @@ type Message = {
   sender: string;
   content: string;
   message: string;
-  createdAt: string; // or number/Date
+  createdDate: string; // or number/Date
 };
 
 export default function ChatRoom({ params }: chatRoomProps) {
@@ -24,27 +25,32 @@ export default function ChatRoom({ params }: chatRoomProps) {
     // 웹소켓 연결 객체
     const stompClient = useRef<CompatClient | null>(null);
     // 채팅방 아이디
-    const { roomId } = useParams() as { roomId: string };
+    const { roomId } = useParams() as { roomId: string }; // [roomId] 폴더 그리고, 이게 주소창보면 숫자써있는데, 이걸 넥스트 js가 자동 매칭 시켜줌 
     // const { roomId } = params;
     // 채팅 내용들을 저장할 변수
     const [messages, setMessages] = useState<Message[]>([]);
     // 사용자 입력을 저장할 변수
     const [inputValue, setInputValue] = useState('');
-    
-    // 로그인이 없다는 가정하에 임시 방편들
-    // 선택한 회원 번호
-    const [selectedNumber, setSelectedNumber] = useState([]);
-
-    //const handleNumberClick = (number: any) => {
-    //    setSelectedNumber(number);
-    //};
+    // 본인 정보 가져오기
+    const { me, isLoading, error } = useMe();
+    const [nickname, setNickname] = useState<string>("");
+    const [email, setEmail] =useState<string>("");
+    const [avatarUrl, setAvatarUrl] = useState<string>("");
 
     useEffect(() => {
         connect(); // 1. 웹 소켓 연결
         fetchMessages(); // 2. 메시지 로드
+
+        if(me?.nickname) {
+            setNickname(me.nickname);
+            setEmail(me.email);
+            setAvatarUrl(me.avatarUrl);
+            
+        }
+
         //컴포넌트 언마운트 시 웹소켓 연결 해제
         return () => disconnect();
-    }, [roomId])
+    }, [roomId, me])
 
     // 웹소켓 연결
     const connect = () => {
@@ -114,7 +120,7 @@ export default function ChatRoom({ params }: chatRoomProps) {
             <div className="flex-1 overflow-y-auto p-3 space-y-5 bg-gray-50">
             {messages.map((item, index) => {
                 {/* 여기 '1'은 임시임 나중에 받 */}
-                const isMe = item.writerId === 1;
+                const isMe = item.writerId === me?.id;
                 return (
                 <div key={index} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                     <div
@@ -125,6 +131,7 @@ export default function ChatRoom({ params }: chatRoomProps) {
                         }`}
                     >
                     <p className="whitespace-pre-wrap break-words">{item.content}</p>
+                    <p className="whitespace-pre-wrap break-words">{item.createdDate}</p>
                     </div>
                 </div>
                 );
