@@ -1,7 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link";
+import { useMe } from "@/app/hooks/useMe";
+import { useChatStore } from "../stores/chatStore";
+
 
 type ChatRoom = {
   roomId: string | number;
@@ -11,23 +14,51 @@ type ChatRoom = {
   message: string;
   createdAt: string; // or number/Date
 
-  // 아래는 구현 예정
-  avatarUrl: string; // 프로필 url
-  lastMessageAt: string; // ISO string
   lastMessage: string; // 마지막 메시지
-  memberCount: number; // 대화 수
+  lastMessageAt: string; // ISO string
 
+    // 아래는 구현 예정
+  memberCount: number; // 대화 수
+  
+  members: Array<Member>;
 
 };
 
+type Member = {
+    nickname: string;
+    avatarUrl: string;
+    userId: number;
+}
+
 
 export default function ChatListSidebar () {
+    
+
+    // 본인 정보 가져오기
+    const { me, isLoading, error } = useMe();
+    const [meId, setMeId] = useState<number>();
+    const [nickname, setNickname] = useState<string>("");
+    const [email, setEmail] =useState<string>("");
+    const [avatarUrl, setAvatarUrl] = useState<string>("");
 
     const [chatRoom, setChatRoom] = useState<ChatRoom[]>([]);
 
+    //
+    const summaries = useChatStore((s) => s.summaries);
+
+
     useEffect(() => {
-        fetchRooms(); // 채팅방 로드
-    }, [])
+        fetchRooms();
+        if(me?.nickname) {
+            setMeId(me.id);
+            setNickname(me.nickname);
+            setEmail(me.email);
+            setAvatarUrl(me.avatarUrl);
+            
+        }
+
+    }, [me])
+
 
     // 채팅 리스트 반환
     const fetchRooms = async () => {
@@ -43,58 +74,44 @@ export default function ChatListSidebar () {
             }
 
             const data = await res.json(); // JSON 변환
-            console.log(data);
+            Array.isArray(data) ? console.table(data) : console.log('data', data);
             setChatRoom(data);
         } catch (error) {
             console.error("채팅방 리스트 불러오기 실패", error);
         }
     }
 
+    
 return (
     <div>
-        <ul className="divide-y divide-gray-200">
-        {chatRoom.map((room) => (
-            <li key={room.roomId}>
-            <Link
-                href={`/chatroom/${room.roomId}`}
-                className="flex items-center px-4 py-7 hover:bg-gray-100"
-            >
-                {/* 프로필 이미지 */}
-                <img
-                src={room.avatarUrl || "/images/avatar-default.png"}
-                alt="프로필"
-                className="w-12 h-12 rounded-full object-cover mr-3"
-                />
-
-                {/* 가운데 (제목 + 마지막 메시지) */}
-                <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center">
-                    <p className="font-semibold text-gray-900 truncate">
-                    {room.title}
-                    </p>
-                    <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                    {new Date(room.lastMessageAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    })}
-                    </span>
-                </div>
-                <p className="text-sm text-gray-600 truncate">
-                    {room.lastMessage || "메시지가 없습니다"}
-                </p>
-                </div>
-
-                {/* 인원수 (그룹일 때만 표시) */}
-                {room.memberCount > 2 && (
-                <span className="ml-3 bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
-                    {room.memberCount}명
+            <aside className="w-64 bg-white border-r p-4">
+      <h2 className="font-bold mb-3">채팅 목록</h2>
+      <ul>
+        {Object.values(summaries).map((room) => (
+          <li key={room.roomId} className="mb-2">
+            <Link href={`/chatroom/${room.roomId}`}>
+              <div className="flex flex-col">
+                <span className="font-semibold">{room.title}</span>
+                <span className="text-sm text-gray-500">
+                  {room.lastMessage} ({new Date(room.lastMessageAt).toLocaleTimeString()})
                 </span>
-                )}
+              </div>
             </Link>
-            </li>
+            
+{room.unreadCount && room.unreadCount > 0 && (
+  <span className="ml-2 inline-block text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+    {room.unreadCount}
+  </span>
+)}
+
+          </li>
         ))}
-        </ul>
+      </ul>
+    </aside>
+    
     </div>
     );
+
+
 
 }

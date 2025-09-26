@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./header";
 import Footer from "./footer";
 import AppProvider from "./provider";
+import ChatSocketProvider from "./chatroom/components/ChatSocketProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +29,13 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 flex flex-col min-h-screen`}
       >
-        <AppProvider>
-        <Header />
-          {children}
-        <Footer />
-        </AppProvider>
+          <AppProvider>
+            <ChatSocketProvider>
+              <Header />
+                {children}
+              <Footer />
+            </ChatSocketProvider>
+          </AppProvider>
       </body>
     </html>
   );

@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatTargetStore } from "./stores/chatTargetStore";
 import { useRouter } from "next/navigation";
+import { ensureConnected, getStompClient, publish, subscribe } from "../lib/stomp";
 
 export default function ChatRoomIndex() {
   
@@ -16,6 +17,13 @@ export default function ChatRoomIndex() {
 
   const [message, setMessage] = useState(""); // 첫 메시지
   const [isSending, setIsSending] = useState(false); // 전송버튼 상태관리(첫 메시지)
+
+
+ // stomp 전역 관리
+  const [connected, setConnected] = useState(false); // STOMP 연결
+  const [roomId, setRoomId] =useState<string>('1'); // 테스트용 기본값
+  const [msg, setMsg] = useState<string>('');
+  const unsubRef = useRef<() => void>(() => {});
 
   // 전송 버튼 클릭 -> 방 생성 + 첫 메시지 전송
   const handleSendClick = useCallback(async () => {
@@ -65,35 +73,108 @@ export default function ChatRoomIndex() {
 
 
   useEffect(() => {
-    // 여긴 일단 빈칸. 다음 단계에서 필요 시 추가
+    let mounted = true;
+
+    (async () => {
+      try {
+        console.log('[WS] connecting...');
+        await ensureConnected();
+        const c = getStompClient();
+        console.log('[WS] connected?', !!c?.connected, c); // 콘솔에서 상태 확인
+        if (mounted) setConnected(!!c?.connected);
+      } catch (e) {
+        console.error('[WS] connect failed', e);
+        if (mounted) setConnected(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
 
   if(!targetUser) {
   return (
-  <div className="mx-auto flex w-full max-w-4xl items-center justify-center gap-10 px-6 py-90">
-    {/* Left image */}
-      <div className="w-40 shrink-0">
-      <img
-      src="/images/chatIcon.png"
-      alt="채팅 아이콘"
-      className="w-full h-auto object-cover"
-      loading="lazy"
-      />
+      <div className="mx-auto flex w-full max-w-4xl items-center justify-center gap-10 px-6 py-90">
+        {/* Left image */}
+        <div className="w-40 shrink-0">
+          <img
+          src="/images/chatIcon.png"
+          alt="채팅 아이콘"
+          className="w-full h-auto object-cover"
+          loading="lazy"
+          />
+          </div>
+
+          {/* Right text */}
+          <div>
+          <h1 className="text-4xl font-bold text-gray-500 dark:text-white mb-3">
+          다른 이용자와 대화를 진행해 보세요!
+          </h1>
+          <p className="text-gray-400 dark:text-gray-300 leading-relaxed">
+          대화 시작을 위해 채팅방이나 대상을 먼저 선택해 주세요.
+          <br />
+          이용자의 프로필을 선택하여 대화하기 버튼으로 대화를 시작할 수 있습니다.
+          </p>
+
+
+      <h1 className="text-xl font-bold">Chatroom (publish 테스트)</h1>
+      <p>WebSocket: {connected ? '✅ Connected' : '⏳ Connecting...'}</p>
+
+      <div className="flex items-center gap-2">
+        <input
+          className="border px-2 py-1 rounded"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+          placeholder="roomId"
+        />
+        <button
+          className="rounded border px-3 py-1"
+          onClick={() => {
+            try { unsubRef.current(); } catch {}
+            const dest = `/sub/chatroom/${roomId}`;
+            console.log('[TEST] subscribing to', dest);
+            unsubRef.current = subscribe(dest, (payload) => {
+              console.log('[TEST] message on', dest, payload);
+            });
+          }}
+        >
+          방 채널 구독
+        </button>
       </div>
 
-      {/* Right text */}
-      <div>
-      <h1 className="text-4xl font-bold text-gray-500 dark:text-white mb-3">
-      다른 이용자와 대화를 진행해 보세요!
-      </h1>
-      <p className="text-gray-400 dark:text-gray-300 leading-relaxed">
-      대화 시작을 위해 채팅방이나 대상을 먼저 선택해 주세요.
-      <br />
-      이용자의 프로필을 선택하여 대화하기 버튼으로 대화를 시작할 수 있습니다.
-      </p>
+      <div className="flex items-center gap-2">
+        <input
+          className="border px-2 py-1 rounded flex-1"
+          value={msg}
+          onChange={(e) => setMsg(e.target.value)}
+          placeholder="보낼 메시지"
+        />
+        <button
+          className="rounded border px-3 py-1"
+          onClick={() => {
+            const dest = `/pub/message`; // 서버 설정에 맞게 조정
+            publish(dest, {
+              roomId,
+              content: msg,
+              writerId: 123, // 지금은 테스트용 (실제는 JWT/세션으로)
+              createdDate: new Date(),
+            });
+            setMsg('');
+          }}
+        >
+          전송
+        </button>
       </div>
-  </div>
-  );
+
+      <p className="text-sm text-gray-500">
+        * 방 채널을 구독한 상태에서 "전송"을 누르면 콘솔에 곧바로 수신 로그가 찍혀야 합니다.
+      </p>
+
+        </div>
+      </div>
+    );
   }
 
   return (
