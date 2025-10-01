@@ -9,7 +9,16 @@ export type RoomSummary = {
   lastMessageAt: string; // ISO string
   memberCount: number;
   unreadCount?: number;  
+
+  members: Array<Member>;
+
 };
+
+export type Member = {
+    nickname: string;
+    avatarUrl: string;
+    userId: number;
+}
 
 type ChatStore = {
   summaries: Record<string | number, RoomSummary>;
@@ -33,7 +42,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({
       summaries: {
         ...curr,
-        [dto.roomId]: { ...prev, ...dto }, // upsert
+        [dto.roomId]: { ...prev, ...dto }, 
       },
     });
   },

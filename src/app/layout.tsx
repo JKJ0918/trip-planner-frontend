@@ -32,7 +32,7 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
           <AppProvider>
             <ChatSocketProvider>
               <Header />
-                {children}
+                {children} {/*page.tsx 가들어가는 부분*/}
               <Footer />
             </ChatSocketProvider>
           </AppProvider>

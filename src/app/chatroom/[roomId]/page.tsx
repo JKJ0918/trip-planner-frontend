@@ -12,20 +12,6 @@ import { publish } from "@/app/lib/stomp";
 // 컴포넌트 바깥에 ‘고정’ 빈 배열을 한 번만 만들기
 const EMPTY_MESSAGES: any[] = [];
 
-interface chatRoomProps {
-  params: { roomId: string };
-}
-
-type Message = {
-  id: string;
-  roomId: string | number;
-  title: string;
-  writerId: string | number;
-  sender: string;
-  content: string;
-  message: string;
-  createdDate: string; // or number/Date
-};
 
 export default function ChatRoom() {
 
@@ -36,7 +22,7 @@ export default function ChatRoom() {
     // const { roomId } = params;
     // 채팅 내용들을 저장할 변수
     // const [messages, setMessages] = useState<Message[]>([]);
-    // 사용자 입력을 저장할 변수
+    // 사용자 입력을 저장할 변수 
     const [inputValue, setInputValue] = useState('');
     // 본인 정보 가져오기
     const { me, isLoading, error } = useMe();
@@ -44,7 +30,7 @@ export default function ChatRoom() {
     const [email, setEmail] =useState<string>("");
     const [avatarUrl, setAvatarUrl] = useState<string>("");
 
-     const router = useRouter()
+    const router = useRouter()
 
     const params = useParams(); // { roomId: '...' }
     const roomId = String(params?.roomId ?? "");
@@ -68,124 +54,103 @@ export default function ChatRoom() {
         publish("/pub/message", {
         roomId,
         content: input,
+        nickname: me?.nickname,
+        avatarUrl: me?.avatarUrl,
+
         });
 
         setInput("");
     };
 
-/*
-    useEffect(() => {
-        connect(); // 1. 웹 소켓 연결
-        fetchMessages(); // 2. 메시지 로드
+return (
+  <div className="flex flex-col h-full w-230">
+  {/* 메시지 목록: 2열 그리드로 중앙선 분리 */}
+  <div className="flex-1 overflow-y-auto p-4 bg-white">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+      {messages.map((m) => {
+        const isMe = m.writerId === me?.id;
+        const ts = new Date(m.createdDate);
 
-        if(me?.nickname) {
-            setNickname(me.nickname);
-            setEmail(me.email);
-            setAvatarUrl(me.avatarUrl);
-            
+        if (!isMe) {
+          // 상대방: 왼쪽 컬럼, 아바타 + 닉네임 + 말풍선
+          return (
+            <div key={m.id} className="col-start-1 col-end-2 justify-self-start flex items-start gap-3">
+              {/* 아바타 */}
+              <img
+                src={`${process.env.NEXT_PUBLIC_API_BASE}${m.avatarUrl}`}
+                alt={`${m.nickname} 프로필`}
+                className="w-9 h-9 rounded-full object-cover shrink-0"
+                loading="lazy"
+                decoding="async"
+              />
+              {/* 본문 */}
+              <div className="min-w-0">
+                <div className="text-xs text-gray-500 mb-1">{m.nickname}</div>
+
+                {/* 가운데선 넘지 않도록 열 안에서만 줄바꿈 (max-w-full) */}
+                <div className="inline-block max-w-full rounded-2xl rounded-tl-md bg-gray-100 px-3 py-2
+                                text-[15px] leading-6 text-gray-900 shadow break-words">
+                  {m.content}
+                </div>
+
+                <div className="mt-1 text-[10px] text-gray-400">
+                  {ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </div>
+            </div>
+          );
         }
 
-        //컴포넌트 언마운트 시 웹소켓 연결 해제
-        return () => disconnect();
-    }, [roomId, me])
-
-    // 웹소켓 연결
-    const connect = () => {
-        // 웹소켓 연결
-        const socket = new WebSocket("ws://localhost:8080/ws-stomp");
-        stompClient.current = Stomp.over(socket);
-
-        stompClient.current.connect(
-            {}, // 헤더를 비워둬도 쿠키 자동전송
-            () => { // 수신 콜백
-                
-            // 메시지 수신
-            stompClient.current?.subscribe(`/sub/chatroom/` + roomId, (message) => {
-                // 누군가 발송했던 메시지를 리스트에 추가
-                const newMessage = JSON.parse(message.body) as Message;
-                console.log("웹소켓 연결 newMessage를 확인합니다.", newMessage);
-                 console.log('pretty:\n', JSON.stringify(newMessage, null, 2));
-                setMessages((prev) => [...prev, newMessage]);
-            });
-        
-        });
-    };
-
-    // 이전에 작성된 메시지 불러오기
-    const fetchMessages  = async () => {
-        try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/find/chat/list/` + roomId, {
-                method: "GET",
-                credentials: "include", 
-                headers: { "Accept": "application/json" }, // GET에는 Content-Type 불필요
-            });
-
-            if(!res){
-                throw new Error("네트워크 응답 실패(fetchMessages fail)");
-            }
-
-            const data = await res.json(); // JSON 변환
-            setMessages(data);
-        } catch (error) {
-            console.error("채팅방 리스트 불러오기 실패", error);
-        }
-    }
-
-    //웹소켓 연결 해제
-    const disconnect = () => {
-        if(stompClient.current) {
-            stompClient.current.disconnect();
-        }
-    };
-
-    // 메시지 전송
-    const sendMessage = () => {
-        if(stompClient.current && inputValue) {
-            //selectdNumber는 userId로 선택된 값
-            if (stompClient.current && inputValue) {
-                const body = {
-                roomId : roomId,
-                content : inputValue,
-                // writerId : selectedNumber
-            };
-            stompClient.current.send(`/pub/message`, {}, JSON.stringify(body));
-            setInputValue('');
-            }
-        }
-    }
-        
-    */
-
-  return (
-    <div className="flex flex-col h-full">
-      {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-white">
-        {messages.map((m) => (
-          <div key={m.id} className="flex flex-col">
-            <span className="text-sm text-gray-600">{m.writerId}</span>
-            <span>{m.content}</span>
-            <span className="text-xs text-gray-400">
-              {new Date(m.createdAt).toLocaleTimeString()}
-            </span>
+        // 나: 오른쪽 컬럼, 말풍선만
+        return (
+          <div key={m.id} className="col-start-2 col-end-3 justify-self-end">
+            <div className="min-w-0 text-right">
+              <div className="inline-block max-w-full rounded-2xl rounded-tr-md px-3 py-2
+                              text-[15px] leading-6 text-white shadow
+                              bg-gradient-to-br from-pink-500 to-orange-400 break-words">
+                {m.content}
+              </div>
+              <div className="mt-1 text-[10px] text-gray-400">
+                {ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* 입력창 */}
-      <div className="flex border-t p-2 bg-gray-50">
-        <input
-          className="flex-1 border rounded px-2 py-1"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="메시지를 입력하세요..."
-        />
-        <button
-          onClick={handleSend}
-          className="ml-2 px-4 py-1 bg-blue-500 text-white rounded"
-        >
-          전송
-        </button>
-      </div>
+        );
+      })}
     </div>
-  );
+  </div>
+
+
+  {/* 입력창 */}
+  <div className="flex items-center gap-2 p-3 bg-gray-50">
+    <input
+      className="flex-1 rounded-full border border-gray-300 px-4 py-2 
+                text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 
+                shadow-sm placeholder-gray-400"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      placeholder="메시지를 입력하세요..."
+    />
+
+    <button
+      onClick={handleSend}
+      className="flex items-center justify-center rounded-full
+                bg-gradient-to-br from-pink-500 to-orange-400 
+                text-white w-10 h-10 shadow hover:opacity-90
+                focus:ring-2 focus:ring-pink-300"
+      aria-label="전송"
+    >
+      {/* paper-plane SVG */}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+          className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M22 2L11 13" />
+        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+    </button>
+  </div>
+
+  </div>
+);
+
+
 }

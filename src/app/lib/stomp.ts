@@ -17,7 +17,7 @@ let connectPromise: Promise<void> | null = null;
 type SubRecord = {
   destination: string;
   handler: (payload: any, raw: IMessage) => void;
-  subscription?: StompSubscription;
+  subscription?: StompSubscription; // 생략가능한 속성( + 나중에 들어올수도있음)
 };
 const subscriptions: SubRecord[] = [];
 
@@ -48,7 +48,7 @@ export async function ensureConnected(connectHeaders?: StompHeaders): Promise<vo
         return sock as any;
       },
       */
-      webSocketFactory: () => new WebSocket(WS_URL),
+      webSocketFactory: () => new WebSocket(WS_URL), // 웹소켓 연결을 생성하는 역할 하는 팩토리 함수
 
       connectHeaders: connectHeaders ?? {},
       reconnectDelay: 2000,  // 자동 재연결 주기(ms), 연결이 정상적으로 유지되는 동안에는 동작안함
@@ -59,8 +59,8 @@ export async function ensureConnected(connectHeaders?: StompHeaders): Promise<vo
         console.log("[STOMP] onConnect");
         // 끊겼다가 살아나도, 기존 구독을 모두 복원
         subscriptions.forEach((s) => {
-          try { s.subscription?.unsubscribe(); } catch {}
-          s.subscription = client!.subscribe(s.destination, (frame) => {
+          try { s.subscription?.unsubscribe(); } catch {} // 중복 방지를 위한 기존 연결 제거
+          s.subscription = client!.subscribe(s.destination, (frame) => { // STOMP 서버 구독 요청
             let payload: any = frame.body;
             try { payload = JSON.parse(frame.body); } catch {}
             s.handler(payload, frame);
@@ -89,23 +89,25 @@ export async function ensureConnected(connectHeaders?: StompHeaders): Promise<vo
 // 구독: 연결된 상태에서만 호출할 것.
 // 반환값은 "구독 해제" 함수.
 export function subscribe(
-  destination: string, handler: (payload: any, raw: IMessage) => void
-) : () => void{
+  destination: string,
+  handler: (payload: any, raw: IMessage) => void // raw: IMessage 는 필요할 때 사용할 것
+  ) : () => void {
   const record: SubRecord = { destination, handler };
   subscriptions.push(record);
   
   if (client?.connected) {
-    record.subscription = client.subscribe(destination, (frame) => {
+    record.subscription = client.subscribe(destination, (frame) => { // 구독 함수
       let payload: any = frame.body;
       try { payload = JSON.parse(frame.body); } catch {}
-      handler(payload, frame);
+      handler(payload, frame); // const unsub = subscribe(dest, (payload: any))... 에서준 payload 호출
+      // payload만 줘도되는데 가끔 frame 필요한 경우가 있어 같이 보냄
     });
   }
 
-  // 구독 해제 함수
+  // 구독 해제 함수를 반환 (해제 하는게 아님)
   return () => {
-    try { record.subscription?.unsubscribe(); } catch {}
-    const idx = subscriptions.indexOf(record);
+    try { record.subscription?.unsubscribe(); } catch {} // 구독이 끊어짐
+    const idx = subscriptions.indexOf(record); // 
     if (idx >= 0) subscriptions.splice(idx, 1);
   };
 
@@ -119,7 +121,7 @@ export function publish(destination: string, body: unknown, headers?: StompHeade
   }
   client.publish({
     destination,
-    body: JSON.stringify(body),
+    body: JSON.stringify(body), // roomId, content 가 들어감
     headers: headers ?? {},
   });
 }

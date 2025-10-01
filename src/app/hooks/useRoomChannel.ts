@@ -15,9 +15,9 @@ type MessageDto = {
 };
 
 export function useRoomChannel(roomId: string | number) {
-  const applySummary = useChatStore((s) => s.applySummary);
-  const setMessages = useMessageStore((s) => s.setMessages);
-  const appendMessage = useMessageStore((s) => s.appendMessage);
+  const applySummary = useChatStore((select) => select.applySummary);
+  const setMessages = useMessageStore((select) => select.setMessages);
+  const appendMessage = useMessageStore((select) => select.appendMessage);
 
   useEffect(() => {
     if (!roomId) return;
@@ -33,7 +33,7 @@ export function useRoomChannel(roomId: string | number) {
         const data: ChatMessage[] = await res.json();
         console.log("[ROOM] initial messages", data);
 
-              const prev = useMessageStore.getState().messages[roomId] || [];
+        const prev = useMessageStore.getState().messages[roomId] || [];
       if (prev.length === 0) {
         setMessages(roomId, data);
       }
@@ -46,22 +46,22 @@ export function useRoomChannel(roomId: string | number) {
 
     // 2) 실시간 구독
     const dest = `/sub/chatroom/${roomId}`;
-    const unsub = subscribe(dest, (payload: any) => {
+    const unsub = subscribe(dest, (payload: any) => { // 자바스크립트에서는 안쓰는 함순는 생략이 가능함
       const msg = payload as ChatMessage;
       console.log("[ROOM] realtime msg:", msg);
 
-      appendMessage(roomId, msg);
+      appendMessage(roomId, msg); // from messageStore.ts
 
-      // 사이드바 요약 갱신
+      // 사이드바 요약 갱신  from chatStore.ts
       applySummary({
         roomId: msg.roomId,
         lastMessage: msg.content,
-        lastMessageAt: msg.createdAt,
+        lastMessageAt: msg.createdDate,
       } as any);
-    });
+    });4
 
     return () => {
-      try { unsub(); } catch {}
+      try { unsub(); } catch {} // 구독해제 cleanup 함수
     };
   }, [roomId]);
 }

@@ -3,9 +3,11 @@ import { create } from "zustand";
 export type ChatMessage = {
   id: string | number;
   roomId: string | number;
-  writerId: number;
   content: string;
-  createdAt: string;
+  writerId: number;
+  nickname: string;
+  avatarUrl: string;
+  createdDate: string;
 };
 
 type MessageStore = {
@@ -26,10 +28,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   appendMessage: (roomId, msg) => {
     const curr = get().messages[roomId] || [];
     set((state) => ({
-      messages: {
-        ...state.messages,
-        [roomId]: [...curr, msg],
-      },
+      messages: { ...state.messages, [roomId]: [...curr, msg], },
     }));
   },
 }));

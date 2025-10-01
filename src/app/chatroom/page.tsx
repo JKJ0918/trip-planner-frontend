@@ -95,6 +95,7 @@ export default function ChatRoomIndex() {
 
 
   if(!targetUser) {
+    
   return (
       <div className="mx-auto flex w-full max-w-4xl items-center justify-center gap-10 px-6 py-90">
         {/* Left image */}
@@ -105,10 +106,10 @@ export default function ChatRoomIndex() {
           className="w-full h-auto object-cover"
           loading="lazy"
           />
-          </div>
+        </div>
 
-          {/* Right text */}
-          <div>
+        {/* Right text */}
+        <div>
           <h1 className="text-4xl font-bold text-gray-500 dark:text-white mb-3">
           다른 이용자와 대화를 진행해 보세요!
           </h1>
@@ -117,62 +118,8 @@ export default function ChatRoomIndex() {
           <br />
           이용자의 프로필을 선택하여 대화하기 버튼으로 대화를 시작할 수 있습니다.
           </p>
-
-
-      <h1 className="text-xl font-bold">Chatroom (publish 테스트)</h1>
-      <p>WebSocket: {connected ? '✅ Connected' : '⏳ Connecting...'}</p>
-
-      <div className="flex items-center gap-2">
-        <input
-          className="border px-2 py-1 rounded"
-          value={roomId}
-          onChange={(e) => setRoomId(e.target.value)}
-          placeholder="roomId"
-        />
-        <button
-          className="rounded border px-3 py-1"
-          onClick={() => {
-            try { unsubRef.current(); } catch {}
-            const dest = `/sub/chatroom/${roomId}`;
-            console.log('[TEST] subscribing to', dest);
-            unsubRef.current = subscribe(dest, (payload) => {
-              console.log('[TEST] message on', dest, payload);
-            });
-          }}
-        >
-          방 채널 구독
-        </button>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <input
-          className="border px-2 py-1 rounded flex-1"
-          value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          placeholder="보낼 메시지"
-        />
-        <button
-          className="rounded border px-3 py-1"
-          onClick={() => {
-            const dest = `/pub/message`; // 서버 설정에 맞게 조정
-            publish(dest, {
-              roomId,
-              content: msg,
-              writerId: 123, // 지금은 테스트용 (실제는 JWT/세션으로)
-              createdDate: new Date(),
-            });
-            setMsg('');
-          }}
-        >
-          전송
-        </button>
-      </div>
-
-      <p className="text-sm text-gray-500">
-        * 방 채널을 구독한 상태에서 "전송"을 누르면 콘솔에 곧바로 수신 로그가 찍혀야 합니다.
-      </p>
-
         </div>
+
       </div>
     );
   }

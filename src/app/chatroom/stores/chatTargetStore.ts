@@ -1,6 +1,6 @@
 // stores/chatTargetStore.ts
 import { create } from "zustand";
-
+ 
 type TargetUser = {
     id: number;
     nickname: string;
