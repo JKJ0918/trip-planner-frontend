@@ -6,31 +6,6 @@ import { useMe } from "@/app/hooks/useMe";
 import { useChatStore } from "../stores/chatStore";
 
 
-type ChatRoom = {
-  roomId: string | number;
-  title: string;
-  sender: string;
-  content: string;
-  message: string;
-  createdAt: string; // or number/Date
-
-  lastMessage: string; // 마지막 메시지
-  lastMessageAt: string; // ISO string
-
-    // 아래는 구현 예정
-  memberCount: number; // 대화 수
-  
-  members: Array<Member>;
-
-};
-
-type Member = {
-    nickname: string;
-    avatarUrl: string;
-    userId: number;
-}
-
-
 export default function ChatListSidebar () {
     
 
@@ -59,29 +34,6 @@ export default function ChatListSidebar () {
 
     }, [me])
 
-
-    /*
-    // 채팅 리스트 반환
-    const fetchRooms = async () => {
-        try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chatList2`, {
-                method: "GET",
-                credentials: "include", 
-                headers: { "Accept": "application/json" }, // GET에는 Content-Type 불필요
-            });
-
-            if(!res){
-                throw new Error("네트워크 응답 실패(fetchRooms fail)");
-            }
-
-            const data = await res.json(); // JSON 변환
-            Array.isArray(data) ? console.table(data) : console.log('data', data);
-            setChatRoom(data);
-        } catch (error) {
-            console.error("채팅방 리스트 불러오기 실패", error);
-        }
-    }
-*/
     
 return (
     <div>

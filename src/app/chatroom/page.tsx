@@ -71,7 +71,7 @@ export default function ChatRoomIndex() {
 
   }, [clearTargetUser, message, router, targetUser]);
 
-
+  /*
   useEffect(() => {
     let mounted = true;
 
@@ -92,7 +92,7 @@ export default function ChatRoomIndex() {
       mounted = false;
     };
   }, []);
-
+*/
 
   if(!targetUser) {
     

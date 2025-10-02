@@ -1,17 +1,9 @@
 // lib/stomp.ts
 
 import { Client, IMessage, StompHeaders, StompSubscription } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
-
-// 브라우저에서만 동적 로드할 SockJS 생성자 보관
-let SockJSCtor: any | null = null;
 
 // 전역 단일 Client
 let client: Client | null = null;
-
-// 동시에 여러 번 호출돼도 연결 1번만 일어나도록
-let isConnecting = false;
-let connectPromise: Promise<void> | null = null;
 
 // 구독 기록
 type SubRecord = {
@@ -121,7 +113,7 @@ export function publish(destination: string, body: unknown, headers?: StompHeade
   }
   client.publish({
     destination,
-    body: JSON.stringify(body), // roomId, content 가 들어감
+    body: JSON.stringify(body), // roomId, content, avatarUrl 가 들어감
     headers: headers ?? {},
   });
 }
