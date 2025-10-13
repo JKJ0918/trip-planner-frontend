@@ -50,7 +50,7 @@ export default function ChatRoom() {
     const handleSend = () => {
         if (!input.trim()) return;
 
-        // publish DTO (백엔드 규약에 맞게 수정 필요!)
+        // publish DTO (백엔드 규약에 맞게 수정)
         publish("/pub/message", {
         roomId,
         content: input,

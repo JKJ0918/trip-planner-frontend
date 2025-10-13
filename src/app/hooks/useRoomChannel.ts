@@ -14,7 +14,7 @@ type MessageDto = {
   createdAt: string;
 };
 
-export function useRoomChannel(roomId: string | number) {
+export function useRoomChannel(roomId: string | number) { 
   const applySummary = useChatStore((select) => select.applySummary);
   const setMessages = useMessageStore((select) => select.setMessages);
   const appendMessage = useMessageStore((select) => select.appendMessage);
@@ -22,7 +22,7 @@ export function useRoomChannel(roomId: string | number) {
   useEffect(() => {
     if (!roomId) return;
 
-    
+     
     // 1) 초기 메시지 불러오기
     (async () => {
       try {

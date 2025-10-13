@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatTargetStore } from "./stores/chatTargetStore";
 import { useRouter } from "next/navigation";
-import { ensureConnected, getStompClient, publish, subscribe } from "../lib/stomp";
 
 export default function ChatRoomIndex() {
   
@@ -133,9 +132,9 @@ export default function ChatRoomIndex() {
         {/* 아바타 */}
         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
           {targetUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={targetUser.avatarUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
+            <img src={`${process.env.NEXT_PUBLIC_API_BASE}${targetUser.avatarUrl}`} alt="" className="w-full h-full object-cover" />
+          
+          ) : ( 
             <span className="text-sm text-gray-500">No Img</span>
           )}
         </div>
