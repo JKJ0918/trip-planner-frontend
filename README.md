@@ -2,31 +2,31 @@
   <h1>여행 일정 공유 웹사이트[TRIPPLANNER]🌍</h1>
 </div>
 
-## 프로젝트 개요
-
 TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 등의 정보를 함께 기록할 수 있는 여행 공유 플랫폼입니다.  
 사용자는 자신의 여행일지를 작성하고 지도 기반으로 핀을 등록하며, 다른 사람들과 댓글·채팅으로 소통할 수 있습니다.  
 실시간 알림(SSE)과 WebSocket 채팅을 통해 여행자 간 상호작용 경험을 극대화했습니다.
 
 
-
-
 <div align="center">
-  <img src="./images/main.png" width="300" alt="시작 화면" />
-  <img src="./images/info.png" width="375" alt="사용자 정보 화면" />
+  <img src="./images/main.png" width="350" alt="메인화면" />
+  <img src="./images/info.png" width="350" alt="게시글 작성" />
+  <img src="./images/journey.png" width="350" alt="게시글 상세보기" />
+  <img src="./images/chat.png" width="350" alt="채팅화면" />
 </div>
 
-## 📆 개발 기간 및 인원
+## 📚 목차
+- [개요](#-개발-기간-및-인원)
+- [기술 스택 & 개발 환경](#-기술-스택--개발-환경)
+- [주요 기능](#-주요-기능)
+- [아키 텍처](#-아키텍처)
+- [데이터베이스 ERD](#-데이터베이스-erd)
+- [기술적 구현 포인트](#-기술적-구현-포인트)
+
+## 개발 기간 및 인원
 
 - **기간**: 2025.03 ~ 2025.10 (약 7개월)
 - **참여 인원**: 1인 개인 프로젝트 (Full Stack 개발)
 - **역할**: 백엔드(Spring Boot) / 프론트엔드(Next.js)
-
-
-## 주요 기능
-
-<table> <tr> <td width="50" align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user-check.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(120deg) brightness(92%) contrast(88%);" /> </td> <td><b>회원가입 / 로그인</b> — JWT 기반 인증을 통해 안전한 사용자 로그인 및 세션 유지 기능을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/plane.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(190deg) brightness(95%) contrast(90%);" /> </td> <td><b>여행일정 관리</b> — 사용자가 여행일정을 작성, 수정, 삭제할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/map-pin.svg" width="22" style="filter: invert(41%) sepia(93%) saturate(347%) hue-rotate(125deg) brightness(95%) contrast(85%);" /> </td> <td><b>Google Maps 연동</b> — 지도에 핀을 등록하고 이미지와 함께 여행 장소를 기록할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-circle.svg" width="22" style="filter: invert(40%) sepia(92%) saturate(548%) hue-rotate(240deg) brightness(90%) contrast(92%);" /> </td> <td><b>실시간 채팅</b> — WebSocket(STOMP)을 이용하여 여행자 간 실시간 소통을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" width="22" style="filter: invert(68%) sepia(50%) saturate(830%) hue-rotate(15deg) brightness(98%) contrast(92%);" /> </td> <td><b>실시간 알림</b> — SSE(Server-Sent Events) 기반으로 댓글, 좋아요 알림을 실시간으로 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-square.svg" width="22" style="filter: invert(28%) sepia(90%) saturate(380%) hue-rotate(290deg) brightness(94%) contrast(90%);" /> </td> <td><b>댓글 및 대댓글</b> — 여행일지에 댓글, 대댓글, 좋아요 기능을 지원합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/search.svg" width="22" style="filter: invert(70%) sepia(45%) saturate(830%) hue-rotate(195deg) brightness(98%) contrast(90%);" /> </td> <td><b>게시글 검색 및 페이징</b> — 제목 및 작성자 기준으로 여행일지를 검색하고, 페이지 단위로 탐색할 수 있습니다.</td> </tr> </table>
-
 
 ## 기술 스택 & 개발 환경
 
@@ -41,9 +41,15 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 <p> <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/> <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/> </p> </div>
 
 
+
+## 주요 기능
+
+<table> <tr> <td width="50" align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user-check.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(120deg) brightness(92%) contrast(88%);" /> </td> <td><b>회원가입 / 로그인</b> — JWT 기반 인증을 통해 안전한 사용자 로그인 및 세션 유지 기능을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/plane.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(190deg) brightness(95%) contrast(90%);" /> </td> <td><b>여행일정 관리</b> — 사용자가 여행일정을 작성, 수정, 삭제할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/map-pin.svg" width="22" style="filter: invert(41%) sepia(93%) saturate(347%) hue-rotate(125deg) brightness(95%) contrast(85%);" /> </td> <td><b>Google Maps 연동</b> — 지도에 핀을 등록하고 이미지와 함께 여행 장소를 기록할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-circle.svg" width="22" style="filter: invert(40%) sepia(92%) saturate(548%) hue-rotate(240deg) brightness(90%) contrast(92%);" /> </td> <td><b>실시간 채팅</b> — WebSocket(STOMP)을 이용하여 여행자 간 실시간 소통을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" width="22" style="filter: invert(68%) sepia(50%) saturate(830%) hue-rotate(15deg) brightness(98%) contrast(92%);" /> </td> <td><b>실시간 알림</b> — SSE(Server-Sent Events) 기반으로 댓글, 좋아요 알림을 실시간으로 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-square.svg" width="22" style="filter: invert(28%) sepia(90%) saturate(380%) hue-rotate(290deg) brightness(94%) contrast(90%);" /> </td> <td><b>댓글 및 대댓글</b> — 여행일지에 댓글, 대댓글, 좋아요 기능을 지원합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/search.svg" width="22" style="filter: invert(70%) sepia(45%) saturate(830%) hue-rotate(195deg) brightness(98%) contrast(90%);" /> </td> <td><b>게시글 검색 및 페이징</b> — 제목 및 작성자 기준으로 여행일지를 검색하고, 페이지 단위로 탐색할 수 있습니다.</td> </tr> </table>
+
 ## 아키텍처
 
 ```mermaid
+%%{init: {"themeVariables": {"primaryColor": "transparent", "primaryTextColor": "#ffffff", "lineColor": "#ffffff", "secondaryColor": "transparent", "tertiaryColor": "transparent"}}}%%
 flowchart LR
     A[Next.js Zustand] -- STOMP/SockJS --> B(Spring WebSocket)
     A -- REST/JSON --> C[Spring Boot API]
@@ -52,3 +58,24 @@ flowchart LR
     C -- SSE --> A
 ```
 
+## 데이터베이스 ERD
+
+<div align="center">
+  <img src="./images/erd_total.png" width="800" alt="ERD Diagram" />
+
+  <br/>
+  📎 <a href="./images/erd_total.png">전체 ERD 보기 (클릭)</a>
+</div>
+
+ERD 설명:
+ - `UserEntity` ↔ `TravelJournalEntity`: 1:N (유저별 여행일지)  
+ - `TravelJournalEntity` ↔ `JournalEntity`: 1:N (일차별 일정)  
+ - `JournalEntity` ↔ `PhotoEntity`: 1:N (일정별 사진)  
+ - `CommentEntity` ↔ `CommentLikeEntity`: 1:N (댓글 ↔ 좋아요)  
+ - `ChatRoom` ↔ `ChatRoomMember`: 1:N (방 ↔ 참여자)
+
+## 기술적 구현 포인트
+
+### JWT 기반 로그인
+#### 일반 로그인
+#### 소셜 로그인

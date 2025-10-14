@@ -64,18 +64,20 @@ export default function ChatRoom() {
 
 return (
   <div className="flex flex-col h-full w-230">
-  {/* 메시지 목록: 2열 그리드로 중앙선 분리 */}
+  {/* 메시지 목록 (그리드 → 단일 컬럼) */}
   <div className="flex-1 overflow-y-auto p-4 bg-white">
-    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+    <div className="flex flex-col gap-3">
       {messages.map((m) => {
         const isMe = m.writerId === me?.id;
         const ts = new Date(m.createdDate);
 
         if (!isMe) {
-          // 상대방: 왼쪽 컬럼, 아바타 + 닉네임 + 말풍선
+          // 상대방: 왼쪽 정렬, 아바타 + 말풍선
           return (
-            <div key={m.id} className="col-start-1 col-end-2 justify-self-start flex items-start gap-3">
-              {/* 아바타 */}
+            <div
+              key={m.id}
+              className="self-start flex items-start gap-3 max-w-[calc(50%-0.5rem)]"
+            >
               <img
                 src={`${process.env.NEXT_PUBLIC_API_BASE}${m.avatarUrl}`}
                 alt={`${m.nickname} 프로필`}
@@ -83,35 +85,39 @@ return (
                 loading="lazy"
                 decoding="async"
               />
-              {/* 본문 */}
               <div className="min-w-0">
                 <div className="text-xs text-gray-500 mb-1">{m.nickname}</div>
-
-                {/* 가운데선 넘지 않도록 열 안에서만 줄바꿈 (max-w-full) */}
-                <div className="inline-block max-w-full rounded-2xl rounded-tl-md bg-gray-100 px-3 py-2
-                                text-[15px] leading-6 text-gray-900 shadow break-words">
+                <div
+                  className="inline-block w-full rounded-2xl rounded-tl-md bg-gray-100 px-3 py-2
+                            text-[15px] leading-6 text-gray-900 shadow break-words whitespace-pre-wrap"
+                >
                   {m.content}
                 </div>
-
                 <div className="mt-1 text-[10px] text-gray-400">
-                  {ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </div>
           );
         }
 
-        // 나: 오른쪽 컬럼, 말풍선만
+        // 나: 오른쪽 정렬, 말풍선만
         return (
-          <div key={m.id} className="col-start-2 col-end-3 justify-self-end">
+          <div
+            key={m.id}
+            className="self-end flex items-end gap-2 max-w-[calc(50%-0.5rem)]"
+          >
             <div className="min-w-0 text-right">
-              <div className="inline-block max-w-full rounded-2xl rounded-tr-md px-3 py-2
-                              text-[15px] leading-6 text-white shadow
-                              bg-gradient-to-br from-pink-500 to-orange-400 break-words">
+              <div
+                className="inline-block w-full rounded-2xl rounded-tr-md px-3 py-2
+                          text-[15px] leading-6 text-white shadow
+                          bg-gradient-to-br from-pink-500 to-orange-400
+                          break-words whitespace-pre-wrap"
+              >
                 {m.content}
               </div>
               <div className="mt-1 text-[10px] text-gray-400">
-                {ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
@@ -119,6 +125,7 @@ return (
       })}
     </div>
   </div>
+
 
 
   {/* 입력창 */}

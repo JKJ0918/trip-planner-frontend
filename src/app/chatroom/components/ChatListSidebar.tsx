@@ -106,9 +106,6 @@ return (
                             })}
                           </span>
                           
-                          {unread && (
-                            <span className="ml-auto h-2 w-2 rounded-full bg-blue-600 shrink-0" />
-                          )}
                         </div>
                       </div>
                     </div>
