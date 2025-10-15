@@ -76,6 +76,83 @@ ERD 설명:
 
 ## 기술적 구현 포인트
 
-### JWT 기반 로그인
-#### 일반 로그인
-#### 소셜 로그인
+### 일반 로그인  (Username/Password + JWT)
+아이디·비밀번호로 인증 후 **JWT를 발급**하여 세션리스 인증을 유지합니다.  
+Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했습니다.
+
+---
+
+### 전체 구조
+<div align="center">
+  <img src="./images/norLogin-archi.png" width="1000" alt="ERD Diagram" />
+</div>
+
+---
+
+### 로그인 과정 요약
+
+| 단계 | 설명 |
+|------|------|
+| **1. 로그인 요청** | 클라이언트가 `POST /login`으로 `{ username, password }`를 전송합니다. |
+| **2. 요청 진입 (Security Filters)** | `SecurityAuthenticationFilter`가 로그인 요청을 감지, 인증 시도를 시작합니다. |
+| **3. 자격 증명 검증** | `UsernamePasswordAuthenticationFilter` → `AuthenticationManager`가 `UserDetailsService`를 통해 사용자 조회 및 비밀번호 검증을 수행합니다. |
+| **4. 인증 성공 처리** | `SuccessfulAuth`(커스텀 핸들러)에서 인증 결과를 받아 **JWT를 생성**합니다. |
+| **5. JWT 전달** | **HttpOnly 쿠키**(또는 Authorization 헤더)로 액세스 토큰을 응답합니다. |
+| **6. 후속 요청 검증** | 이후 모든 보호 API 요청에서 `JWTFilter`가 토큰을 검증하고 `SecurityContextHolder`에 인증 정보를 적재합니다. |
+
+---
+### 소셜 로그인 (JWT 기반)
+
+외부 OAuth2 인증 서버(Google 등)와 연동하여 사용자의 인증을 처리하고,  
+로그인 성공 시 **JWT를 발급**하여 세션리스 인증을 구현했습니다.
+
+---
+
+### 전체 구조
+<div align="center">
+  <img src="./images/socialLogin-archi.png" width="1000" alt="ERD Diagram" />
+</div>
+
+---
+
+### 로그인 과정 요약
+
+| 단계 | 설명 |
+|------|------|
+| **1. 소셜 로그인 시도** | 사용자가 "소셜 로그인” 버튼을 클릭하면, 프론트엔드에서 외부 인증 서버로 리다이렉트됩니다. |
+| **2. Authorization Code 발급** | 사용자가 소셜 계정으로 로그인하면, 인증 서버는 `authorization code`를 백엔드로 전달합니다. |
+| **3. Access Token 요청 및 발급** | 백엔드의 `OAuth2LoginAuthenticationProvider`가 `authorization code`로 Access Token을 요청하고 발급받습니다. |
+| **4. 유저 정보 조회** | 발급받은 Access Token을 이용해 외부 리소스 서버(Google User Info 등)에서 사용자 정보를 조회합니다. |
+| **5. 사용자 정보 처리** | `CustomOAuth2Service`에서 DB를 조회하여 신규 유저면 저장, 기존 유저면 정보 업데이트를 수행합니다. |
+| **6. JWT 발급 및 로그인 완료** | `LoginSuccessHandler`에서 JWT를 생성하고, **HttpOnly 쿠키**로 클라이언트에 전달합니다.<br> 이후 클라이언트는 이 토큰을 사용해 보호된 API를 요청합니다. |
+
+---
+
+### 실시간 알림 SSE 
+
+사용자의 댓글/답글/좋아요 등 이벤트가 발생하면 **알림을 DB에 저장**하고,  
+즉시 **실시간 채널(SSE)** 로 해당 사용자에게 푸시합니다.  
+프론트는 전역 스토어를 갱신하여 **알림 리스트**를 즉시 반영합니다.
+
+---
+
+### 전체 구조
+
+<p align="center">
+  <img src="./images/notification-archi.png" width="900" alt="Real-time Notification Architecture">
+</p>
+
+---
+
+### 🧭 동작 흐름 요약
+
+| 단계 | 설명 |
+|---|---|
+| **1. 도메인 이벤트 발생** | 댓글/좋아요 등에서 `notificationService.createAndBroadcast(userId, payload)` 호출 |
+| **2. 영속화** | `NotificationEntity(userId, type, refId, message, isRead, createdAt)` 를 MariaDB에 저장 |
+| **3. 브로드캐스트** | 실시간 채널로 푸시<br> **SSE**: `NotificationSseController` 가 `SseEmitter` 로 전송 |
+| **4. 프론트 수신** | `NotificationSocket/SSE Provider`가 구독 후 `notification Hook`에서 `unreadCount` 갱신 |
+| **5. 읽음 처리** | 사용자가 알림을 열람하면 `/api/notifications/{id}/read` 또는 `/api/notifications/read-all` 호출 |
+| **6. 동기화** | 초기 진입 시 `GET /api/notifications?cursor=...` + `GET /api/notifications/unread-count` 로 상태 동기화 |
+
+---
