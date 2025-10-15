@@ -144,7 +144,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 
 ---
 
-### 🧭 동작 흐름 요약
+### 동작 흐름 요약
 
 | 단계 | 설명 |
 |---|---|
@@ -153,6 +153,4 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 | **3. 브로드캐스트** | 실시간 채널로 푸시<br> **SSE**: `NotificationSseController` 가 `SseEmitter` 로 전송 |
 | **4. 프론트 수신** | `NotificationSocket/SSE Provider`가 구독 후 `notification Hook`에서 `unreadCount` 갱신 |
 | **5. 읽음 처리** | 사용자가 알림을 열람하면 `/api/notifications/{id}/read` 또는 `/api/notifications/read-all` 호출 |
-| **6. 동기화** | 초기 진입 시 `GET /api/notifications?cursor=...` + `GET /api/notifications/unread-count` 로 상태 동기화 |
-
 ---
