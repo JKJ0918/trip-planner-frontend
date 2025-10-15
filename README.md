@@ -15,12 +15,12 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 </div>
 
 ## 📚 목차
-- [개요](#-개발-기간-및-인원)
-- [기술 스택 & 개발 환경](#-기술-스택--개발-환경)
-- [주요 기능](#-주요-기능)
-- [아키 텍처](#-아키텍처)
-- [데이터베이스 ERD](#-데이터베이스-erd)
-- [기술적 구현 포인트](#-기술적-구현-포인트)
+- [개요](#개발-기간-및-인원)
+- [기술 스택 & 개발 환경](#기술-스택--개발-환경)
+- [주요 기능](#주요-기능)
+- [아키 텍처](#아키텍처)
+- [데이터베이스 ERD](#데이터베이스-erd)
+- [기술적 구현 포인트](#기술적-구현-포인트)
 
 ## 개발 기간 및 인원
 
@@ -74,9 +74,9 @@ ERD 설명:
  - `CommentEntity` ↔ `CommentLikeEntity`: 1:N (댓글 ↔ 좋아요)  
  - `ChatRoom` ↔ `ChatRoomMember`: 1:N (방 ↔ 참여자)
 
-## 기술적 구현 포인트
+## ⚙️ 기술적 구현 포인트
 
-### 일반 로그인  (Username/Password + JWT)
+### ⚙️ 일반 로그인  (Username/Password + JWT)
 아이디·비밀번호로 인증 후 **JWT를 발급**하여 세션리스 인증을 유지합니다.  
 Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했습니다.
 
@@ -101,7 +101,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 | **6. 후속 요청 검증** | 이후 모든 보호 API 요청에서 `JWTFilter`가 토큰을 검증하고 `SecurityContextHolder`에 인증 정보를 적재합니다. |
 
 ---
-### 소셜 로그인 (JWT 기반)
+### ⚙️ 소셜 로그인 (JWT 기반)
 
 외부 OAuth2 인증 서버(Google 등)와 연동하여 사용자의 인증을 처리하고,  
 로그인 성공 시 **JWT를 발급**하여 세션리스 인증을 구현했습니다.
@@ -128,7 +128,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 
 ---
 
-### 실시간 알림 SSE 
+### ⚙️ 실시간 알림 SSE 
 
 사용자의 댓글/답글/좋아요 등 이벤트가 발생하면 **알림을 DB에 저장**하고,  
 즉시 **실시간 채널(SSE)** 로 해당 사용자에게 푸시합니다.  
@@ -150,7 +150,63 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 |---|---|
 | **1. 도메인 이벤트 발생** | 댓글/좋아요 등에서 `notificationService.createAndBroadcast(userId, payload)` 호출 |
 | **2. 영속화** | `NotificationEntity(userId, type, refId, message, isRead, createdAt)` 를 MariaDB에 저장 |
-| **3. 브로드캐스트** | 실시간 채널로 푸시<br> **SSE**: `NotificationSseController` 가 `SseEmitter` 로 전송 |
+| **3. 브로드캐스트** | 실시간 채널로 푸시<br> **SSE**`NotificationSseController` 가 `SseEmitter` 로 전송 |
 | **4. 프론트 수신** | `NotificationSocket/SSE Provider`가 구독 후 `notification Hook`에서 `unreadCount` 갱신 |
 | **5. 읽음 처리** | 사용자가 알림을 열람하면 `/api/notifications/{id}/read` 또는 `/api/notifications/read-all` 호출 |
+---
+
+### ⚙️ 게시글 작성 (Google Maps 기반 여행기 등록)
+
+**Google Maps JavaScript API**를 이용해 지도 위에서 여행지 위치를 선택하고,  
+사용자가 직접 **핀(Pin)** 을 찍어 여행 장소를 등록할 수 있습니다.  
+입력된 지도 정보와 일정·사진·메모 등의 데이터는 DTO로 구성되어  
+**백엔드(Spring Boot)** 로 전달되어 데이터베이스에 저장됩니다.
+
+---
+
+### 전체 구조
+
+<p align="center">
+  <img src="./images/post-archi.png" width="900" alt="post Architecture">
+</p>
+
+---
+
+### 흐름 요약
+
+| 단계 | 설명 |
+|------|------|
+| **1. 지도 불러오기** | Google Maps API를 통해 여행지 중심 좌표에 맞춘 지도를 렌더링합니다. |
+| **2. 핀 등록 (Marker 생성)** | 사용자가 지도를 클릭하면 해당 위치에 **커스텀 핀**이 생성되고, 제목·메모·이미지 등을 입력할 수 있습니다. |
+| **3. 상태 관리** | 등록된 핀들은 `Zustand` 전역 상태로 관리되어, 지도와 여행일정 UI가 동기화됩니다. |
+| **4. 게시글 저장 요청** | 사용자가 “저장”을 클릭하면, 지도 정보(`pins`, `lat`, `lng`, `placeName` 등)와 여행일정, 이미지가 **JSON DTO** 형태로 백엔드로 전송됩니다. |
+| **5. 서버 저장** | 백엔드는 DTO를 수신하여 `TravelJournalEntity` 및 관련 엔티티(`PinEntity`, `PhotoEntity`,`journalEntity` 등 )로 변환 후 **MariaDB**에 영속화합니다. |
+| **6. 등록 완료** | 저장이 성공하면 프론트엔드는 `/post/{id}` 상세 페이지로 리다이렉트되어, 사용자가 작성한 지도를 포함한 여행기를 확인할 수 있습니다. |
+
+---
+
+### ⚙️ 실시간 채팅 기능 WebSocket/Stomp 방식
+
+STOMP 기반 WebSocket으로 **채팅방 메시지**와 **사이드바 요약(마지막 메시지/날짜)** 를
+실시간 동기화합니다. 연결 실패 시 자동 재연결 및 재구독을 처리합니다.
+
+---
+
+<p align="center">
+  <img src="./images/chat-archi.png" width="900" alt="chatting Architecture">
+</p>
+
+---
+
+### 🧭 동작 흐름 요약
+
+| 단계 | 설명 |
+|---|---|
+| **1. 연결** | 클라이언트가 `/ws` 엔드포인트로 STOMP 연결. 핸드셰이크 시 인증 정보를 세션에 저장합니다. |
+| **2. 구독(요약)** | 전역에서 `subscribe('/user/queue/chatrooms/summary')` → 사이드바의 마지막 메시지/미읽음 수 실시간 반영. |
+| **3. 구독(방별)** | 채팅방 진입 시 `subscribe('/sub/chatroom/{roomId}')` → 새 메시지를 실시간 수신하고 목록에 append. |
+| **4. 전송** | 사용자가 입력 후 `publish('/pub/message', { roomId, content })` → 서버가 저장 후 해당 방 구독자에게 브로드캐스트. |
+| **5. 저장** | 메시지는 **MongoDB**(대화 로그), 방 요약(마지막 메시지/미읽음 수/마지막 읽음)은 **MariaDB** 에 반영. |
+| **6. 재연결** | 네트워크 단절 시 자동 재연결 → onConnect에서 **필요 채널 재구독** 후 상태 복원. |
+
 ---
