@@ -34,9 +34,6 @@ export default function Header() {
             <Link href="/posts" className="hover:text-indigo-600 transition">여행 일정</Link>
           </li>
           <li>
-            <Link href="#" className="hover:text-indigo-600 transition">맛집&명소 등록</Link>
-          </li>
-          <li>
             <Link href="#" className="hover:text-indigo-600 transition">이용 가이드</Link>
           </li>
           <li>

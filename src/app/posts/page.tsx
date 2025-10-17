@@ -113,6 +113,7 @@ export default function PostListPage() {
             className="rounded-4xl bg-gray-100 shadow px-3 py-2 text-sm"
             aria-label="페이지당 개수"
           >
+            <option value={2}>2개</option>
             <option value={4}>4개</option>
             <option value={6}>6개</option>
             <option value={12}>12개</option>

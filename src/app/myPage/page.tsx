@@ -14,7 +14,7 @@ const sections = [
   '내가 쓴 여행일지',
   '알림',
   '좋아요한 게시물',
-  '추가예정',
+
 ]; 
 
 export default function MyPage() {

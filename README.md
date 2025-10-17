@@ -7,20 +7,53 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 실시간 알림(SSE)과 WebSocket 채팅을 통해 여행자 간 상호작용 경험을 극대화했습니다.
 
 
-<div align="center">
-  <img src="./images/main.png" width="350" alt="메인화면" />
-  <img src="./images/info.png" width="350" alt="게시글 작성" />
-  <img src="./images/journey.png" width="350" alt="게시글 상세보기" />
-  <img src="./images/chat.png" width="350" alt="채팅화면" />
-</div>
+<p align="center">
+  <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
+    <img src="./images/main.png" width="45%" alt="메인화면" />
+  </a>
+  <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
+    <img src="./images/info.png" width="45%" alt="게시글 작성" />
+  </a>
+  <br/>
+  <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
+    <img src="./images/journey.png" width="45%" alt="게시글 상세보기" />
+  </a>
+  <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
+    <img src="./images/chat.png" width="45%" alt="채팅화면" />
+  </a>
+</p>
+
+
+
+- 자세한 홈페이지 구성 요소를 보시려면 아래 'TripPlanner Detail Google Slides' 를 클릭해 주십시오.
+
+<p align="center">
+  <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
+    <img alt="TripPlanner Detail (Google Slides)" src="https://img.shields.io/badge/TripPlanner Detail%20Tour-Google%20Slides-4285F4?logo=google-slides&logoColor=white">
+  </a>
+</p>
+
+
+
 
 ## 📚 목차
 - [개요](#개발-기간-및-인원)
+  - [개발 기간 및 인원](#개발-기간-및-인원)
 - [기술 스택 & 개발 환경](#기술-스택--개발-환경)
 - [주요 기능](#주요-기능)
-- [아키 텍처](#아키텍처)
 - [데이터베이스 ERD](#데이터베이스-erd)
-- [기술적 구현 포인트](#기술적-구현-포인트)
+- [기술적 구현 포인트](#⚙️-기술적-구현-포인트)
+  - [일반 로그인 (Username/Password + JWT)](#⚙️-일반-로그인-usernamepassword--jwt)
+  - [소셜 로그인 (JWT 기반)](#⚙️-소셜-로그인-jwt-기반)
+  - [실시간 알림 SSE](#⚙️-실시간-알림-sse)
+  - [게시글 작성 (Google Maps 기반 여행기 등록)](#⚙️-게시글-작성-google-maps-기반-여행기-등록)
+  - [실시간 채팅 기능 WebSocket/Stomp 방식](#⚙️-실시간-채팅-기능-websocketstomp-방식)
+- [🧩 트러블 슈팅 Trouble Shooting](#🧩-트러블-슈팅-trouble-shooting)
+  - [채팅방 목록 실시간 반영 문제](#1-채팅방-목록-실시간-반영-문제)
+  - [댓글 작성 시 화면 깜빡임 문제](#2-댓글-작성-시-화면-깜빡임-문제)
+  - [3. 이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제](#3-이미지-업로드-파일-선택-취소-시-기존-미리보기가-사라지는-문제)
+- [배운점 및 마무리](#배운점-및-마무리)
+
 
 ## 개발 기간 및 인원
 
@@ -46,18 +79,6 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 
 <table> <tr> <td width="50" align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user-check.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(120deg) brightness(92%) contrast(88%);" /> </td> <td><b>회원가입 / 로그인</b> — JWT 기반 인증을 통해 안전한 사용자 로그인 및 세션 유지 기능을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/plane.svg" width="22" style="filter: invert(36%) sepia(98%) saturate(623%) hue-rotate(190deg) brightness(95%) contrast(90%);" /> </td> <td><b>여행일정 관리</b> — 사용자가 여행일정을 작성, 수정, 삭제할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/map-pin.svg" width="22" style="filter: invert(41%) sepia(93%) saturate(347%) hue-rotate(125deg) brightness(95%) contrast(85%);" /> </td> <td><b>Google Maps 연동</b> — 지도에 핀을 등록하고 이미지와 함께 여행 장소를 기록할 수 있습니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-circle.svg" width="22" style="filter: invert(40%) sepia(92%) saturate(548%) hue-rotate(240deg) brightness(90%) contrast(92%);" /> </td> <td><b>실시간 채팅</b> — WebSocket(STOMP)을 이용하여 여행자 간 실시간 소통을 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" width="22" style="filter: invert(68%) sepia(50%) saturate(830%) hue-rotate(15deg) brightness(98%) contrast(92%);" /> </td> <td><b>실시간 알림</b> — SSE(Server-Sent Events) 기반으로 댓글, 좋아요 알림을 실시간으로 제공합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/message-square.svg" width="22" style="filter: invert(28%) sepia(90%) saturate(380%) hue-rotate(290deg) brightness(94%) contrast(90%);" /> </td> <td><b>댓글 및 대댓글</b> — 여행일지에 댓글, 대댓글, 좋아요 기능을 지원합니다.</td> </tr> <tr> <td align="center"> <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/search.svg" width="22" style="filter: invert(70%) sepia(45%) saturate(830%) hue-rotate(195deg) brightness(98%) contrast(90%);" /> </td> <td><b>게시글 검색 및 페이징</b> — 제목 및 작성자 기준으로 여행일지를 검색하고, 페이지 단위로 탐색할 수 있습니다.</td> </tr> </table>
 
-## 아키텍처
-
-```mermaid
-%%{init: {"themeVariables": {"primaryColor": "transparent", "primaryTextColor": "#ffffff", "lineColor": "#ffffff", "secondaryColor": "transparent", "tertiaryColor": "transparent"}}}%%
-flowchart LR
-    A[Next.js Zustand] -- STOMP/SockJS --> B(Spring WebSocket)
-    A -- REST/JSON --> C[Spring Boot API]
-    C --> D[(MariaDB)]
-    B --> E[(MongoDB)]
-    C -- SSE --> A
-```
-
 ## 데이터베이스 ERD
 
 <div align="center">
@@ -76,7 +97,7 @@ ERD 설명:
 
 ## ⚙️ 기술적 구현 포인트
 
-### ⚙️ 일반 로그인  (Username/Password + JWT)
+### ⚙️ 일반 로그인 (Username/Password + JWT)
 아이디·비밀번호로 인증 후 **JWT를 발급**하여 세션리스 인증을 유지합니다.  
 Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했습니다.
 
@@ -172,7 +193,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 
 ---
 
-### 흐름 요약
+### 동작 흐름 요약
 
 | 단계 | 설명 |
 |------|------|
@@ -198,7 +219,7 @@ STOMP 기반 WebSocket으로 **채팅방 메시지**와 **사이드바 요약(�
 
 ---
 
-### 🧭 동작 흐름 요약
+### 동작 흐름 요약
 
 | 단계 | 설명 |
 |---|---|
@@ -210,3 +231,258 @@ STOMP 기반 WebSocket으로 **채팅방 메시지**와 **사이드바 요약(�
 | **6. 재연결** | 네트워크 단절 시 자동 재연결 → onConnect에서 **필요 채널 재구독** 후 상태 복원. |
 
 ---
+
+## 🧩 트러블 슈팅 Trouble Shooting
+
+프로젝트 개발 과정에서 마주친 대표적인 문제와 그 해결 과정을 정리하였습니다.
+
+### **1. 채팅방 목록 실시간 반영 문제**
+
+#### 문제 상황
+채팅 메시지를 전송하면 채팅방 내부에는 실시간으로 표시되지만,  
+사이드바(채팅방 요약 목록)는 최신 메시지가 반영되지 않아 즉시 업데이트되지 않음.  
+변경된 채팅방 요약 데이터가 DB에 적용이 되고 있었지만, 실시간으로 UI는 갱신되지 않는 현상이 발생.
+
+---
+
+#### 원인 분석
+
+React는 **상태의 “참조(주소)”가 바뀌어야 렌더링을 수행**하므로, 기존 배열/객체를 직접 수정하면 변경을 감지하지 못함.
+결국 상태는 바뀌었지만 UI는 리렌더링되지 않았던 것.
+
+---
+
+#### 🛠️ 해결 방법
+
+1. **백엔드 개선: `convertAndSendToUser()` 도입**  
+  각 사용자의 사이드바 정보를 개별적으로 갱신하도록 구조 변경.  
+  메시지 전송 시점에 사용자별 summary 데이터도 함께 전송.
+   ```java
+   // 채팅방 내 전체 브로드캐스트
+   template.convertAndSend("/sub/chatroom/" + roomId, message);
+
+   // 각 사용자별 사이드바 요약 데이터 전송
+   template.convertAndSendToUser(userId.toString(), "/queue/chatrooms/summary", summary);
+    ```
+2. **프론트 엔드 개선: `convertAndSendToUser()` 도입**  
+ChatSocketProvider가 /user/queue/chatrooms/summary를 구독해 수신한 DTO를 applySummary에 전달 → 전역 상태만 바꾸면 사이드바가 자동으로 갱신되는 흐름 확립.
+   ```java
+   // 예시: chatStore.ts 내부 개념 코드 (불변성 유지)
+    applySummary: (summary) =>
+      set((state) => ({
+        summaries: state.summaries.map((r) =>
+          r.roomId === summary.roomId
+            ? { ...r, ...summary } // 새로운 객체로 교체
+            : r
+        ),
+      }));
+
+   ```
+
+#### 📁 관련 코드
+- `src/main/java/com/tripPlanner/project/controller/chat/ChatController.java - receiveMessage 메소드` - [메시지 수신 엔드포인트](https://github.com/JKJ0918/trip-planner-backend/blob/master/src/main/java/com/tripPlanner/project/controller/chat/ChatController.java)
+- `src/main/java/com/tripPlanner/project/service/chat/ChatService.java - saveChatMessage, broadcastRoomSummaryForAll  메소드` - [저장 + 브로드캐스트 + 사용자별 요약 생성](https://github.com/JKJ0918/trip-planner-backend/blob/master/src/main/java/com/tripPlanner/project/service/chat/ChatService.java)
+- `src/app/chatroom/components/ChatSocketProvider.tsx` — [실시간 요약 구독 및 상태 반영 로직](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/chatroom/components/ChatSocketProvider.tsx)
+- `src/app/chatroom/stores/chatStore.ts` — [applySummary()를 통한 상태 업데이트 로직](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/chatroom/stores/chatStore.ts)
+- `src/app/chatroom/components/ChatListSidebar.tsx` — [summaries 상태를 렌더링](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/chatroom/components/ChatListSidebar.tsx)
+
+
+### **2. 댓글 작성 시 화면 깜빡임 문제**
+
+#### 문제 상황
+댓글을 작성하면 리스트가 잠깐 사라졌다가 다시 나타나는 깜빡임(flicker) 현상이 발생.
+네트워크가 느릴수록 더 두드러지며, 사용자 입력 포커스가 잦은 변경으로 불편함 초래.
+
+---
+
+#### 원인 분석
+
+과거 구현(전형적인 패턴)에서는 댓글 작성 후 전체 목록 재요청을 수행해 리스트가 통째로 교체되면서 깜빡임이 발생한다는 문제 발생.
+
+낙관적 업데이트(Optimistic Update): 새 댓글은 즉시 1페이지 맨 앞에 삽입하여(실제 응답 전) 깜빡임 없이 보이게 하고, 성공 시에는 해당 항목만 실제 서버 응답으로 교체한다. 실패 시엔 낙관 항목만 제거(국소 롤백). 이 방식이 전체 리렌더를 유발하는 “전체 재요청 → 전면 교체”를 대체함. 
+
+키 안정화 + 메모이제이션: 각 댓글에 key={c.id}(접두 포함)로 안정된 key를 부여하고, CommentCard, CommentInput을 memo로 감싸 불필요한 재렌더링을 줄인다. 또한 답글 입력영역은 DOM을 유지(keep mounted) 하면서 hidden 클래스로만 보임/숨김을 토글해 마운트/언마운트로 인한 깜빡임을 방지함. 
+
+---
+
+#### 🛠️ 해결 방법
+
+1. **전체 재요청 제거 → 국소 append로 전환**  
+useInfiniteQuery 캐시를 직접 갱신해 1페이지 앞에 낙관값을 추가합니다. 성공 시 그 항목만 교체, 실패 시 그 항목만 제거.
+```java
+
+  // CommentSection.tsx Line 688 ~
+  // CommentSection.tsx — 최상위 댓글 낙관 추가 → 성공 시 교체, 실패 시 롤백
+  const handleAddTopComment = useCallback(async () => {
+
+    // 1) 낙관적 추가 (id 접두로 '8' 사용 → 롤백/교체 식별)
+    const optimistic: Comment = {
+      id: Number(`8${Date.now()}`),
+      content,
+      writerName: 'Me',
+      ....
+    };
+
+    // 첫 페이지 맨 앞에 삽입
+    queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
+      ['comments', journalId, sortOrder],
+      (old) => {
+        if (!old) return old as any;
+        const pages = [...old.pages];
+        if (pages.length > 0) {
+          pages[0] = { ...pages[0], content: [optimistic, ...pages[0].content] };
+        }
+        return { ...old, pages };
+      }
+    );
+
+    try {
+      const res = await fetch(`.../api/comments/${journalId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+
+      // 2) 성공: 낙관 항목만 실제 응답으로 교체
+      if (res.ok) {
+        const saved = await safeJson<Comment>(res);
+        if (saved) {
+          queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
+            ['comments', journalId, sortOrder],
+            (old) => {
+              if (!old) return old as any;
+              const pages = [...old.pages];
+              if (pages.length > 0) {
+                const idx = pages[0].content.findIndex((c) => c.id === optimistic.id);
+                if (idx >= 0) {
+                  const arr = [...pages[0].content];
+                  arr[idx] = saved;                 // 국소 교체
+                  pages[0] = { ...pages[0], content: arr };
+                }
+              }
+              return { ...old, pages };
+            }
+          );
+      }
+
+      ....
+
+    } catch {
+      // 3) 실패: 낙관 항목만 제거(롤백)
+      queryClient.setQueryData<{ pages: CommentPage[]; pageParams: any[] }>(
+        ['comments', journalId, sortOrder],
+        (old) => {
+          if (!old) return old as any;
+          const pages = [...old.pages];
+          if (pages.length > 0) {
+            pages[0] = {
+              ...pages[0],
+              content: pages[0].content.filter((c) => !String(c.id).startsWith('8')),
+            };
+          }
+          return { ...old, pages };
+        }
+      );
+      alert('댓글 작성 실패');
+    } finally {
+      setLoading(false);
+      setNewComment('');        // UX: 입력창 비우기
+    }
+  }, [journalId, newComment, queryClient]);
+
+```
+
+2. **자동 리패치 비활성화**  
+포커스/재연결 시 전면 재패치가 발생하지 않도록 옵션을 명확히 함.
+
+```java
+  // CommentSection.tsx Line 344, 345
+  useInfiniteQuery({
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 60_000,
+  });
+```
+
+2. **메모이즈로 리렌더 최소화**  
+CommentInput/CommentCard는 memo로 감싸 필요할 때만 렌더
+```java
+  // CommentSection.tsx Line 40
+  // CommentSection.tsx — 입력창은 memo로 감싸서 필요 시에만 리렌더
+  const CommentInput = memo(function CommentInput({
+    value, loading, onChange, onSubmit,
+  }: {
+    value: string;
+    loading: boolean;
+    onChange: (v: string) => void;
+    onSubmit: () => void;
+  }) {
+    ...
+  });
+
+```
+
+#### 📁 관련 코드
+- `src/app/posts/components/CommentSection.tsx` — [무한 스크롤, 낙관 추가/교체/롤백, 메모이즈 처리](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/posts/components/CommentSection.tsx)
+
+
+### **3. 이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제**
+
+#### 문제 상황
+일별 여행일지 작성 화면에서 이미지를 3장 선택한 뒤, 추가로 업로드하려고 **파일 선택창을 열었다가 ‘취소’**하면,
+기존에 선택해 둔 미리보기(썸네일)들이 사라지는 문제가 발생.
+
+---
+
+#### 원인 분석
+
+`<input type="file">` 의 files는 브라우저가 관리하는 일회성 상태라서 렌더/리마운트 타이밍이나 조건부 렌더에 따라 비워질 수 있음.
+
+UI를 input.files에 직접 의존하면, onChange가 발생하지 않는 ‘취소’ 시에도 기존 프리뷰가 날아간 것처럼 보이는 부작용이 생김.
+
+같은 파일을 다시 선택하려면 input.value = "" 리셋이 필요한데, 이 처리가 없으면 중복 선택/재선택 자체가 안 되거나 상태가 꼬일 수 있음.
+
+---
+
+#### 🛠️ 해결 방법
+
+파일 입력은 소스, 화면 상태는 전역(=Zustand)에서 관리
+1. UI 상태를 전부 store로 관리
+
+    일별 초안(draft) 마다 uploadedImages 배열을 전역 상태로 보관 → 화면은 이 배열만 렌더.
+
+    파일 다이얼로그에서 취소하면 onChange가 호출되지 않으므로, 상태 변화 없음 → 기존 썸네일 유지.
+
+2. 파일 선택 시에만 store에 반영 & input 즉시 리셋
+
+    파일 선택(onChange)에서 파일이 있을 때만 store에 append.
+
+    같은 파일을 다시 고를 수 있도록 input.value = ''로 즉시 리셋.
+
+
+   ```java
+   // TravelJournal.tsx — Line 29 ~
+   // TravelJournal.tsx — onChange에서 store 반영 후 input 리셋
+    const handleImageChange = async (e, id) => {
+      const files = e.target.files;
+      // 취소 시: 상태 변화 없음 → 썸네일 유지
+      if (!files || files.length === 0) return;           
+      // store에만 반영
+      await addUploadedImageToDraft(id, Array.from(files)); 
+      // 동일 파일 재선택 허용
+      fileInputRefs.current[id]!.value = '';               
+    };
+   ```
+
+#### 📁 관련 코드
+- `src/app/maps/components/TravelJournal.tsx - [파일 입력 관리, store 반영, 프리뷰 렌더, 삭제 처리(버튼)](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/maps/components/TravelJournal.tsx)
+
+
+## 배운점 및 마무리
+
+웹페이지 구성에 있어 다양한 파트를 경험해 보고 싶어 개인 프로젝트를 진행하였습니다. 그리고, 백엔드와 프론트엔드를 모두 직접 설계하는 만큼 처음 보는 코드들도 많았습니다. 기초적인 java, javascript 문법 등과 같은 것도 중요하지만, 다양한 기능을 구현하기 위해서는 라이브러리 문법도 중요하다는 것을 배웠습니다.
+
+요즘 AI를 이용한 vibe 코딩이라는 말이 많이 나오고 있습니다. 하지만, 프로젝트가 점점 커지면서 기본적인 라이브러리 사용법 없이는 AI 가 작성해 주는 코드만으로는 내가 원하는 구현에 한계가 있어, 지금 구현하는 것이 무엇인지에 대한 것을 공식 문서나 구글 검색 등을 이용하여 정확히 파악하는 게 중요하다는 점을 배웠습니다.
+
+긴글 읽어 주셔서 감사합니다.
