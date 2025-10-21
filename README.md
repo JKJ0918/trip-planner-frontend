@@ -25,13 +25,17 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 
 
 
-- 자세한 홈페이지 구성 요소를 보시려면 아래 'TripPlanner Detail Google Slides' 를 클릭해 주십시오.
+- 자세한 홈페이지 구성 요소를 보시려면 사진을 클릭하시거나 아래 'TripPlanner Detail Google Slides' 를 클릭해 주십시오.
+
 
 <p align="center">
   <a href="https://docs.google.com/presentation/d/1bG6nySLRsFpGKmnCHQ8BPZca14jjO9in8Ng5OueXZj8/edit?usp=sharing" target="_blank">
     <img alt="TripPlanner Detail (Google Slides)" src="https://img.shields.io/badge/TripPlanner Detail%20Tour-Google%20Slides-4285F4?logo=google-slides&logoColor=white">
   </a>
 </p>
+
+-  이 프로젝트는 백엔드와 프론트엔드 레포지토리가 나뉘어져 있습니다. 백엔드 코드는 다음 주소를 참고해 주십시오.
+-  백엔드 : https://github.com/JKJ0918/trip-planner-backend
 
 
 
@@ -43,15 +47,15 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 - [주요 기능](#주요-기능)
 - [데이터베이스 ERD](#데이터베이스-erd)
 - [기술적 구현 포인트](#⚙️-기술적-구현-포인트)
-  - [1. 일반 로그인 (Username/Password + JWT)](#⚙️-1-일반-로그인-usernamepassword--jwt)
-  - [2. 소셜 로그인 (JWT 기반)](#⚙️-2-소셜-로그인-jwt-기반)
-  - [3. 실시간 알림 SSE](#⚙️-3-실시간-알림-sse)
-  - [4. 게시글 작성 (Google Maps 기반 여행기 등록)](#⚙️-4-게시글-작성-google-maps-기반-여행기-등록)
-  - [5. 실시간 채팅 기능 WebSocket/Stomp 방식](#⚙️-5-실시간-채팅-기능-websocketstomp-방식)
+  - [일반 로그인 (Username/Password + JWT)](#⚙️-일반-로그인-usernamepassword--jwt)
+  - [소셜 로그인 (JWT 기반)](#⚙️-소셜-로그인-jwt-기반)
+  - [실시간 알림 SSE](#⚙️-실시간-알림-sse)
+  - [게시글 작성 (Google Maps 기반 여행기 등록)](#⚙️-게시글-작성-google-maps-기반-여행기-등록)
+  - [실시간 채팅 기능 WebSocket/Stomp 방식](#⚙️-실시간-채팅-기능-websocketstomp-방식)
 - [🧩 트러블 슈팅 Trouble Shooting](#🧩-트러블-슈팅-trouble-shooting)
-  - [1. 채팅방 목록 실시간 반영 문제](#1-채팅방-목록-실시간-반영-문제)
-  - [2. 댓글 작성 시 화면 깜빡임 문제](#2-댓글-작성-시-화면-깜빡임-문제)
-  - [3. 이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제](#3-이미지-업로드-파일-선택-취소-시-기존-미리보기가-사라지는-문제)
+  - [채팅방 목록 실시간 반영 문제](#채팅방-목록-실시간-반영-문제)
+  - [댓글 작성 시 화면 깜빡임 문제](#댓글-작성-시-화면-깜빡임-문제)
+  - [이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제](#이미지-업로드-파일-선택-취소-시-기존-미리보기가-사라지는-문제)
 - [배운점 및 마무리](#배운점-및-마무리)
 
 
@@ -97,7 +101,7 @@ ERD 설명:
 
 ## ⚙️ 기술적 구현 포인트
 
-### ⚙️ 1. 일반 로그인 (Username/Password + JWT)
+### ⚙️ 일반 로그인 (Username/Password + JWT)
 아이디·비밀번호로 인증 후 **JWT를 발급**하여 세션리스 인증을 유지합니다.  
 Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했습니다.
 
@@ -122,7 +126,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 | **6. 후속 요청 검증** | 이후 모든 보호 API 요청에서 `JWTFilter`가 토큰을 검증하고 `SecurityContextHolder`에 인증 정보를 적재합니다. |
 
 ---
-### ⚙️ 2. 소셜 로그인 (JWT 기반)
+### ⚙️ 소셜 로그인 (JWT 기반)
 
 외부 OAuth2 인증 서버(Google 등)와 연동하여 사용자의 인증을 처리하고,  
 로그인 성공 시 **JWT를 발급**하여 세션리스 인증을 구현했습니다.
@@ -149,7 +153,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 
 ---
 
-### ⚙️ 3. 실시간 알림 SSE 
+### ⚙️ 실시간 알림 SSE 
 
 사용자의 댓글/답글/좋아요 등 이벤트가 발생하면 **알림을 DB에 저장**하고,  
 즉시 **실시간 채널(SSE)** 로 해당 사용자에게 푸시합니다.  
@@ -176,7 +180,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 | **5. 읽음 처리** | 사용자가 알림을 열람하면 `/api/notifications/{id}/read` 또는 `/api/notifications/read-all` 호출 |
 ---
 
-### ⚙️ 4. 게시글 작성 (Google Maps 기반 여행기 등록)
+### ⚙️ 게시글 작성 (Google Maps 기반 여행기 등록)
 
 **Google Maps JavaScript API**를 이용해 지도 위에서 여행지 위치를 선택하고,  
 사용자가 직접 **핀(Pin)** 을 찍어 여행 장소를 등록할 수 있습니다.  
@@ -206,7 +210,7 @@ Spring Security의 필터 체인과 인증 컴포넌트를 커스터마이징했
 
 ---
 
-### ⚙️ 5. 실시간 채팅 기능 WebSocket/Stomp 방식
+### ⚙️ 실시간 채팅 기능 WebSocket/Stomp 방식
 
 STOMP 기반 WebSocket으로 **채팅방 메시지**와 **사이드바 요약(마지막 메시지/날짜)** 를
 실시간 동기화합니다. 연결 실패 시 자동 재연결 및 재구독을 처리합니다.
@@ -236,7 +240,7 @@ STOMP 기반 WebSocket으로 **채팅방 메시지**와 **사이드바 요약(�
 
 프로젝트 개발 과정에서 마주친 대표적인 문제와 그 해결 과정을 정리하였습니다.
 
-### **1. 채팅방 목록 실시간 반영 문제**
+### **채팅방 목록 실시간 반영 문제**
 
 #### 문제 상황
 채팅 메시지를 전송하면 채팅방 내부에는 실시간으로 표시되지만,  
@@ -287,7 +291,7 @@ ChatSocketProvider가 /user/queue/chatrooms/summary를 구독해 수신한 DTO�
 - `src/app/chatroom/components/ChatListSidebar.tsx` — [summaries 상태를 렌더링](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/chatroom/components/ChatListSidebar.tsx)
 
 
-### **2. 댓글 작성 시 화면 깜빡임 문제**
+### **댓글 작성 시 화면 깜빡임 문제**
 
 #### 문제 상황
 댓글을 작성하면 리스트가 잠깐 사라졌다가 다시 나타나는 깜빡임(flicker) 현상이 발생.
@@ -427,7 +431,7 @@ CommentInput/CommentCard는 memo로 감싸 필요할 때만 렌더
 - `src/app/posts/components/CommentSection.tsx` — [무한 스크롤, 낙관 추가/교체/롤백, 메모이즈 처리](https://github.com/JKJ0918/trip-planner-frontend/blob/main/src/app/posts/components/CommentSection.tsx)
 
 
-### **3. 이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제**
+### **이미지 업로드: 파일 선택 취소 시 기존 미리보기가 사라지는 문제**
 
 #### 문제 상황
 일별 여행일지 작성 화면에서 이미지를 3장 선택한 뒤, 추가로 업로드하려고 **파일 선택창을 열었다가 ‘취소’**하면,
