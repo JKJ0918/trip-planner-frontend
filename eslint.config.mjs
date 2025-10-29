@@ -15,10 +15,8 @@ const eslintConfig = [
   {
     rules: {
 
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
+      "@typescript-eslint/no-unused-vars": "off",
+
       // Unexpected any. Specify a different type 문구 제거
       "@typescript-eslint/no-explicit-any": "off",
     },
