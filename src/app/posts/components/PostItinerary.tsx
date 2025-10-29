@@ -18,7 +18,7 @@ type Props = {
   endDate: string;
 };
 
-const BASE_URL = "http://localhost:8080"; // 나중에 배포시 삭제 예정
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}`; // 나중에 배포시 삭제 예정
 
 export default function PostItinerary({ itinerary, startDate, endDate }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);

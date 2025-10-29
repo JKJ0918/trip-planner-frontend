@@ -20,7 +20,7 @@ type ItineraryEditorProps = {
   availableDates: string[];
 };
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}`;
 
 export default function ItineraryEditor({ itinerary, onItineraryChange, availableDates, }: ItineraryEditorProps) {
   const [localItinerary, setLocalItinerary] = useState<DayJournal[]>([]);

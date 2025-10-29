@@ -27,7 +27,6 @@ type HeroSectionProps = {
   isAfterTravel?: boolean;
 };
 
-const BASE_URL = 'http://localhost:8080';
 
 // 날짜 표시
 function formatDateWithDayAndPeriod(startStr: string, endStr: string): string {
@@ -81,7 +80,7 @@ export default function HeroSection({
         {/* 좌측 이미지 */}
         <div className="w-full md:w-1/2 h-64 md:h-96 rounded-xl overflow-hidden shadow">
           <img
-            src={`${BASE_URL}${thumbnailUrl}`}
+            src={`${process.env.NEXT_PUBLIC_API_BASE}${thumbnailUrl}`}
             alt={title}
             className="object-cover w-full h-full"
           />

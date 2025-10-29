@@ -2,7 +2,7 @@
 export const Join = async (username: string, password: string,
      nickname: string, name: string, email: string) => {
   try {
-    const response = await fetch("http://localhost:8080/join", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/join`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

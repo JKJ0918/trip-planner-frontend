@@ -1,7 +1,7 @@
 // utils/fetchUserInfo.ts
 export async function fetchUserInfo() {
   try {
-    const res = await fetch("http://localhost:8080/api/auth/me", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/me`, {
       method: "GET",
       credentials: "include", // 쿠키 포함
     });

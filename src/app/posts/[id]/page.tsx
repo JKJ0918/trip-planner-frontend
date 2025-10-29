@@ -134,7 +134,7 @@ export default function TravelPostPage() {
   useEffect(() => {
   if (!id) return;
 
-  fetch(`http://localhost:8080/api/journals/public/${id}`, {
+  fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/public/${id}`, {
     credentials: "include", // 쿠키 같이 보냄
   })
     .then(res => {
@@ -157,7 +157,7 @@ export default function TravelPostPage() {
 useEffect(() => {
   const loadMe = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/journals/auth/me', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/auth/me`, {
         credentials: 'include',
       });
       const text = await res.text();

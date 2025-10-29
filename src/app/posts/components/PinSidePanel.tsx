@@ -25,7 +25,7 @@ export default function PinSidePanel({
   pin: Pin;
   onClose: () => void;
 }) {
-  const BASE_URL = 'http://localhost:8080';
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}`;
   const [idx, setIdx] = useState(0);
 
   const images = pin.images ?? [];

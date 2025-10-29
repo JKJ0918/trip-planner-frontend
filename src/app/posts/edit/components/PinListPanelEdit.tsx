@@ -24,7 +24,7 @@ type Props = {
     onTravelPinEntryChange: (updatePins: Pin[]) => void;
 }
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}`;
 
 export default function PinListPanelEdit({ travelPinEntry, onTravelPinEntryChange }: Props) {
   const handleChange = (index: number, field: keyof Pin, value: string) => {

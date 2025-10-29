@@ -41,7 +41,7 @@ export default function SocialJoin() {
     if (!canSubmit) return; // 안전망
 
     try {
-      const res = await fetch("http://localhost:8080/api/user/additional-info", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/user/additional-info`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

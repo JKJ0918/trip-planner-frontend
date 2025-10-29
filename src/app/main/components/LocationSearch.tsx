@@ -10,7 +10,7 @@ export default function LocationSearch() {
 
   useEffect(() => {
     const fetchLocations = async () => {
-      const res = await fetch('http://localhost:8080/api/locations');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/locations`);
       const data = await res.json();
       setLocations(data);
       setFiltered(data);

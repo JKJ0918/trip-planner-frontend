@@ -361,7 +361,7 @@ export const useTripStore = create<TripState>((set, get) => ({
 
       console.log(payload);
 
-      const res = await fetch('http://localhost:8080/api/journals', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -179,7 +179,7 @@ export default function EditPostPage() {
   useEffect(() => { // 특정 게시글 불러오기
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/journals/public/${id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/public/${id}`);
         const data = await res.json(); // 응답 데이터 JSON으로 파싱
 
         const enhancedItinerary = data.itinerary.map((entry: any) => ({ // data.itinerary.map(...) 파싱된 데이터의 일일 일정 배열들을 순회 하며 새배열 생성
@@ -233,7 +233,7 @@ export default function EditPostPage() {
             const formData = new FormData();
             entry.newImages.forEach((file) => formData.append('files', file));
 
-            const res = await fetch('http://localhost:8080/api/images/edit/upload', {
+            const res = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload', {
               method: 'POST',
               body: formData,
               // credentials: 'include', // 인증 필요 시 주석 해제
@@ -247,7 +247,7 @@ export default function EditPostPage() {
 
           // 삭제 이미지 처리
           if (entry.deletedImages && entry.deletedImages.length > 0) {
-            const delRes = await fetch('http://localhost:8080/api/images/edit/delete', {
+            const delRes = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/delete', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ imageUrls: entry.deletedImages }),
@@ -278,7 +278,7 @@ export default function EditPostPage() {
             const formData = new FormData();
             newImages.forEach((file) => formData.append('files', file));
 
-            const res = await fetch('http://localhost:8080/api/images/edit/upload', {
+            const res = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload', {
               method: 'POST',
               body: formData,
               // credentials: 'include', // 인증 필요 시 주석 해제
@@ -296,7 +296,7 @@ export default function EditPostPage() {
       );
 
       // 3) 전체 수정 저장
-      const res = await fetch(`http://localhost:8080/api/journals/public/edit/${journalData.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/public/edit/${journalData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -324,7 +324,7 @@ export default function EditPostPage() {
     if (!confirm) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/journals/public/delete/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/public/delete/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

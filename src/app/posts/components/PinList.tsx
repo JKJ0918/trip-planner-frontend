@@ -23,7 +23,7 @@ type Props = {
   mapRef: { current: google.maps.Map | null };
 };
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}`;
 
 export default function PinList({ pins, onSelect, mapRef }: Props) {
   const handleClick = (pin: Pin) => {
@@ -48,7 +48,7 @@ export default function PinList({ pins, onSelect, mapRef }: Props) {
             {/* 썸네일 */}
             {pin.images && pin.images.length > 0 && (
               <img
-                src={`http://localhost:8080${pin.images[0]}`}
+                src={`${BASE_URL}${pin.images[0]}`}
                 alt={pin.name}
                 className="w-full h-36 object-cover rounded-lg mb-2"
               />

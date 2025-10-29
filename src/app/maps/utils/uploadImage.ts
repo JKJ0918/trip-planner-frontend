@@ -4,7 +4,7 @@ export async function uploadImage(file: File): Promise<string | null> {
   formData.append("file", file);
 
   try {
-    const res = await fetch("http://localhost:8080/api/images/upload", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/images/upload`, {
       method: "POST",
       body: formData,
     });
