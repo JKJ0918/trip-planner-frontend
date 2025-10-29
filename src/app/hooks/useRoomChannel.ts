@@ -58,7 +58,7 @@ export function useRoomChannel(roomId: string | number) {
         lastMessage: msg.content,
         lastMessageAt: msg.createdDate,
       } as any);
-    });4
+    });
 
     return () => {
       try { unsub(); } catch {} // 구독해제 cleanup 함수
