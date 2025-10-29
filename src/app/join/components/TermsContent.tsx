@@ -7,7 +7,7 @@ export default function TermsContent() {
       <section className="space-y-3">
         <h4 className="font-medium">제1조 (목적)</h4>
         <p>
-          본 약관은 TripPlanner(이하 "회사")가 제공하는 모든 서비스의 이용 조건, 회원의 권리와 의무,
+          본 약관은 TripPlanner(이하 &quot;회사&quot;)가 제공하는 모든 서비스의 이용 조건, 회원의 권리와 의무,
           회사와 회원 간의 책임 사항을 규정함을 목적으로 합니다.
         </p>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NotificationsController, useNotifications } from "@/app/hooks/useNotifications";
@@ -9,33 +9,30 @@ export type MiniNotification = {
   id: number;
   message: string;
   link: string;
-  createdAt: string;   // ISO
+  createdAt: string;
   isRead?: boolean;
 };
 
 type Props = {
-  /** API Base URL (드롭다운에서 넘겨주세요) */
   base: string;
-  /** 마이페이지 알림 탭 경로 */
-  mypageHref?: string; // default: "/myPage?tab=notifications"
-  /** 패널 닫기 콜백 (행/자세히 클릭 시 호출) */
+  mypageHref?: string;         // default: "/myPage?tab=notifications"
   onClose?: () => void;
-  /** 최대 표시 개수 */
-  limit?: number; // default: 5
-  /** 알림 공유 Hook */
+  limit?: number;              // default: 5
   controller?: NotificationsController;
 };
 
 export function NotificationPreviewPanel({
   base,
-  mypageHref = "/myPage?tab=notifications", // 경로 수정 필요
+  mypageHref = "/myPage?tab=notifications",
   onClose,
   limit = 5,
   controller,
 }: Props) {
-  // 외부에서 controller를 주면 공유 상태 사용, 없으면 자체 훅 사용
-  const state = controller ?? useNotifications(base, { limit });
-  const { unread, items, markRead, markAllRead } = state;
+  // ✅ 훅은 항상 호출
+  const localState = useNotifications(base, { limit });
+  // ✅ 외부 controller가 있으면 그걸 쓰고, 없으면 로컬 훅 결과 사용
+  const { unread, items, markRead, markAllRead } = controller ?? localState;
+
   const router = useRouter();
 
   return (
@@ -69,9 +66,7 @@ export function NotificationPreviewPanel({
         ))}
       </ul>
 
-      {items.length === 0 && (
-        <div className="p-4 text-sm text-gray-500">알림이 없습니다.</div>
-      )}
+      {items.length === 0 && <div className="p-4 text-sm text-gray-500">알림이 없습니다.</div>}
 
       <div className="sticky bottom-0 bg-white px-3 py-2 flex items-center justify-between">
         <span className="text-xs text-gray-500">미확인 {unread}개</span>
