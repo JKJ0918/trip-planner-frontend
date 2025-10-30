@@ -3,6 +3,9 @@ export async function fetchUserInfoJ() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/auth/me`, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include", // 쿠키 포함
     });
 
