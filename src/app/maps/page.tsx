@@ -20,6 +20,8 @@ export default function FullMapPage() {
       try {
         const user = await fetchUserInfoJ();
         setUser({id: user.userId});
+        console.log("가져온 id를 확인합니다.", user);
+        
       } catch (err) {
         console.error("유저 정보를 불러오지 못했습니다:", err);
       }
