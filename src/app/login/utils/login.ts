@@ -17,8 +17,8 @@ export const Login = async (username: string, password: string) => {
     }
 
     const data = await response.json();
-    document.cookie = `Authorization=${data.accessToken}; path=/; max-age=604800;`;
-    document.cookie = `refresh=${data.refresh}; path=/; max-age=604800;`;
+    // document.cookie = `Authorization=${data.accessToken}; path=/; max-age=604800;`;
+    // document.cookie = `refresh=${data.refresh}; path=/; max-age=604800;`;
 
     return true;
   } catch (error) {
