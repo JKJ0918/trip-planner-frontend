@@ -19,8 +19,8 @@ export default function FullMapPage() {
     const loadUser = async () => {
       try {
         const user = await fetchUserInfoJ();
-        setUser({id: user.userId});
-        console.log("가져온 id를 확인합니다.", user);
+        setUser({id: user.id를});
+        console.log("가져온 id를 확인합니다.", user.id);
         
       } catch (err) {
         console.error("유저 정보를 불러오지 못했습니다:", err);
