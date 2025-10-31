@@ -6,7 +6,7 @@ import Link from 'next/link';
 interface Props { post: TravelPostSummary; }
 
 export default function PostCard({ post }: Props) {
-  const src = `${process.env.NEXT_PUBLIC_API_BASE}${post.thumbnailUrl ?? ''}`;
+  const src = `${post.thumbnailUrl ?? ''}`;
 
   return (
     <Link href={`/posts/${post.id}`} className="block">

@@ -80,7 +80,7 @@ export default function HeroSection({
         {/* 좌측 이미지 */}
         <div className="w-full md:w-1/2 h-64 md:h-96 rounded-xl overflow-hidden shadow">
           <img
-            src={`${process.env.NEXT_PUBLIC_API_BASE}${thumbnailUrl}`}
+            src={`${thumbnailUrl}`}
             alt={title}
             className="object-cover w-full h-full"
           />

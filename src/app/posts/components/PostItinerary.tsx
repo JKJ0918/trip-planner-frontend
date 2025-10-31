@@ -68,7 +68,7 @@ export default function PostItinerary({ itinerary, startDate, endDate }: Props) 
             {item.images?.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {item.images.map((img, i) => {
-                  const fullUrl = `${BASE_URL}${img}`;
+                  const fullUrl = `${img}`;
                   return (
                     <img
                       key={i}

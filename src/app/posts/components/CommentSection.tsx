@@ -136,7 +136,7 @@ const CommentCard = memo(function CommentCard({
         <div className={`flex gap-3 ${isReply ? 'ml-10' : ''} mb-4`}>
           {/* 아바타 */}
           <img
-            src={`${process.env.NEXT_PUBLIC_API_BASE}${comment.avatarUrl}`}
+            src={`${comment.avatarUrl}`}
             alt={`${comment.writerName} 프로필`} // 이미지 미로드 대체 텍스트 
             className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5"
             loading="lazy"
