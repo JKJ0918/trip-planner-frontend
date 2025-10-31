@@ -146,7 +146,7 @@ export default function ItineraryEditor({ itinerary, onItineraryChange, availabl
             {(entry.imageUrls || []).map((url, imgIdx) => (
               <div key={imgIdx} className="relative w-24 h-24">
                 <img
-                  src={`${BASE_URL}${url}`}
+                  src={`${url}`}
                   alt={`uploaded-${imgIdx}`}
                   className="w-full h-full object-cover rounded border"
                 />

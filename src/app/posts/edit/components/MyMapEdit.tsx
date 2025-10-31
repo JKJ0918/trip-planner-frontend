@@ -175,7 +175,7 @@ export default function MyMapEdit({ pins, onUpdatePin }: MyMapEditProps) {
               <h3 className="text-center text-blue-600 font-semibold">방문지 정보</h3>
               <div className="flex gap-1">
                 {editingPin.images?.slice(0, 3).map((img, i) => {
-                  const src = img instanceof File ? URL.createObjectURL(img) : `${BASE_URL}${img}`;
+                  const src = img instanceof File ? URL.createObjectURL(img) : `${img}`;
                   return (
                     <img
                       key={i}
@@ -229,7 +229,7 @@ export default function MyMapEdit({ pins, onUpdatePin }: MyMapEditProps) {
 
             {/* 이미지 프리뷰/삭제 */}
             {editingPin.images?.map((img, i) => {
-              const src = img instanceof File ? URL.createObjectURL(img) : `${BASE_URL}${img}`;
+              const src = img instanceof File ? URL.createObjectURL(img) : `${img}`;
               return (
                 <div key={i} className="relative w-20 h-16 inline-block mr-1">
                   <img src={src} className="w-full h-full object-cover rounded border" alt={`img-${i}`} />

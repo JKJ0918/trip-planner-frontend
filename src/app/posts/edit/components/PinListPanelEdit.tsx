@@ -51,7 +51,7 @@ export default function PinListPanelEdit({ travelPinEntry, onTravelPinEntryChang
               {imagePreview ? (
                 <div className="relative w-16 h-16 rounded overflow-hidden shrink-0">
                     <img
-                        src={`${BASE_URL}${imagePreview}`}
+                        src={`${imagePreview}`}
                         alt="preview"
                         className="w-full h-full object-cover rounded"
                     />

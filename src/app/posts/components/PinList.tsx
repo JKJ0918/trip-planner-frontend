@@ -48,7 +48,7 @@ export default function PinList({ pins, onSelect, mapRef }: Props) {
             {/* 썸네일 */}
             {pin.images && pin.images.length > 0 && (
               <img
-                src={`${BASE_URL}${pin.images[0]}`}
+                src={`${pin.images[0]}`}
                 alt={pin.name}
                 className="w-full h-36 object-cover rounded-lg mb-2"
               />

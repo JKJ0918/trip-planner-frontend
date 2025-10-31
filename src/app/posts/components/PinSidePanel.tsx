@@ -58,7 +58,7 @@ export default function PinSidePanel({
             {images.map((img, i) => (
               <img
                 key={i}
-                src={`${BASE_URL}${img}`}
+                src={`${img}`}
                 alt={`slide-${i}`}
                 className={`absolute top-0 left-0 w-full h-48 object-cover rounded-lg transition-transform duration-300 ${
                   i === idx

@@ -14,8 +14,8 @@ type SubRecord = {
 const subscriptions: SubRecord[] = [];
 
 // 운영은 wss://your-domain/ws-stomp 권장
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL_WS || "ws://localhost:8080/ws-stomp";
-
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL_WS || "wss://tripplanner-backend-v1.onrender.com/ws-stomp";
+// const WS_URL = process.env.NEXT_PUBLIC_WS_URL_WS || "ws://localhost:8080/ws-stomp";
 // (1) 현재 클라이언트 얻기 (디버깅용)
 export function getStompClient() {
   return client;
