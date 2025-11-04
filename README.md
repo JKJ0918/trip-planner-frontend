@@ -46,6 +46,10 @@ TripPlanner는 여행 일정을 계획하고, 실제 비용·항공편·숙소 �
 - [기술 스택 & 개발 환경](#기술-스택--개발-환경)
 - [주요 기능](#주요-기능)
 - [데이터베이스 ERD](#데이터베이스-erd)
+- [배포](#배포)
+  - [프론트엔드 - Vercel](#프론트엔드-Vercel)
+  - [백엔드 - Render + Docker](#백엔드-Render--Docker)
+  - [데이터베이스: Aiven(MariaDB) / MongoDB Atlas / Cloudynary](#데이터베이스)
 - [기술적 구현 포인트](#⚙️-기술적-구현-포인트)
   - [일반 로그인 (Username/Password + JWT)](#⚙️-일반-로그인-usernamepassword--jwt)
   - [소셜 로그인 (JWT 기반)](#⚙️-소셜-로그인-jwt-기반)
@@ -98,6 +102,53 @@ ERD 설명:
  - `JournalEntity` ↔ `PhotoEntity`: 1:N (일정별 사진)  
  - `CommentEntity` ↔ `CommentLikeEntity`: 1:N (댓글 ↔ 좋아요)  
  - `ChatRoom` ↔ `ChatRoomMember`: 1:N (방 ↔ 참여자)
+
+## 배포
+본 프로젝트는 Render(백엔드) + Vercel(프론트엔드) 환경에서 배포 되었습니다. 스마트폰/PC 브라우저에서 직접 접속이 가능하며, 로그인·게시글 작성·이미지 업로드 등 모든 주요 기능이 동작합니다. 
+
+빌드한 코드 내부에 API 키나 데이터 베이스 정보 등 민감한 정보를 기입하지 않고 플랫폼에서 제공하는 환경변수에 값을 넣어 보안에 신경썼습니다.
+
+<div align="center">
+  <img src="./images/deploy-archi.png" width="1000" alt="배포 아키텍쳐" />
+</div>
+
+### 프론트엔드 Vercel
+프론트엔드의 배포 방식으로 Vercel에서 제공하는 깃허브 레포지토리와 연동하여 프론트엔드 프로젝트를 배포할 수 있는 기능을 이용하였습니다. 업데이트 사항이 있을때, 레포지토리에 업로드 한번으로 간단하게 업데이트 반영이 가능합니다.
+<div align="center">
+  <img src="./images/Vercel deploy.png" width="800" alt="vercel 배포화면" />
+</div>
+
+### 백엔드 Render+Docker
+배포시 오류를 최적화 하기 위해 도커를 이용하였습니다. 빌드 파일을 도커 이미지 파일로 생성하여 도커 허브에 올렸고, 도커 허브와 Render를 연동 하여 배포하였습니다.
+
+<p align="center">
+    <img src="./images/render_img.png" width="800" alt="render 배포화면" />
+    <img src="./images/dockerhub_img.png" width="800" alt="docker hub 화면" />
+</p>
+
+### 데이터베이스
+#### Aiven
+메인 데이터 테이블을 MariaDB 형식으로 연동 하였습니다. MySQL를 제공하지만  MariaDB와 호환이 가능했습니다.
+
+<p align="center">
+    <img src="./images/aiven.png" width="800" alt="aiven 화면" />
+</p>
+
+#### MongoDB
+MongoDB 에서 제공하는 플랫폼을 이용하여 서브 데이터인 대화내용을 저장하는 데이터베이스로 사용하였습니다.
+<p align="center">
+    <img src="./images/mongodb img.png" width="800" alt="mongodb 화면" />
+</p>
+
+
+#### Cloudinary
+위 두 플랫폼은 이미지 저장 공간을 제공하지 않아 외부 저장 플랫폼을 사용하여 이미지 저장공간을 확보하였습니다.
+<p align="center">
+    <img src="./images/cloudynary_img.png" width="800" alt="Cloudinary 화면" />
+</p>
+
+
+
 
 ## ⚙️ 기술적 구현 포인트
 
