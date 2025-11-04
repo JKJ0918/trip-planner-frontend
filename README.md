@@ -122,7 +122,7 @@ ERD 설명:
 - **Backend:** Render (Docker 기반)  
   - Spring Boot 3 + MariaDB (Aiven Cloud) + MongoDB (Atlas)  
 - **Storage:** Cloudinary (이미지 업로드)
-- **배포 주소:** [https://trip-planner-frontend.vercel.app](https://trip-planner-frontend.vercel.app)
+- **배포 주소:** [https://trip-planner-frontend-omega.vercel.app/](https://trip-planner-frontend-omega.vercel.app/)
 
 ### 프론트엔드 Vercel
 프론트엔드의 배포 방식으로 Vercel에서 제공하는 깃허브 레포지토리와 연동하여 프론트엔드 프로젝트를 배포할 수 있는 기능을 이용하였습니다. 업데이트 사항이 있을때, 레포지토리에 업로드 한번으로 간단하게 업데이트 반영이 가능합니다.
