@@ -104,18 +104,30 @@ ERD 설명:
  - `ChatRoom` ↔ `ChatRoomMember`: 1:N (방 ↔ 참여자)
 
 ## 배포
-본 프로젝트는 Render(백엔드) + Vercel(프론트엔드) 환경에서 배포 되었습니다. 스마트폰/PC 브라우저에서 직접 접속이 가능하며, 로그인·게시글 작성·이미지 업로드 등 모든 주요 기능이 동작합니다. 
+
+본 프로젝트는 Render(백엔드) + Vercel(프론트엔드) 환경에서 배포 되었습니다. 실제 배포 환경에서 CORS, Cookie 인증, 이미지 저장소 연결, DB 외부 호스팅을 하여 스마트폰/PC 브라우저에서 직접 접속이 가능하며, 로그인·게시글 작성·이미지 업로드 등 모든 주요 기능이 동작합니다. 
 
 빌드한 코드 내부에 API 키나 데이터 베이스 정보 등 민감한 정보를 기입하지 않고 플랫폼에서 제공하는 환경변수에 값을 넣어 보안에 신경썼습니다.
+
+
 
 <div align="center">
   <img src="./images/deploy-archi.png" width="1000" alt="배포 아키텍쳐" />
 </div>
 
+
+- **Frontend:** Vercel  
+  - Next.js 14 (App Router) + TypeScript  
+  - 환경변수 관리, Image Optimization, API 연동  
+- **Backend:** Render (Docker 기반)  
+  - Spring Boot 3 + MariaDB (Aiven Cloud) + MongoDB (Atlas)  
+- **Storage:** Cloudinary (이미지 업로드)
+- **배포 주소:** [https://trip-planner-frontend.vercel.app](https://trip-planner-frontend.vercel.app)
+
 ### 프론트엔드 Vercel
 프론트엔드의 배포 방식으로 Vercel에서 제공하는 깃허브 레포지토리와 연동하여 프론트엔드 프로젝트를 배포할 수 있는 기능을 이용하였습니다. 업데이트 사항이 있을때, 레포지토리에 업로드 한번으로 간단하게 업데이트 반영이 가능합니다.
 <div align="center">
-  <img src="./images/Vercel deploy.png" width="800" alt="vercel 배포화면" />
+  <img src="./images/Vercel deploy.PNG" width="800" alt="vercel 배포화면" />
 </div>
 
 ### 백엔드 Render+Docker
@@ -147,7 +159,7 @@ MongoDB 에서 제공하는 플랫폼을 이용하여 서브 데이터인 대화
     <img src="./images/cloudynary_img.png" width="800" alt="Cloudinary 화면" />
 </p>
 
-
+---
 
 
 ## ⚙️ 기술적 구현 포인트
