@@ -34,10 +34,10 @@ export default function Header() {
             <Link href="/posts" className="hover:text-indigo-600 transition">여행 일정</Link>
           </li>
           <li>
-            <Link href="#" className="hover:text-indigo-600 transition">이용 가이드</Link>
+            <Link href="/guide" className="hover:text-indigo-600 transition">이용 가이드</Link>
           </li>
           <li>
-            <Link href="#" className="hover:text-indigo-600 transition">문의하기</Link>
+            <Link href="/contact" className="hover:text-indigo-600 transition">문의하기</Link>
           </li>
         </ul>
 

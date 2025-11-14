@@ -37,7 +37,7 @@ export default function DropDownMenu() {
   const resolve = (p?: string | null) => 
     p ? (p.startsWith("http") ? p : `${base}${p}`) : undefined;
 
-  const avatar = resolve(me?.avatarUrl) ?? `${base}/uploads/basic_profile.png`;
+  const avatar = resolve(me?.avatarUrl) ?? `${base}/uploads/basic_profile_bz5kt6.png`;
 
   // 바깥 클릭으로 드롭다운 닫기
   useEffect(() => {

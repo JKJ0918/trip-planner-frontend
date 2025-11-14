@@ -53,7 +53,7 @@ export default function ProfilePanel({ userNickname }: Props) {
 
   const currentAvatar = useMemo(() => {
     const toAbs = (p?: string) => (p ? (p.startsWith("http") ? p : ` ${process.env.NEXT_PUBLIC_API_BASE}${p}`) : undefined);
-    return previewUrl ?? toAbs(watch("avatarUrl")) ?? ` ${process.env.NEXT_PUBLIC_API_BASE}/uploads/basic_profile.png`;
+    return previewUrl ?? toAbs(watch("avatarUrl")) ?? ` ${process.env.NEXT_PUBLIC_API_BASE}/uploads/basic_profile_bz5kt6.png`;
   }, [base, previewUrl, watch]);
 
   const onPickFile = () => inputRef.current?.click();

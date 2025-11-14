@@ -28,7 +28,7 @@ export default function MyPage() {
   ? avatarUrl.startsWith("http")
     ? avatarUrl                // 절대경로 그대로 사용
     : `${base}${avatarUrl}`    // 상대경로면 base 붙이기
-  : `${base}/uploads/basic_profile.png`;
+  : `${base}/uploads/bbasic_profile_bz5kt6.png`;
   
   const router = useRouter();
 
