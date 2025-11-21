@@ -11,7 +11,7 @@ import { fetchUserInfoJ } from './utils/fetchUserInfoJ';
 const MyMap = dynamic(() => import('./components/MyMap'), { ssr: false });
 
 export default function FullMapPage() {
-  const [activeTab, setActiveTab] = useState<null | '여행 일정' | '방문지' | '상세 일정'>(null);
+  const [ activeTab, setActiveTab] = useState<null | '여행 일정' | '방문지' | '상세 일정'>(null);
   const { startDate, endDate, pins, submitTripPlan } = useTripStore();
   const setUser = useTripStore((state) => state.setUser);
   

@@ -9,8 +9,8 @@ export default function TravelJournal() {
     addJournalDraft,
     removeJournalDraft,
     updateJournalDraft,
-    addUploadedImageToDraft,
-    removeImageFromDraft,
+    addUploadedImageToDraft, // 특정 draft에 업로드된 이미지 추가
+    removeImageFromDraft, // 특정 draft에서 이미지 삭제
     dateRangeList,
   } = useTripStore();
 
@@ -31,9 +31,20 @@ export default function TravelJournal() {
     id: string
   ) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {
+         return;
+    }
+
+    // 선택된 파일들을 zustand store로 전달
     await addUploadedImageToDraft(id, Array.from(files));
-    if (fileInputRefs.current[id]) fileInputRefs.current[id]!.value = '';
+    
+    // 같은 파일 다시 선택 가능하도록 input 값 초기화
+    if (fileInputRefs.current[id]) {
+
+      fileInputRefs.current[id]!.value = '';
+
+    }
+
   };
 
   const handleDeleteImage = (id: string, imageId: string) => {
@@ -103,15 +114,17 @@ export default function TravelJournal() {
 
           <input
             type="file"
-            multiple
+            multiple // 여러장 시진 업로드 가능
             accept="image/*"
             ref={(el) => {
               fileInputRefs.current[draft.id] = el;
             }}
             onChange={(e) => handleImageChange(e, draft.id)}
             className="hidden"
-            id={`file-${draft.id}`}
+            id={`file-${draft.id}`} 
           />
+          {/*id는 HTML에서  요소를 식별하기 위함 아래 라벨의 htmlFor={`file-${draft.id}`} 와 일치하는 것을 볼 수 있음 즉, label 클릭 → input 클릭*/}
+
 
           <label
             htmlFor={`file-${draft.id}`}
