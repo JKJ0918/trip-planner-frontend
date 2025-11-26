@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { useTripStore } from '../utils/tripstore';
 
 export default function TravelJournal() {
-  const {
+  const { 
     journalDrafts,
     addJournalDraft,
     removeJournalDraft,
@@ -31,6 +31,8 @@ export default function TravelJournal() {
     id: string
   ) => {
     const files = e.target.files;
+
+    // 파일이 없을 경우
     if (!files || files.length === 0) {
          return;
     }
@@ -38,7 +40,7 @@ export default function TravelJournal() {
     // 선택된 파일들을 zustand store로 전달
     await addUploadedImageToDraft(id, Array.from(files));
     
-    // 같은 파일 다시 선택 가능하도록 input 값 초기화
+    // input 값 초기화 (같은 파일 다시 선택 가능하도록)
     if (fileInputRefs.current[id]) {
 
       fileInputRefs.current[id]!.value = '';
