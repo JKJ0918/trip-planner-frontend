@@ -234,7 +234,7 @@ export default function EditPostPage() {
             entry.newImages.forEach((file) => formData.append('files', file));
 
             const res = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload', {
-              method: 'POST',
+              method: 'PUT', // POST에서 변경
               body: formData,
               // credentials: 'include', // 인증 필요 시 주석 해제
             });

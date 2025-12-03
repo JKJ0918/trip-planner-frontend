@@ -378,7 +378,7 @@ export const useTripStore = create<TripState>((set, get) => ({
               const resultUrl = await uploadImage(image.file);
               if (resultUrl) uploadedUrls.push(resultUrl);
             } else {
-              // 이미 업로드되어 url이 존재하면 그대로 사용
+              // 이미 업로드되어 url이 존재하면 그대로 사용(이미지 수정시 이미 있는 경우를 뜻함)
               uploadedUrls.push(image.url);
             }
           }
