@@ -233,8 +233,8 @@ export default function EditPostPage() {
             const formData = new FormData();
             entry.newImages.forEach((file) => formData.append('files', file));
 
-            const res = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload', {
-              method: 'PUT', // POST에서 변경
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload`, {
+              method: 'POST',
               body: formData,
               // credentials: 'include', // 인증 필요 시 주석 해제
             });
@@ -247,7 +247,7 @@ export default function EditPostPage() {
 
           // 삭제 이미지 처리
           if (entry.deletedImages && entry.deletedImages.length > 0) {
-            const delRes = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/delete', {
+            const delRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/delete`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ imageUrls: entry.deletedImages }),
@@ -278,7 +278,7 @@ export default function EditPostPage() {
             const formData = new FormData();
             newImages.forEach((file) => formData.append('files', file));
 
-            const res = await fetch('${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/images/edit/upload`, {
               method: 'POST',
               body: formData,
               // credentials: 'include', // 인증 필요 시 주석 해제
