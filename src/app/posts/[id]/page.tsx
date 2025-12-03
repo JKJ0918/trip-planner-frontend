@@ -105,8 +105,7 @@ export default function TravelPostPage() {
       setLiking(true);
       setPost(optimistic);
 
-      const url = `${process.env.NEXT_PUBLIC_API_BASE}/${post.id}/like`;
-      const res = await fetch(url, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/journals/${post.id}/like`, {
         method: post.likedByMe ? "DELETE" : "PUT",
         credentials: "include",
       });
